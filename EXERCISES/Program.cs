@@ -1,10 +1,24 @@
-﻿using System.Drawing;
+﻿using JobWebService;
+using System.Drawing;
 
 namespace EXERCISES
 {
     internal class Program
     {
-
+        static void CheckInsert()
+        {
+            Console.WriteLine("Enter Job Genre");
+            string genre = Console.ReadLine();
+            DBHelperOledb dBHelperOledb = new DBHelperOledb();
+            string sql = $"Insert into Genre(GenreTitle) Values('{genre}')";
+            dBHelperOledb.OpenConnection();
+           int c= dBHelperOledb.Insert(sql);
+            dBHelperOledb.CloseConnection();  
+            if(c>0)
+                Console.WriteLine( "Ok");
+            else
+                Console.WriteLine("Not ok");
+        }
         static void T1()
         {
             //way number 1
@@ -52,11 +66,7 @@ namespace EXERCISES
         }
         static void Main(string[] args)
         {
-            Task t1 = PrintAsync(6, 10);
-            Task t2 = PrintAsync(7, 10);
-            Task.WaitAll(t1, t2);
-            Console.WriteLine();
-            Console.WriteLine("I have finished");
+            CheckInsert();
             Console.ReadLine();
         }
         static async Task PrintAsync(int color, int interval)
