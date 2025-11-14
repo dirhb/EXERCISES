@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EXERCISES.Models
+namespace EXERCISES
 {
     public class Jobs : Model
     {
