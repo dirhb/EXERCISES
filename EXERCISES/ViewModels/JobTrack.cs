@@ -1,5 +1,4 @@
-﻿using EXERCISES.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EXERCISES.ViewModels
 {
-    public class JobCatalog
+    public class JobTrack
     {
         public List<Jobs> Jobs { get; set; }
         public string? JobID { get; set; }
@@ -15,7 +14,5 @@ namespace EXERCISES.ViewModels
         public int Pages { get; set; }
         public List<Genre> Genres { get; set; }
         public string? GenreID { get; set; }
-        public List<Employer> Employers { get; set; }
-        public string? EmployerID { get; set; }
     }
 }
