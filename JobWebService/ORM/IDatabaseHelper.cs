@@ -2,21 +2,22 @@
 
 namespace JobWebService
 {
-    public interface IDbHelper
+    public interface IDatabaseHelper
     {
         void OpenConnection();
+
         void CloseConnection();
-        //dataReader is an object of recordSet
+
+        //datareader זה אובייקט של recordset
         IDataReader Select(string sql);
-        // CRUD 
+
+        //CRUD פעולות
         int Update(string sql);
         int Insert(string sql);
         int Delete(string sql);
 
         void OpenTransaction();
-
         void Commit();
-
-        void Rollback();
+        void RollBack();
     }
 }
