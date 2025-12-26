@@ -21,7 +21,7 @@ namespace EXERCISES
             this.genreDescription = genreDescription;
         }
 
-        public string GenreID { get { return genreID; } set { genreID = value; ValidateProperty(value, "ReviewsID"); } }
+        public string GenreID { get { return genreID; } set { genreID = value; ValidateProperty(value, "GenreID"); } }
 
         [Required(ErrorMessage = "Genre Title is required")]
         [StringLength(40, MinimumLength = 4, ErrorMessage = "Genre Title cannot be less than 4 characters")]

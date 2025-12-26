@@ -3,7 +3,7 @@ using System.Data.OleDb;
 
 namespace JobWebService
 {
-    public class DBHelperOledb : IDbHelper
+    public class DBHelperOledb : IDatabaseHelper
     {
         //יוצר קשר עם מוסד הנתונים
         OleDbConnection oleDbConnection;
@@ -71,6 +71,16 @@ namespace JobWebService
         {
             this.oleDbCommand.CommandText = sql;
             return this.oleDbCommand.ExecuteNonQuery();
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RollBack()
+        {
+            throw new NotImplementedException();
         }
     }
 }
