@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EXERCISES.ViewModels
+namespace JobModels.ViewModels
 {
     public class JobTrack
     {
-        public List<Jobs> Jobs { get; set; }
+        public List<Job> Jobs { get; set; }
         public string? JobID { get; set; }
         public int PageNumber { get; set; }
         public int Pages { get; set; }

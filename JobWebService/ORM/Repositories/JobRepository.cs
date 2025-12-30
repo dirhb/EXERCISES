@@ -70,6 +70,20 @@ namespace JobWebService.ORM.Repositories
             return list;
         }
 
+        // Optional paging implementation
+        public List<Job> GetPaged(int pageNumber, int pageSize)
+        {
+            List<Job> jobs = new List<Job>();
+            int offset = (pageNumber - 1) * pageSize;
+            string sql = $"SELECT * FROM Jobs ORDER BY JobID OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
+            this.helperOleDb.AddParameters("Offset", offset.ToString());
+            this.helperOleDb.AddParameters("PageSize", pageSize.ToString());
+            using (IDataReader dataReader = this.helperOleDb.Read(sql))
+                while (dataReader.Read())
+                    jobs.Add(this.modelCreators.JobCreator.CreateModel(dataReader));
+            return jobs;
+        }
+
         public object ReadValue()
         {
             throw new NotImplementedException();

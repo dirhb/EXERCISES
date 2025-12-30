@@ -1,17 +1,17 @@
-﻿using EXERCISES.Models;
+﻿using JobModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EXERCISES.ViewModels
+namespace JobModels.ViewModels
 {
     public class HomePage
     {
-        public List<Jobs>? JobMatches { get; set; }
-        public List<Jobs>? PopularJobs { get; set; }
-        public List<Reviews>? RecentReviews { get; set; }
+        public List<Job>? JobMatches { get; set; }
+        public List<Job>? PopularJobs { get; set; }
+        public List<Review>? RecentReviews { get; set; }
         
 
     }
