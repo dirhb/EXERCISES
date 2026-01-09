@@ -7,6 +7,59 @@ namespace JobWebService.ORM.Repositories
     {
         public UserRepository(DBHelperOledb helperOleDb) : base(helperOleDb) { }
 
+        // Checks whether username exists (returns true if available)
+        public bool IsAvailableUserName(string userName)
+        {
+            string sql = "SELECT 1 FROM Users WHERE UserID=@UserID";
+            this.helperOleDb.AddParameters("UserID", userName);
+            using (IDataReader dr = this.helperOleDb.Read(sql))
+            {
+                return !dr.Read();
+            }
+        }
+
+        // Read password hash and salt for a user
+        public Password GetPasswordByUserId(string userId)
+        {
+            string sql = "SELECT Password, '' AS Salt FROM Users WHERE UserID=@UserID";
+            this.helperOleDb.AddParameters("UserID", userId);
+            using (IDataReader dr = this.helperOleDb.Read(sql))
+            {
+                if (dr == null || !dr.Read()) return null;
+                return new Password(Convert.ToString(dr["Password"]), Convert.ToString(dr["Salt"]));
+            }
+        }
+
+        // Return UserType for given user id
+        public UserType UserTypeByUserId(string userId)
+        {
+            string sql = "SELECT ut.UserTypeID, ut.UserTypeName FROM UserTypes ut INNER JOIN Users u ON ut.UserTypeID = u.UserTypeID WHERE u.UserID=@UserID";
+            this.helperOleDb.AddParameters("UserID", userId);
+            using (IDataReader dr = this.helperOleDb.Read(sql))
+            {
+                if (dr == null || !dr.Read()) return null;
+                return this.modelCreators.UserTypeCreator.CreateModel(dr);
+            }
+        }
+
+        // minimal 2FA projection (returns subset of user fields)
+        public User GetUser2FAByUserName(string userName)
+        {
+            string sql = "SELECT UserID, UserTypeID, Email FROM Users WHERE UserID=@UserID";
+            this.helperOleDb.AddParameters("UserID", userName);
+            using (IDataReader dr = this.helperOleDb.Read(sql))
+            {
+                if (dr == null || !dr.Read()) return null;
+                User u = new User()
+                {
+                    UserID = Convert.ToString(dr["UserID"]),
+                    UserTypeID = dr["UserTypeID"] == DBNull.Value ? (int?)null : Convert.ToInt32(dr["UserTypeID"]),
+                    Email = Convert.ToString(dr["Email"])
+                };
+                return u;
+            }
+        }
+
         public bool Delete(int id)
         {
             string sql = $"DELETE FROM Users WHERE UserID=@UserID";
@@ -99,7 +152,7 @@ namespace JobWebService.ORM.Repositories
                 return this.modelCreators.UserCreator.CreateModel(dataReader);
             }
         }
-
+        //checks if email exists in db
         public bool ExistsByEmail(string email)
         {
             string sql = "SELECT COUNT(*) FROM Users WHERE Email=@Email";
@@ -119,6 +172,26 @@ namespace JobWebService.ORM.Repositories
                 if (!dataReader.Read()) return null;
                 return this.modelCreators.UserCreator.CreateModel(dataReader);
             }
+        }
+
+        // Compatibility helpers used by controllers
+        public bool IsExistUserName(string userName)
+        {
+            string sql = "SELECT 1 FROM Users WHERE UserID=@UserID";
+            this.helperOleDb.AddParameters("UserID", userName);
+            using (IDataReader dr = this.helperOleDb.Read(sql))
+            {
+                return dr != null && dr.Read();
+            }
+        }
+
+        public bool UpdatePassword(User user)
+        {
+            if (user == null) return false;
+            string sql = "UPDATE Users SET Password=@Password WHERE UserID=@UserID";
+            this.helperOleDb.AddParameters("Password", user.Password);
+            this.helperOleDb.AddParameters("UserID", user.UserID);
+            return this.helperOleDb.Update(sql) > 0;
         }
     }
 }

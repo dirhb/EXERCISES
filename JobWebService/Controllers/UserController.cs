@@ -1,77 +1,125 @@
 using Microsoft.AspNetCore.Mvc;
 using JobModels;
 using JobWebService.ORM.Repositories;
+using System.Diagnostics;
 
 namespace JobWebService.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     public class UserController : ControllerBase
     {
-        private readonly IRepository<User> _repo;
-        private readonly UserRepository _userRepo; // used for credential lookup
 
-        public UserController(IRepository<User> repo, UserRepository userRepo)
+        [HttpPost]
+        public bool Register(User user)
         {
-            _repo = repo;
-            _userRepo = userRepo;
-        }
-
-        [HttpGet]
-        public IActionResult GetAll()
-        {
-            var items = _repo.ReadAll();
-            return Ok(items);
-        }
-
-        [HttpGet("{id}")]
-        public IActionResult Get(string id)
-        {
-            var item = _repo.Read(id);
-            if (item == null) return NotFound();
-            return Ok(item);
+            DBHelperOledb helperOledb = new DBHelperOledb();
+            LibraryUOW libraryUOW = new LibraryUOW(helperOledb);
+            try
+            {
+                helperOledb.OpenConnection();
+                user.Password = new Passsword(user.Password);
+                user.CreationDate = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
+                return libraryUOW.UserRepository.Insert(user);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+            }
+            finally
+            {
+                helperOledb.CloseConnection();
+            }
+            return false;
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] User model)
+        [ActionName("UpdateUser")]
+        public bool UpdateUser(User user)
         {
-            if (model == null) return BadRequest();
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            var ok = _repo.Insert(model);
-            if (!ok) return StatusCode(500, "Failed to create user");
-            return CreatedAtAction(nameof(Get), new { id = model.UserID }, model);
+            DBHelperOledb helperOledb = new DBHelperOledb();
+            LibraryUOW libraryUOW = new LibraryUOW(helperOledb);
+            try
+            {
+                helperOledb.OpenConnection();
+                return libraryUOW.UserRepository.Update(user);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+            }
+            finally
+            {
+                helperOledb.CloseConnection();
+            }
+            return false;
+        }
+        [HttpPost]
+        [ActionName("UpdatePassword")]
+        public bool UpdatePassword(User user)
+        {
+            DBHelperOledb helperOledb = new DBHelperOledb();
+            LibraryUOW libraryUOW = new LibraryUOW(helperOledb);
+            try
+            {
+                helperOledb.OpenConnection();
+                user.Password = new Passsword(user.Password);
+                return libraryUOW.UserRepository.UpdatePassword(user);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+            }
+            finally
+            {
+                helperOledb.CloseConnection();
+            }
+            return false;
         }
 
-        [HttpPut("{id}")]
-        public IActionResult Update(string id, [FromBody] User model)
+        [HttpGet]
+        public bool CheckPassword(string userId, string password)
         {
-            if (model == null || id != model.UserID) return BadRequest();
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            var ok = _repo.Update(model);
-            if (!ok) return NotFound();
-            return NoContent();
+            DBHelperOledb helperOledb = new DBHelperOledb();
+            LibraryUOW libraryUOW = new LibraryUOW(helperOledb);
+            try
+            {
+                helperOledb.OpenConnection();
+                Password password = libraryUOW.UserRepository.GetPasswordByUserId(userId);
+                return Password.IsMatch(password);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+            }
+            finally
+            {
+                helperOledb.CloseConnection();
+            }
+            return false;
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult Delete(string id)
+        [HttpGet]
+        public bool IsAvailableUserName(string username)
         {
-            var ok = _repo.Delete(id);
-            if (!ok) return NotFound();
-            return NoContent();
-        }
-
-        public record LoginRequest(string Email, string Password);
-
-        // Simple login endpoint (demo only). Do NOT use plaintext passwords in production.
-        [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginRequest req)
-        {
-            if (req == null) return BadRequest();
-            var user = _userRepo.GetByCredentials(req.Email, req.Password);
-            if (user == null) return Unauthorized();
-            return Ok(user);
+            DBHelperOledb helperOledb = new DBHelperOledb();
+            LibraryUOW libraryUOW = new LibraryUOW(helperOledb);
+            try
+            {
+                helperOledb.OpenConnection();
+                return !libraryUOW.UserRepository.IsExistUserName(username);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+            }
+            finally
+            {
+                helperOledb.CloseConnection();
+            }
+            return false;
         }
     }
 }
+
+
