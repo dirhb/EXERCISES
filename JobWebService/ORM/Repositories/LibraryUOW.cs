@@ -1,4 +1,6 @@
-﻿namespace JobWebService.ORM.Repositories
+﻿using JobWebService.ORM.ModelFactory;
+
+namespace JobWebService.ORM.Repositories
 {
     public class LibraryUOW
     {
@@ -12,12 +14,15 @@
         UserRepository userRepository;
         UserTypeRepository userTypeRepository;
 
-        private readonly DBHelperOledb helperOledb;
-        public LibraryUOW(DBHelperOledb helperOledb)
+        DBHelperOledb helperOledb;
+        public LibraryUOW()
         {
-            this.helperOledb = helperOledb;
+            this.helperOledb = new DBHelperOledb();
         }
-
+        public DBHelperOledb HelperOledb
+        {
+            get { return helperOledb; }
+        }
         public CountryRepository CountryRepository
         {
             get

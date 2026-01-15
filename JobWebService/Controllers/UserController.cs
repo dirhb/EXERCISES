@@ -9,39 +9,33 @@ namespace JobWebService.Controllers
     [Route("api/[controller]/[action]")]
     public class UserController : ControllerBase
     {
-
+        LibraryUOW libraryUOW;
         [HttpPost]
         public bool Register(User user)
         {
-            DBHelperOledb helperOledb = new DBHelperOledb();
-            LibraryUOW libraryUOW = new LibraryUOW(helperOledb);
             try
             {
-                helperOledb.OpenConnection();
-                user.Password = new Passsword(user.Password);
-                user.CreationDate = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
-                return libraryUOW.UserRepository.Insert(user);
+                this.libraryUOW.HelperOledb.OpenConnection();
+                return this.libraryUOW.UserRepository.Create(user);
             }
             catch (Exception ex)
             {
-                Trace.WriteLine(ex);
+                return false;
             }
             finally
             {
-                helperOledb.CloseConnection();
+                this.libraryUOW.HelperOledb.CloseConnection();
             }
-            return false;
         }
 
         [HttpPost]
         [ActionName("UpdateUser")]
         public bool UpdateUser(User user)
         {
-            DBHelperOledb helperOledb = new DBHelperOledb();
-            LibraryUOW libraryUOW = new LibraryUOW(helperOledb);
+           
             try
             {
-                helperOledb.OpenConnection();
+                this.libraryUOW.HelperOledb.OpenConnection();
                 return libraryUOW.UserRepository.Update(user);
             }
             catch (Exception ex)
@@ -50,7 +44,7 @@ namespace JobWebService.Controllers
             }
             finally
             {
-                helperOledb.CloseConnection();
+                this.libraryUOW.HelperOledb.CloseConnection();
             }
             return false;
         }
@@ -58,12 +52,10 @@ namespace JobWebService.Controllers
         [ActionName("UpdatePassword")]
         public bool UpdatePassword(User user)
         {
-            DBHelperOledb helperOledb = new DBHelperOledb();
-            LibraryUOW libraryUOW = new LibraryUOW(helperOledb);
+            
             try
             {
-                helperOledb.OpenConnection();
-                user.Password = new Passsword(user.Password);
+                this.libraryUOW.HelperOledb.OpenConnection();
                 return libraryUOW.UserRepository.UpdatePassword(user);
             }
             catch (Exception ex)
@@ -72,7 +64,7 @@ namespace JobWebService.Controllers
             }
             finally
             {
-                helperOledb.CloseConnection();
+                this.libraryUOW.HelperOledb.CloseConnection();
             }
             return false;
         }
@@ -80,13 +72,12 @@ namespace JobWebService.Controllers
         [HttpGet]
         public bool CheckPassword(string userId, string password)
         {
-            DBHelperOledb helperOledb = new DBHelperOledb();
-            LibraryUOW libraryUOW = new LibraryUOW(helperOledb);
+            
             try
             {
-                helperOledb.OpenConnection();
-                Password password = libraryUOW.UserRepository.GetPasswordByUserId(userId);
-                return Password.IsMatch(password);
+                this.libraryUOW.HelperOledb.OpenConnection();
+                string password2 = libraryUOW.UserRepository.GetPasswordByUserId(userId);
+                return password2.Equals(password);
             }
             catch (Exception ex)
             {
@@ -94,7 +85,7 @@ namespace JobWebService.Controllers
             }
             finally
             {
-                helperOledb.CloseConnection();
+                this.libraryUOW.HelperOledb.CloseConnection();
             }
             return false;
         }
@@ -102,11 +93,10 @@ namespace JobWebService.Controllers
         [HttpGet]
         public bool IsAvailableUserName(string username)
         {
-            DBHelperOledb helperOledb = new DBHelperOledb();
-            LibraryUOW libraryUOW = new LibraryUOW(helperOledb);
+            
             try
             {
-                helperOledb.OpenConnection();
+                this.libraryUOW.HelperOledb.OpenConnection();
                 return !libraryUOW.UserRepository.IsExistUserName(username);
             }
             catch (Exception ex)
@@ -115,11 +105,9 @@ namespace JobWebService.Controllers
             }
             finally
             {
-                helperOledb.CloseConnection();
+                this.libraryUOW.HelperOledb.CloseConnection();
             }
             return false;
         }
     }
 }
-
-
