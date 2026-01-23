@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using JobModels;
+using JobModels; 
 using JobWebService.ORM.Repositories;
 using System.Diagnostics;
 
@@ -18,9 +18,7 @@ namespace JobWebService.Controllers
             try
             {
                 helperOledb.OpenConnection();
-                user.Password = new Passsword(user.Password);
-                user.CreationDate = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
-                return libraryUOW.UserRepository.Insert(user);
+                return libraryUOW.UserRepository.Create(user);
             }
             catch (Exception ex)
             {
@@ -63,7 +61,7 @@ namespace JobWebService.Controllers
             try
             {
                 helperOledb.OpenConnection();
-                user.Password = new Passsword(user.Password);
+                user.Password = new Password(user.Password);
                 return libraryUOW.UserRepository.UpdatePassword(user);
             }
             catch (Exception ex)
