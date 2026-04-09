@@ -5,7 +5,7 @@ namespace JobWebService.ORM.Repositories
 {
     public class UserRepository : Repository, IRepository<User>
     {
-        public UserRepository(DBHelperOledb helperOleDb) : base(helperOleDb) { }
+        public UserRepository(DBHelperOledb helperOleDb, ModelCreators modelcreators) : base(helperOleDb, modelcreators) { }
 
         // Checks whether username exists (returns true if available)
         public bool IsAvailableUserName(string userName)
@@ -122,7 +122,8 @@ namespace JobWebService.ORM.Repositories
 
         public object ReadValue()
         {
-            throw new NotImplementedException();
+            string sql = "SELECT COUNT(*) FROM Users";
+            return this.helperOleDb.ReadValue(sql);
         }
 
         public bool Update(User model)

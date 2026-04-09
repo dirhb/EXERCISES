@@ -59,7 +59,8 @@ namespace JobWebService.ORM.Repositories
 
         public object ReadValue()
         {
-            throw new NotImplementedException();
+            string sql = "SELECT COUNT(*) FROM EducationTypes";
+            return this.helperOleDb.ReadValue(sql);
         }
 
         public bool Update(EducationType model)

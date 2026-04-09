@@ -15,9 +15,11 @@ namespace JobWebService.ORM.Repositories
         UserTypeRepository userTypeRepository;
 
         DBHelperOledb helperOledb;
+        ModelCreators modelcreators;
         public LibraryUOW()
         {
             this.helperOledb = new DBHelperOledb();
+            this.modelcreators = new ModelCreators();
         }
         public DBHelperOledb HelperOledb
         {
@@ -28,7 +30,7 @@ namespace JobWebService.ORM.Repositories
             get
             {
                 if (countryRepository == null)
-                    countryRepository = new CountryRepository(helperOledb);
+                    countryRepository = new CountryRepository(helperOledb, modelcreators);
                 return countryRepository;
             }
         }
@@ -38,7 +40,7 @@ namespace JobWebService.ORM.Repositories
             get
             {
                 if (educationRepository == null)
-                    educationRepository = new EducationRepository(helperOledb);
+                    educationRepository = new EducationRepository(helperOledb, modelcreators);
                 return educationRepository;
             }
         }
@@ -48,7 +50,7 @@ namespace JobWebService.ORM.Repositories
             get
             {
                 if (educationTypeRepository == null)
-                    educationTypeRepository = new EducationTypeRepository(helperOledb);
+                    educationTypeRepository = new EducationTypeRepository(helperOledb, modelcreators);
                 return educationTypeRepository;
             }
         }
@@ -58,7 +60,7 @@ namespace JobWebService.ORM.Repositories
             get
             {
                 if (genreRepository == null)
-                    genreRepository = new GenreRepository(helperOledb);
+                    genreRepository = new GenreRepository(helperOledb, modelcreators);
                 return genreRepository;
             }
         }
@@ -68,7 +70,7 @@ namespace JobWebService.ORM.Repositories
             get
             {
                 if (jobRepository == null)
-                    jobRepository = new JobRepository(helperOledb);
+                    jobRepository = new JobRepository(helperOledb, modelcreators);
                 return jobRepository;
             }
         }
@@ -78,7 +80,7 @@ namespace JobWebService.ORM.Repositories
             get
             {
                 if (notificationRepository == null)
-                    notificationRepository = new NotificationRepository(helperOledb);
+                    notificationRepository = new NotificationRepository(helperOledb, modelcreators);
                 return notificationRepository;
             }
         }
@@ -88,7 +90,7 @@ namespace JobWebService.ORM.Repositories
             get
             {
                 if (reviewRepository == null)
-                    reviewRepository = new ReviewRepository(helperOledb);
+                    reviewRepository = new ReviewRepository(helperOledb, modelcreators);
                 return reviewRepository;
             }
         }
@@ -98,7 +100,7 @@ namespace JobWebService.ORM.Repositories
             get
             {
                 if (userRepository == null)
-                    userRepository = new UserRepository(helperOledb);
+                    userRepository = new UserRepository(helperOledb, modelcreators);
                 return userRepository;
             }
         }
@@ -108,7 +110,7 @@ namespace JobWebService.ORM.Repositories
             get
             {
                 if (userTypeRepository == null)
-                    userTypeRepository = new UserTypeRepository(helperOledb);
+                    userTypeRepository = new UserTypeRepository(helperOledb, modelcreators);
                 return userTypeRepository;
             }
         }

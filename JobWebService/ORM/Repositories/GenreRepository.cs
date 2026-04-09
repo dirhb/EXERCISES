@@ -5,7 +5,7 @@ namespace JobWebService.ORM.Repositories
 {
     public class GenreRepository : Repository, IRepository<Genre>
     {
-        public GenreRepository(DBHelperOledb helperOleDb) : base(helperOleDb) { }
+        public GenreRepository(DBHelperOledb helperOleDb, ModelCreators modelcreators) : base(helperOleDb, modelcreators) { }
 
         public bool Delete(int id)
         {
@@ -60,7 +60,8 @@ namespace JobWebService.ORM.Repositories
 
         public object ReadValue()
         {
-            throw new NotImplementedException();
+            string sql = "SELECT COUNT(*) FROM Genres";
+            return this.helperOleDb.ReadValue(sql);
         }
 
         public bool Update(Genre model)

@@ -5,7 +5,7 @@ namespace JobWebService.ORM.Repositories
 {
     public class JobRepository : Repository, IRepository<Job>
     {
-        public JobRepository(DBHelperOledb helperOleDb) : base(helperOleDb) { }
+        public JobRepository(DBHelperOledb helperOleDb, ModelCreators modelcreators) : base(helperOleDb, modelcreators) { }
 
         public bool Delete(int id)
         {
@@ -86,7 +86,8 @@ namespace JobWebService.ORM.Repositories
 
         public object ReadValue()
         {
-            throw new NotImplementedException();
+            string sql = "SELECT COUNT(*) FROM Jobs";
+            return this.helperOleDb.ReadValue(sql);
         }
 
         public bool Update(Job model)

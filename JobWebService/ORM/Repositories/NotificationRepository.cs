@@ -5,7 +5,7 @@ namespace JobWebService.ORM.Repositories
 {
     public class NotificationRepository : Repository, IRepository<Notification>
     {
-        public NotificationRepository(DBHelperOledb helperOleDb) : base(helperOleDb) { }
+        public NotificationRepository(DBHelperOledb helperOleDb, ModelCreators modelcreators) : base(helperOleDb, modelcreators) { }
 
         public bool Delete(int id)
         {
@@ -60,7 +60,8 @@ namespace JobWebService.ORM.Repositories
 
         public object ReadValue()
         {
-            throw new NotImplementedException();
+            string sql = "SELECT COUNT(*) FROM Notifications";
+            return this.helperOleDb.ReadValue(sql);
         }
 
         public bool Update(Notification model)

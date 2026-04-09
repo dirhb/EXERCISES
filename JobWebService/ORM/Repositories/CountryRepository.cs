@@ -5,7 +5,7 @@ namespace JobWebService.ORM.Repositories
 {
     public class CountryRepository : Repository, IRepository<Country>
     {
-        public CountryRepository(DBHelperOledb helperOledb) : base(helperOledb) { }
+        public CountryRepository(DBHelperOledb helperOledb, ModelCreators modelcreator) : base(helperOledb, modelcreator) { }
 
         public bool Delete(int id)
         {
@@ -15,7 +15,9 @@ namespace JobWebService.ORM.Repositories
         }
         public bool Delete(string id)
         {
-            return false;
+            string sql = $"DELETE FROM Countries WHERE CountryID=@CountryID";
+            this.helperOleDb.AddParameters("CountryID", id); //prevents SQL Injection
+            return this.helperOleDb.Delete(sql) > 0;
         }
         public bool Delete(Country model)
         {
@@ -52,7 +54,8 @@ namespace JobWebService.ORM.Repositories
         }
         public object ReadValue()
         {
-            throw new NotImplementedException();
+            string sql = "SELECT COUNT(*) FROM Countries";
+            return this.helperOleDb.ReadValue(sql);
         }
         public bool Update(Country model)
         {

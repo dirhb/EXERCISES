@@ -5,7 +5,7 @@ namespace JobWebService.ORM.Repositories
 {
     public class UserTypeRepository : Repository, IRepository<UserType>
     {
-        public UserTypeRepository(DBHelperOledb helperOledb) : base(helperOledb) { }
+        public UserTypeRepository(DBHelperOledb helperOleDb, ModelCreators modelcreators) : base(helperOleDb, modelcreators) { }
 
         public bool Delete(int id)
         {
@@ -16,7 +16,9 @@ namespace JobWebService.ORM.Repositories
 
         public bool Delete(string id)
         {
-            return false;
+            string sql = $"DELETE FROM UserTypes WHERE UserTypeID=@UserTypeID";
+            this.helperOleDb.AddParameters("UserTypeID", id); //prevents SQL Injection
+            return this.helperOleDb.Delete(sql) > 0;
         }
 
         public bool Delete(UserType model)
