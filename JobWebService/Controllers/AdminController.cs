@@ -17,7 +17,7 @@ namespace JobWebService.Controllers
         }
 
         [HttpPost]
-        public bool ManageJobs(Job job)
+        public bool UpdateJob(Job job)
         {
             try
             {
@@ -36,7 +36,7 @@ namespace JobWebService.Controllers
         }
 
         [HttpPost]
-        public bool DeleteJobs(string jobId)
+        public bool DeleteJob(string jobId)
         {
             try
             {
@@ -55,7 +55,7 @@ namespace JobWebService.Controllers
         }
 
         [HttpPost]
-        public bool DeleteUsers(string userId)
+        public bool DeleteUser(string userId)
         {
             try
             {
@@ -76,19 +76,31 @@ namespace JobWebService.Controllers
         [HttpGet]
         public List<JobApplicationLog> ReviewApplication(string? status)
         {
+            List<JobApplicationLog> result = UseCaseMemoryStore.Applications;
+            List<JobApplicationLog> newList = new List<JobApplicationLog>();
             try
             {
-                List<JobApplicationLog> result = UseCaseMemoryStore.Applications;
+                if (status != null)
+                {
+                    foreach (var item in result)
+                    {
+                        if (item.Status != null)
+                        {
+                            if (item.Status.ToLower() == status.ToLower())
+                            {
+                                newList.Add(item);
+                            }
+                        }
+                    }
 
-                if (!string.IsNullOrWhiteSpace(status))
-                    result = result.Where(x => (x.Status ?? "").Equals(status, StringComparison.OrdinalIgnoreCase)).ToList();
-
-                return result.OrderByDescending(x => x.CreatedAt).ToList();
+                    result = newList;
+                }
+                return result.OrderByDescending(x => x.CreatedAt).ToList(); //ORDER BY in SQL instead
             }
             catch (Exception ex)
             {
                 Trace.WriteLine(ex);
-                return new List<JobApplicationLog>();
+                return null;
             }
         }
 

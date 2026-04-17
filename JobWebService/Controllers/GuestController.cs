@@ -136,12 +136,12 @@ namespace JobWebService.Controllers
         }
 
         [HttpGet]
-        public bool Login(string userId, string password)
+        public bool Login(string username, string password)
         {
             try
             {
                 this.libraryUOW.HelperOledb.OpenConnection();
-                string passInDb = this.libraryUOW.UserRepository.GetPasswordByUserId(userId);
+                string passInDb = this.libraryUOW.UserRepository.GetPasswordByUserName(username);
                 return passInDb != null && passInDb.Equals(password);
             }
             catch (Exception ex)

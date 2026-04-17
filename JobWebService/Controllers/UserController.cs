@@ -77,12 +77,12 @@ namespace JobWebService.Controllers
         }
 
         [HttpGet]
-        public bool CheckPassword(string userId, string password)
+        public bool CheckPassword(string username, string password)
         {
             try
             {
                 this.libraryUOW.HelperOledb.OpenConnection();
-                string password2 = libraryUOW.UserRepository.GetPasswordByUserId(userId);
+                string password2 = libraryUOW.UserRepository.GetPasswordByUserName(username);
                 return password2 != null && password2.Equals(password);
             }
             catch (Exception ex)

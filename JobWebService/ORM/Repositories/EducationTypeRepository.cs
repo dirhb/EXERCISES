@@ -5,7 +5,7 @@ namespace JobWebService.ORM.Repositories
 {
     public class EducationTypeRepository : Repository, IRepository<EducationType>
     {
-        public EducationTypeRepository(DBHelperOledb helperOleDb) : base(helperOleDb) { }
+        public EducationTypeRepository(DBHelperOledb helperOledb, ModelCreators modelcreator) : base(helperOledb, modelcreator) { }
 
         public bool Delete(int id)
         {

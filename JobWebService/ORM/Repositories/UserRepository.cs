@@ -19,10 +19,10 @@ namespace JobWebService.ORM.Repositories
         }
 
         //Read password hash and salt for a user
-        public String GetPasswordByUserId(string userId)
+        public String GetPasswordByUserName(string userName)
         {
-            string sql = "SELECT Password, '' AS Salt FROM Users WHERE UserID=@UserID";
-            this.helperOleDb.AddParameters("UserID", userId);
+            string sql = "SELECT Password FROM User WHERE UserName=@UserName";
+            this.helperOleDb.AddParameters("UserName", userName);
             using (IDataReader dr = this.helperOleDb.Read(sql))
             {
                 if (dr == null || !dr.Read()) return null;

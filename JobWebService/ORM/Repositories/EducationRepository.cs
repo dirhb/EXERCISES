@@ -5,7 +5,7 @@ namespace JobWebService.ORM.Repositories
 {
     public class EducationRepository : Repository, IRepository<Education>
     {
-        public EducationRepository(DBHelperOledb helperOledb) : base(helperOledb) { }
+        public EducationRepository(DBHelperOledb helperOledb, ModelCreators modelcreator) : base(helperOledb, modelcreator) { }
         public bool Delete(int id)
         {
             string sql = $"DELETE FROM Educations WHERE EducationTypeID=@EducationTypeID";

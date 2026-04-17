@@ -6,6 +6,19 @@ namespace JobWebService.Controllers
     public static class UseCaseMemoryStore
     {
         public static List<JobApplicationLog> Applications = new List<JobApplicationLog>();
+        // -- used to test that ^
+        //static UseCaseMemoryStore()
+        //{
+        //    Applications.Add(new JobApplicationLog
+        //    {
+        //        ApplicationID = Guid.NewGuid().ToString("N"),
+        //        JobID = "job-1",
+        //        UserID = "user-1",
+        //        ResumeText = "Sample resume",
+        //        Status = "Aaaa",
+        //        CreatedAt = DateTime.UtcNow.ToString("O")
+        //    });
+        //}
         public static Dictionary<string, string> UserResumes = new Dictionary<string, string>();
         public static Dictionary<string, decimal> UserSalaries = new Dictionary<string, decimal>();
         public static Dictionary<string, List<string>> UserJobHistory = new Dictionary<string, List<string>>();

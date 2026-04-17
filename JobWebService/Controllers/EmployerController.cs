@@ -92,7 +92,7 @@ namespace JobWebService.Controllers
                 Trace.WriteLine(ex);
                 return new List<JobApplicationLog>();
             }
-        }
+                }
 
         [HttpPost]
         public bool FireEmployee(string userId)
