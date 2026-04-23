@@ -13,6 +13,7 @@ namespace JobWebService.ORM.Repositories
         ReviewRepository reviewRepository;
         UserRepository userRepository;
         UserTypeRepository userTypeRepository;
+        JobApplicationRepository jobApplicationRepository;
 
         DBHelperOledb helperOledb;
         ModelCreators modelcreators;
@@ -115,5 +116,14 @@ namespace JobWebService.ORM.Repositories
             }
         }
 
+        public JobApplicationRepository JobApplicationRepository
+        {
+            get
+            {
+                if (jobApplicationRepository == null)
+                    jobApplicationRepository = new JobApplicationRepository(helperOledb, modelcreators);
+                return jobApplicationRepository;
+            }
+        }
     }
 }

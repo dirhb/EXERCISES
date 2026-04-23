@@ -74,35 +74,30 @@ namespace JobWebService.Controllers
         }
 
         [HttpGet]
-        public List<JobApplicationLog> ReviewApplication(string? status)
+        public List<JobApplication> ReviewApplication(string? status)
         {
-            List<JobApplicationLog> result = UseCaseMemoryStore.Applications;
-            List<JobApplicationLog> newList = new List<JobApplicationLog>();
             try
             {
-                if (status != null)
-                {
-                    foreach (var item in result)
-                    {
-                        if (item.Status != null)
-                        {
-                            if (item.Status.ToLower() == status.ToLower())
-                            {
-                                newList.Add(item);
-                            }
-                        }
-                    }
+                this.libraryUOW.HelperOledb.OpenConnection();
 
-                    result = newList;
-                }
-                return result.OrderByDescending(x => x.CreatedAt).ToList(); //ORDER BY in SQL instead
+                if (!string.IsNullOrWhiteSpace(status))
+                    return this.libraryUOW.JobApplicationRepository.ReadByStatus(status);
+
+                return this.libraryUOW.JobApplicationRepository.ReadAll()
+                    .OrderByDescending(x => x.SubmittedAtUTC)
+                    .ToList();
             }
             catch (Exception ex)
             {
                 Trace.WriteLine(ex);
-                return null;
+                return new List<JobApplication>();
+            }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
             }
         }
+
 
         [HttpPost]
         public bool NotifyAboutWebsiteChanges(string text)

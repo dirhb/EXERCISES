@@ -74,25 +74,29 @@ namespace JobWebService.Controllers
         }
 
         [HttpGet]
-        public List<JobApplicationLog> Applications(string jobId, string? resumeWord)
+        public List<JobApplication> Applications(string jobId, string? resumeWord)
         {
             try
             {
-                List<JobApplicationLog> result = UseCaseMemoryStore.Applications
-                    .Where(x => x.JobID == jobId)
-                    .ToList();
+                this.libraryUOW.HelperOledb.OpenConnection();
+
+                List<JobApplication> result = this.libraryUOW.JobApplicationRepository.ReadByJobId(jobId);
 
                 if (!string.IsNullOrWhiteSpace(resumeWord))
-                    result = result.Where(x => (x.ResumeText ?? "").Contains(resumeWord, StringComparison.OrdinalIgnoreCase)).ToList();
+                    result = result.Where(x => (x.ResumeSnapshot ?? "").Contains(resumeWord, StringComparison.OrdinalIgnoreCase)).ToList();
 
-                return result.OrderByDescending(x => x.CreatedAt).ToList();
+                return result.OrderByDescending(x => x.SubmittedAtUTC).ToList();
             }
             catch (Exception ex)
             {
                 Trace.WriteLine(ex);
-                return new List<JobApplicationLog>();
+                return new List<JobApplication>();
             }
-                }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
+            }
+        }
 
         [HttpPost]
         public bool FireEmployee(string userId)
@@ -118,14 +122,17 @@ namespace JobWebService.Controllers
         {
             try
             {
-                // salary field is not in current Users table, so keep it in memory for now
-                UseCaseMemoryStore.UserSalaries[userId] = salary;
-                return true;
+                this.libraryUOW.HelperOledb.OpenConnection();
+                return this.libraryUOW.UserRepository.UpdateSalary(userId, salary);
             }
             catch (Exception ex)
             {
                 Trace.WriteLine(ex);
                 return false;
+            }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
             }
         }
     }

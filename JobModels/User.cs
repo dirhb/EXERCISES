@@ -12,11 +12,14 @@ namespace JobModels
         public string? UserID { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
+        public string? UserName { get; set; }
         public string? Password { get; set; }
         public string? Country { get; set; }
         public string? PhoneNum { get; set; }
         public string? CreationDate { get; set; }
         public int? UserTypeID { get; set; }
         public string? Email { get; set; }
+        public string? ResumeText { get; set; }
+        public decimal? Salary { get; set; }
     }
 }

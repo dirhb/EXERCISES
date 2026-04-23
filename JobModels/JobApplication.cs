@@ -12,7 +12,7 @@ namespace JobModels
         public string JobId { get; set; } = string.Empty;
         public string EmployeeId { get; set; } = string.Empty;
         public string ResumeSnapshot { get; set; } = string.Empty;
-        public DateTime SubmittedAtUtc { get; set; } = DateTime.UtcNow;
+        public DateTime SubmittedAtUTC { get; set; } = DateTime.UtcNow;
         public string Status { get; set; } = "Submitted";
     }
 }

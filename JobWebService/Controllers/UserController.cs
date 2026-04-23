@@ -120,36 +120,40 @@ namespace JobWebService.Controllers
         {
             try
             {
-                UseCaseMemoryStore.UserResumes[userId] = resumeText;
-                return true;
+                this.libraryUOW.HelperOledb.OpenConnection();
+                return this.libraryUOW.UserRepository.UpdateResume(userId, resumeText);
             }
             catch (Exception ex)
             {
                 Trace.WriteLine(ex);
                 return false;
             }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
+            }
         }
 
+
         [HttpPost]
-        public JobApplicationLog? ApplyToJob(string userId, string jobId)
+        public JobApplication? ApplyToJob(string userId, string jobId)
         {
             try
             {
-                JobApplicationLog app = new JobApplicationLog();
-                app.ApplicationID = Guid.NewGuid().ToString("N");
-                app.UserID = userId;
-                app.JobID = jobId;
-                app.ResumeText = UseCaseMemoryStore.UserResumes.GetValueOrDefault(userId, string.Empty);
+                this.libraryUOW.HelperOledb.OpenConnection();
+
+                User? user = this.libraryUOW.UserRepository.Read(userId);
+
+                JobApplication app = new JobApplication();
+                app.ApplicationId = Guid.NewGuid().ToString("N");
+                app.EmployeeId = userId;
+                app.JobId = jobId;
+                app.ResumeSnapshot = user?.ResumeText ?? string.Empty;
                 app.Status = "Submitted";
-                app.CreatedAt = DateTime.UtcNow.ToString("O");
+                app.SubmittedAtUTC = DateTime.UtcNow;
 
-                UseCaseMemoryStore.Applications.Add(app);
-
-                if (!UseCaseMemoryStore.UserJobHistory.ContainsKey(userId))
-                    UseCaseMemoryStore.UserJobHistory[userId] = new List<string>();
-
-                if (!UseCaseMemoryStore.UserJobHistory[userId].Contains(jobId))
-                    UseCaseMemoryStore.UserJobHistory[userId].Add(jobId);
+                bool ok = this.libraryUOW.JobApplicationRepository.Create(app);
+                if (!ok) return null;
 
                 return app;
             }
@@ -157,6 +161,10 @@ namespace JobWebService.Controllers
             {
                 Trace.WriteLine(ex);
                 return null;
+            }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
             }
         }
 
@@ -167,12 +175,15 @@ namespace JobWebService.Controllers
             {
                 this.libraryUOW.HelperOledb.OpenConnection();
 
-                List<string> ids = UseCaseMemoryStore.UserJobHistory.GetValueOrDefault(userId, new List<string>());
+                List<JobApplication> apps = this.libraryUOW.JobApplicationRepository.ReadByUserId(userId);
                 List<Job> historyJobs = new List<Job>();
 
-                foreach (string id in ids)
+                foreach (JobApplication app in apps)
                 {
-                    Job? job = this.libraryUOW.JobRepository.Read(id);
+                    if (string.IsNullOrWhiteSpace(app.JobId))
+                        continue;
+
+                    Job? job = this.libraryUOW.JobRepository.Read(app.JobId);
                     if (job != null)
                         historyJobs.Add(job);
                 }

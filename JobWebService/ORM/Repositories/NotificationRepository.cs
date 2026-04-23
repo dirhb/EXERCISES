@@ -9,14 +9,14 @@ namespace JobWebService.ORM.Repositories
 
         public bool Delete(int id)
         {
-            string sql = $"DELETE FROM Notifications WHERE NotificationID=@NotificationID";
+            string sql = $"DELETE FROM Notification WHERE NotificationID=@NotificationID";
             this.helperOleDb.AddParameters("NotificationID", id.ToString());
             return this.helperOleDb.Delete(sql) > 0;
         }
 
         public bool Delete(string id)
         {
-            string sql = $"DELETE FROM Notifications WHERE NotificationID=@NotificationID";
+            string sql = $"DELETE FROM Notification WHERE NotificationID=@NotificationID";
             this.helperOleDb.AddParameters("NotificationID", id);
             return this.helperOleDb.Delete(sql) > 0;
         }
@@ -29,8 +29,7 @@ namespace JobWebService.ORM.Repositories
 
         public bool Insert(Notification model)
         {
-            string sql = $"INSERT INTO Notifications(NotificationID,NotificationText,NotificationDate) VALUES(@NotificationID,@NotificationText,@NotificationDate)";
-            this.helperOleDb.AddParameters("NotificationID", model.NotificationID);
+            string sql = $"INSERT INTO Notification(NotificationText,NotificationDate) VALUES(@NotificationText,@NotificationDate)";
             this.helperOleDb.AddParameters("NotificationText", model.NotificationText);
             this.helperOleDb.AddParameters("NotificationDate", model.NotificationDate);
             return this.helperOleDb.Create(sql) > 0;
@@ -38,7 +37,7 @@ namespace JobWebService.ORM.Repositories
 
         public Notification Read(object id)
         {
-            string sql = $"SELECT * FROM Notifications WHERE NotificationID=@NotificationID";
+            string sql = $"SELECT * FROM Notification WHERE NotificationID=@NotificationID";
             this.helperOleDb.AddParameters("NotificationID", id.ToString());
             using (IDataReader dataReader = this.helperOleDb.Read(sql))
             {
@@ -51,7 +50,7 @@ namespace JobWebService.ORM.Repositories
         public List<Notification> ReadAll()
         {
             List<Notification> list = new List<Notification>();
-            string sql = "SELECT * FROM Notifications";
+            string sql = "SELECT * FROM Notification";
             using (IDataReader dataReader = this.helperOleDb.Read(sql))
                 while (dataReader.Read())
                     list.Add(this.modelCreators.NotificationCreator.CreateModel(dataReader));
@@ -60,13 +59,13 @@ namespace JobWebService.ORM.Repositories
 
         public object ReadValue()
         {
-            string sql = "SELECT COUNT(*) FROM Notifications";
+            string sql = "SELECT COUNT(*) FROM Notification";
             return this.helperOleDb.ReadValue(sql);
         }
 
         public bool Update(Notification model)
         {
-            string sql = "UPDATE Notifications SET NotificationText=@NotificationText,NotificationDate=@NotificationDate WHERE NotificationID=@NotificationID";
+            string sql = "UPDATE Notification SET NotificationText=@NotificationText,NotificationDate=@NotificationDate WHERE NotificationID=@NotificationID";
             this.helperOleDb.AddParameters("NotificationID", model.NotificationID);
             this.helperOleDb.AddParameters("NotificationText", model.NotificationText);
             this.helperOleDb.AddParameters("NotificationDate", model.NotificationDate);
