@@ -10,12 +10,12 @@ public class JobApplicationRepository : Repository, IRepository<JobApplication>
 
     public bool Insert(JobApplication model)
     {
-        string sql = "INSERT INTO [JobApplications](JobID,UserID,ResumeText,Status/*,CreatedAt*/) VALUES(@JobID,@UserID,@ResumeText,@Status/*,@CreatedAt*/)";
+        string sql = "INSERT INTO\r\n    JobApplications (JobID, UserID, ResumeText, Status, CreatedAt)\r\nVALUES\r\n    (@JobID, @UserID, @ResumeText, @Status, CreatedAt);";
         this.helperOleDb.AddParameters("@JobID", model.JobId);
         this.helperOleDb.AddParameters("@UserID", model.EmployeeId);
         this.helperOleDb.AddParameters("@ResumeText", model.ResumeSnapshot);
         this.helperOleDb.AddParameters("@Status", model.Status);
-        //this.helperOleDb.AddParameters("@CreatedAt", model.SubmittedAtUTC);
+        this.helperOleDb.AddParameters("@CreatedAt", model.SubmittedAtUTC);
         return this.helperOleDb.Create(sql) > 0;
     }
 

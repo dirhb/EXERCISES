@@ -136,7 +136,7 @@ namespace JobWebService.Controllers
 
 
         [HttpPost]
-        public JobApplication? ApplyToJob(string userId, string jobId)
+        public bool ApplyToJob(int userId, int jobId)
         {
             try
             {
@@ -144,23 +144,25 @@ namespace JobWebService.Controllers
 
                 User? user = this.libraryUOW.UserRepository.Read(userId);
 
+                if (user == null)
+                    return false;
+
                 JobApplication app = new JobApplication();
-                app.ApplicationId = Guid.NewGuid().ToString("N");
+                //app.ApplicationId = Guid.NewGuid().ToString("N");
                 app.EmployeeId = userId;
                 app.JobId = jobId;
-                app.ResumeSnapshot = user?.ResumeText ?? string.Empty;
+                app.ResumeSnapshot = user.ResumeText ?? string.Empty;
                 app.Status = "Submitted";
-                app.SubmittedAtUTC = DateTime.UtcNow;
+                app.SubmittedAtUTC = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 
                 bool ok = this.libraryUOW.JobApplicationRepository.Create(app);
-                if (!ok) return null;
 
-                return app;
+                return ok;
             }
             catch (Exception ex)
             {
                 Trace.WriteLine(ex);
-                return null;
+                return false;
             }
             finally
             {
@@ -180,7 +182,7 @@ namespace JobWebService.Controllers
 
                 foreach (JobApplication app in apps)
                 {
-                    if (string.IsNullOrWhiteSpace(app.JobId))
+                    if (app.JobId <= 0)
                         continue;
 
                     Job? job = this.libraryUOW.JobRepository.Read(app.JobId);

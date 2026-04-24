@@ -8,11 +8,11 @@ namespace JobModels
 {
     public class JobApplication
     {
-        public string ApplicationId { get; set; } = Guid.NewGuid().ToString("N");
-        public string JobId { get; set; } = string.Empty;
-        public string EmployeeId { get; set; } = string.Empty;
+        public int ApplicationId { get; set; }
+        public int JobId { get; set; }
+        public int EmployeeId { get; set; }
         public string ResumeSnapshot { get; set; } = string.Empty;
-        public DateTime SubmittedAtUTC { get; set; } = DateTime.UtcNow;
+        public string SubmittedAtUTC { get; set; } = string.Empty;
         public string Status { get; set; } = "Submitted";
     }
 }

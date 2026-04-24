@@ -9,12 +9,12 @@ namespace JobWebService.ORM.ModelFactory
         {
             JobApplication jobApplication = new JobApplication()
             {
-                ApplicationId = Convert.ToString(reader["ApplicationID"]),
-                JobId = Convert.ToString(reader["JobID"]),
-                EmployeeId = Convert.ToString(reader["UserID"]),
+                ApplicationId = Convert.ToInt16(reader["ApplicationID"]),
+                JobId = Convert.ToInt16(reader["JobID"]),
+                EmployeeId = Convert.ToInt16(reader["UserID"]),
                 ResumeSnapshot = Convert.ToString(reader["ResumeText"]),
                 Status = Convert.ToString(reader["Status"]),
-                SubmittedAtUTC = Convert.ToDateTime(reader["CreatedAt"]),
+                SubmittedAtUTC = Convert.ToString(reader["CreatedAt"]),
             };
             return jobApplication;
         }
