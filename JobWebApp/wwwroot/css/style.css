@@ -1,0 +1,423 @@
+body {
+    background: #f5f7fa;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+* {
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.Navigation {
+    list-style-type: none;
+    display: flex;
+    gap: 20px;
+    background-color: rgb(86, 130, 177);
+    align-items: center;
+    font-size: 1.67em;
+    font-family: Raleway;
+    flex-wrap: nowrap; /* prevents wrapping */
+}
+
+.JobFindLogo {
+    top: 200px;
+    margin-left: 40px;
+    width: 170px;
+    height: 140px;
+    cursor: pointer;
+}
+
+.right-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    margin-left: auto;
+    margin-right: 10px;
+}
+
+.left-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.searchBar {
+    align-items: center;
+    width: max-content;
+    display: flex;
+    --padding: 14px;
+    border-radius: 28px;
+    background: #f6f6f6;
+    padding: var(--padding);
+    transition: box-shadow 0.25s;
+    margin-left: 15%;
+    box-shadow: 2px 2px 5px rgba(0,0,0, 0.3);
+}
+
+.search-input {
+    font-size: 16px;
+    color: #333333;
+    margin-left: var(--padding);
+    outline: none;
+    border: none;
+    background: transparent;
+    width: 300px;
+    font-family: Raleway;
+}
+/* Make it look better on smaller screens */
+@media (max-width: 1200px) {
+    .Navigation {
+        gap: 30px; /* Smaller gap between items */
+        font-size: 1.2em; /* Smaller text */
+    }
+
+    .JobFindLogo {
+        width: 120px; /* Smaller logo */
+        height: 100px;
+        margin-left: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .Navigation {
+        gap: 15px;
+        font-size: 1em; /* Even smaller text */
+        padding: 10px;
+    }
+
+    .searchBar {
+        margin-left: 0; /* Remove the 15% margin */
+        width: 100%; /* Full width on mobile */
+    }
+
+    .search-input {
+        width: 150px; /* Smaller search box */
+    }
+}
+
+.search-input::placeholder,
+.search-icon {
+    color: rgba(0,0,0,0.25);
+}
+
+.searchBar:focus-within {
+    box-shadow: 0 0 2px rgba(0,0,0, 0.75);
+}
+
+@font-face {
+    font-family: 'Raleway';
+    src: url('fonts/Raleway-VariableFont_wght.ttf') format('truetype');
+}
+
+.Notification-icon button {
+    border: none;
+    cursor: pointer;
+    padding: 10px 15px;
+    font-size: 24px;
+    background-color: hsl(0, 0%, 80%);
+    color: #ffffff;
+}
+
+.notification-icon {
+    border: none;
+    cursor: pointer;
+    padding: 10px 15px;
+    font-size: 24px;
+    background-color: rgb(65, 99, 136);
+    color: #ffffff;
+    border-radius: 50%;
+    margin-left: 67px;
+}
+
+.dropdown {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 100px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.Notification .dropdown {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown li {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.notification:hover .dropdown {
+    display: block;
+}
+
+.Notification-icon:hover {
+    background-color: #ddd;
+}
+
+.Notification a:hover {
+    background-color: hsl(0, 0%, 90%)
+}
+
+/* Account icon + dropdown (mirror notification behavior) */
+.account-icon {
+    border: none;
+    cursor: pointer;
+    padding: 10px 15px;
+    font-size: 24px;
+    background-color: rgb(65, 99, 136);
+    color: #ffffff;
+    border-radius: 50%;
+    margin-left: 67px;
+}
+
+.account:hover .dropdown {
+    display: block;
+}
+
+.account-icon:hover {
+    background-color: #ddd;
+}
+
+/* Main layout below navigation */
+.container {
+    /*display: flex;*/
+    gap: 24px;
+    padding: 24px;
+    align-items: flex-start; /* keep columns top-aligned when left grows */
+    width: 100%;
+    min-height: 100vh;
+}
+
+.left-col {
+    flex: 1;
+    min-width: 0;
+}
+
+.right-col {
+    width: 1;
+    min-width: 0;
+}
+
+.job {
+   width:400px;
+   margin:10px;
+
+}
+
+.card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+}
+
+.jobs-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1em;
+}
+/* simple vertical stretch: taller and still scrollable */
+.jobs-box {
+    max-height: 70vh; /* don't overflow viewport */
+    overflow-y: auto;
+    border: 1px solid #e6e6e6;
+    border-radius: 6px;
+}
+
+.job-row {
+    padding: 6px 0;
+    border-bottom: 1px dashed #eee;
+    color: #555;
+}
+
+.comment-card {
+    width: 420px;
+    position: relative;
+    margin-top: 12px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.comment-bubble {
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: inline-block;
+    border: 1px solid #ddd;
+}
+
+.comment-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.comment-input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 18px;
+    border: 1px solid #ccc;
+}
+
+.comments-list {
+    list-style: none;
+    margin: 12px 0 0 0;
+    padding: 0;
+}
+
+    .comments-list li {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+.small-icon {
+    font-size: 20px
+}
+
+.popular-list {
+    list-style: none;
+    padding: 0;
+    margin: 0
+}
+
+    .popular-list li {
+        padding: 8px 6px;
+        border-bottom: 1px solid #f0f0f0
+    }
+/*claude changes*/
+.job-row {
+    padding: 12px 16px; /* More padding */
+    border: 1px solid #ddd; /* Box around each job */
+    border-radius: 8px; /* Rounded corners */
+    margin-bottom: 8px; /* Space between jobs */
+    background: #f9f9f9; /* Light background */
+    cursor: pointer; /* Shows it's clickable */
+    transition: background 0.2s; /* Smooth hover effect */
+}
+
+    .job-row:hover {
+        background: #e6f2ff; /* Changes color on hover */
+        border-color: #5682b1; /* Matches your blue theme */
+    }
+
+.jobs-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.2em; /* Bigger */
+    color: #333; /* Darker */
+    font-weight: bold; /* Bolder */
+    margin-bottom: 16px; /* More space below */
+}
+
+.popular h4 {
+    font-size: 1.2em;
+    color: #333;
+    font-weight: bold;
+    margin-bottom: 16px;
+}
+
+.popular-list li {
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: #f9f9f9;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+    .popular-list li:hover {
+        background: #e6f2ff;
+        border-color: #5682b1;
+    }
+
+.card {
+    background: #fff;
+    border-radius: 12px; /* More rounded */
+    padding: 20px; /* More padding */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* Bigger shadow */
+    margin-bottom: 16px;
+}
+
+.welcome-section {
+    background: linear-gradient(135deg, #5682b1 0%, #416388 100%); /* Blue gradient matching your nav */
+    color: white;
+    text-align: center;
+    padding: 60px 24px; /* Space top and bottom */
+}
+
+    .welcome-section h1 {
+        font-size: 2.5em;
+        margin-bottom: 16px;
+        font-family: Raleway;
+    }
+
+    .welcome-section p {
+        font-size: 1.2em;
+        max-width: 700px; /* Keeps text from stretching too wide */
+        margin: 0 auto; /* Centers it */
+        font-family: Raleway;
+    }
+
+.stats-section {
+    display: flex;
+    justify-content: center; /* Centers the boxes */
+    gap: 40px; /* Space between boxes */
+    padding: 60px 24px;
+    background: #f5f7fa; /* Light gray background */
+    flex-wrap: wrap; /* Wraps on smaller screens */
+}
+
+.stat-box {
+    text-align: center;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    min-width: 200px; /* Minimum width for each box */
+    transition: transform 0.3s; /* Smooth animation */
+}
+
+    .stat-box:hover {
+        transform: translateY(-5px); /* Lifts up when you hover */
+        box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    }
+
+.stat-icon {
+    font-size: 48px;
+    color: #5682b1; /* Your blue color */
+    margin-bottom: 12px;
+}
+
+.stat-number {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #333;
+    margin: 12px 0;
+    font-family: Raleway;
+}
+
+.stat-label {
+    font-size: 1.1em;
+    color: #666;
+    font-family: Raleway;
+}
