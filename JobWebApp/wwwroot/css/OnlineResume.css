@@ -1,0 +1,211 @@
+﻿/* ============================================================
+   OnlineResume.css — styles only for OnlineResume.html
+   ============================================================ */
+
+/* ── Page header ─────────────────────────────────────────── */
+.resume-page .page-header {
+    background: linear-gradient(160deg, var(--brand-900) 0%, var(--brand-600) 100%);
+    color: #fff;
+    padding: clamp(32px, 6vw, 60px) 20px clamp(24px, 4vw, 40px);
+}
+
+    .resume-page .page-header h1 {
+        color: #fff;
+    }
+
+    .resume-page .page-header p {
+        color: rgba(255,255,255,0.75);
+    }
+
+/* ── Container spacing ───────────────────────────────────── */
+.resume-page .container {
+    padding-top: 24px;
+}
+
+/* ── Accordion ───────────────────────────────────────────── */
+.accordion {
+    display: grid;
+    gap: 10px;
+}
+
+.accordion-item {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: box-shadow 0.2s var(--ease);
+}
+
+    .accordion-item.open {
+        box-shadow: var(--shadow-md);
+        border-color: var(--brand-400);
+    }
+
+/* Header / trigger button */
+.accordion-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--surface-2);
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.16s var(--ease);
+}
+
+    .accordion-header:hover {
+        background: #ddeeff;
+    }
+
+.accordion-item.open .accordion-header {
+    background: #ddeeff;
+}
+
+/* Number badge */
+.acc-num {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand-400), var(--brand-700));
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.acc-title {
+    flex: 1;
+    font-weight: 600;
+    font-size: 0.97rem;
+    color: var(--brand-800);
+}
+
+/* Chevron icon — rotates when open */
+.acc-icon {
+    font-size: 22px;
+    color: var(--brand-500);
+    transition: transform 0.25s var(--ease);
+}
+
+.accordion-item.open .acc-icon {
+    transform: rotate(180deg);
+}
+
+/* Body / content area */
+.accordion-body {
+    padding: 18px 18px 20px;
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    animation: accOpen 0.22s var(--ease);
+}
+
+@keyframes accOpen {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Form fields inside accordion ───────────────────────── */
+.acc-fields {
+    display: grid;
+    gap: 14px;
+}
+
+    .acc-fields label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 0.86rem;
+        font-weight: 600;
+        color: var(--text-700);
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+
+    .acc-fields input,
+    .acc-fields textarea {
+        font-family: inherit;
+        font-size: 0.95rem;
+        font-weight: 400;
+        text-transform: none;
+        letter-spacing: 0;
+        color: var(--text-900);
+        background: var(--surface-2);
+        border: 1.5px solid var(--line);
+        border-radius: var(--radius-sm);
+        padding: 10px 13px;
+        outline: none;
+        transition: border-color 0.18s, box-shadow 0.18s;
+        resize: vertical;
+        width: 100%;
+    }
+
+        .acc-fields input:focus,
+        .acc-fields textarea:focus {
+            border-color: var(--brand-400);
+            box-shadow: 0 0 0 3px rgba(59,123,200,0.12);
+            background: #fff;
+        }
+
+        .acc-fields input::placeholder,
+        .acc-fields textarea::placeholder {
+            color: var(--text-500);
+            font-weight: 400;
+        }
+
+/* Side-by-side date/year fields */
+.field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+/* Add another role button */
+.add-more-btn {
+    margin-top: 10px;
+    padding: 9px 18px;
+    background: transparent;
+    border: 1.5px dashed var(--brand-400);
+    border-radius: var(--radius-sm);
+    color: var(--brand-600);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.16s, border-color 0.16s, color 0.16s;
+}
+
+    .add-more-btn:hover {
+        background: #ddeeff;
+        border-color: var(--brand-600);
+        color: var(--brand-700);
+    }
+
+/* ── Quick Actions — CTA style ───────────────────────────── */
+.resume-page .right-col .popular-list li {
+    background: var(--surface);
+    border: 1.5px solid var(--brand-300);
+    color: var(--brand-700);
+    font-weight: 600;
+    border-radius: var(--radius);
+    text-align: center;
+    justify-content: center;
+    transition: background 0.18s, color 0.18s, transform 0.18s var(--ease);
+}
+
+    .resume-page .right-col .popular-list li:hover {
+        background: var(--brand-600);
+        border-color: var(--brand-600);
+        color: #fff;
+        transform: translateY(-2px) translateX(0);
+    }

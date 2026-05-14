@@ -1,0 +1,86 @@
+﻿/* ── Page header ─────────────────────────────────────────── */
+.chat-page .page-header {
+    background: linear-gradient(160deg, var(--brand-900) 0%, var(--brand-600) 100%);
+    color: #fff;
+    padding: clamp(32px, 6vw, 60px) 20px clamp(24px, 4vw, 40px);
+}
+
+    .chat-page .page-header h1 {
+        color: #fff;
+    }
+
+    .chat-page .page-header p {
+        color: rgba(255,255,255,0.75);
+    }
+
+/* ── Container spacing ───────────────────────────────────── */
+.chat-page .container {
+    padding-top: 24px;
+}
+
+/* ── Conversation items — chat feel ─────────────────────── */
+.chat-page .popular-list li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+}
+
+    /* avatar placeholder dot */
+    .chat-page .popular-list li::before {
+        content: '';
+        flex-shrink: 0;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--brand-400), var(--brand-600));
+        opacity: 0.75;
+    }
+
+/* ── Tips card ───────────────────────────────────────────── */
+.chat-page .right-col .card {
+    border-left: 4px solid var(--brand-400);
+}
+
+.chat-page .right-col .popular-list li {
+    border-left: none;
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    font-size: 0.92rem;
+    color: var(--text-700);
+}
+
+    /* counter badges */
+    .chat-page .right-col .popular-list li::before {
+        display: none;
+    }
+
+.chat-page .right-col .popular-list li {
+    counter-increment: tip-counter;
+    position: relative;
+    padding-left: 36px;
+}
+
+.chat-page .right-col .popular-list {
+    counter-reset: tip-counter;
+}
+
+    .chat-page .right-col .popular-list li::after {
+        content: counter(tip-counter);
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--brand-500);
+        background: var(--accent-lt);
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 20px;
+        text-align: center;
+    }

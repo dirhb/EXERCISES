@@ -1,0 +1,249 @@
+﻿/* ============================================================
+   Homepage.css — styles only for Homepage.html
+   ============================================================ */
+
+/* ── Hero welcome section ────────────────────────────────── */
+.welcome-section {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--brand-900) 0%, var(--brand-700) 55%, var(--brand-500) 100%);
+    color: #fff;
+    text-align: center;
+    padding: clamp(56px, 10vw, 100px) 20px clamp(48px, 8vw, 84px);
+}
+
+    /* decorative blobs */
+    .welcome-section::before,
+    .welcome-section::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .welcome-section::before {
+        width: 520px;
+        height: 520px;
+        background: radial-gradient(circle, rgba(59,123,200,0.35), transparent 70%);
+        top: -160px;
+        left: -120px;
+    }
+
+    .welcome-section::after {
+        width: 380px;
+        height: 380px;
+        background: radial-gradient(circle, rgba(240,165,0,0.18), transparent 70%);
+        bottom: -100px;
+        right: -80px;
+    }
+
+    .welcome-section h1 {
+        font-family: 'DM Serif Display', serif;
+        font-size: clamp(2.2rem, 6vw, 3.6rem);
+        letter-spacing: -0.02em;
+        margin-bottom: 12px;
+        position: relative;
+        z-index: 1;
+        animation: fadeUp 0.7s var(--ease) both;
+    }
+
+    .welcome-section p {
+        max-width: 640px;
+        margin: 0 auto;
+        font-size: clamp(1rem, 2.4vw, 1.18rem);
+        color: rgba(255,255,255,0.82);
+        position: relative;
+        z-index: 1;
+        animation: fadeUp 0.7s 0.1s var(--ease) both;
+    }
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(22px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* CTA buttons */
+.hero-cta-row {
+    margin-top: 28px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.7s 0.2s var(--ease) both;
+}
+
+.cta-btn {
+    background: #fff;
+    color: var(--brand-700);
+    padding: 12px 24px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.97rem;
+    box-shadow: 0 6px 22px rgba(0,0,0,0.18);
+    transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s;
+    letter-spacing: 0.01em;
+}
+
+    .cta-btn:hover {
+        transform: translateY(-2px) scale(1.03);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+    }
+
+    .cta-btn.secondary {
+        background: transparent;
+        color: #fff;
+        border: 1.5px solid rgba(255,255,255,0.65);
+        box-shadow: none;
+    }
+
+        .cta-btn.secondary:hover {
+            background: rgba(255,255,255,0.12);
+            border-color: #fff;
+        }
+
+/* ── Stats section ───────────────────────────────────────── */
+.stats-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    padding: 28px clamp(16px, 3vw, 32px);
+}
+
+.stat-box {
+    text-align: center;
+    padding: 24px 16px;
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(255,255,255,0.7);
+    transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+
+    .stat-box:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+.stat-icon {
+    font-size: 40px;
+    color: var(--brand-500);
+    background: linear-gradient(135deg, var(--brand-400), var(--brand-600));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.5rem, 4vw, 2.1rem);
+    color: var(--brand-800);
+    margin: 8px 0 4px;
+}
+
+.stat-label {
+    color: var(--text-500);
+    font-size: 0.88rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+/* ── Homepage main section ───────────────────────────────── */
+.home-page .container {
+    padding-top: 24px;
+    align-items: stretch;
+}
+
+.home-page .equal-card {
+    height: 100%;
+}
+
+.jobs-card h3 {
+    font-size: 1.1rem;
+}
+
+    /* section label accent */
+    .jobs-card h3 .material-symbols-outlined {
+        font-size: 20px;
+        color: var(--accent);
+    }
+/* ── Featured Job cards ──────────────────────────────────── */
+.featured-job {
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: background 0.16s, border-color 0.16s, transform 0.16s var(--ease);
+    cursor: pointer;
+}
+
+    .featured-job:hover {
+        background: #ddeeff;
+        border-color: var(--brand-400);
+        transform: translateX(3px);
+    }
+
+.fj-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+    .fj-top > div {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+.fj-title {
+    font-weight: 700;
+    font-size: 0.97rem;
+    color: var(--brand-800);
+}
+
+.fj-company {
+    font-size: 0.85rem;
+    color: var(--text-500);
+}
+
+.fj-badge {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: var(--accent-lt);
+    color: #a06b00;
+    padding: 3px 10px;
+    border-radius: 999px;
+    letter-spacing: 0.03em;
+}
+
+.fj-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+    .fj-tags span {
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: rgba(59,123,200,0.1);
+        color: var(--brand-600);
+        border: 1px solid rgba(59,123,200,0.18);
+    }

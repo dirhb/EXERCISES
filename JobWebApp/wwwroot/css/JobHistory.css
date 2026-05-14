@@ -1,0 +1,116 @@
+﻿/* ── Page header accent bar ──────────────────────────────── */
+.job-history-page .page-header {
+    background: linear-gradient(160deg, var(--brand-900) 0%, var(--brand-700) 100%);
+    color: #fff;
+    padding: clamp(32px, 6vw, 60px) 20px clamp(24px, 4vw, 40px);
+    margin-bottom: 4px;
+}
+
+    .job-history-page .page-header h1 {
+        color: #fff;
+        font-size: clamp(1.9rem, 5vw, 3rem);
+    }
+
+    .job-history-page .page-header p {
+        color: rgba(255,255,255,0.75);
+    }
+
+/* ── Container spacing ───────────────────────────────────── */
+.job-history-page .container {
+    padding-top: 24px;
+}
+
+/* ── Past Jobs card ──────────────────────────────────────── */
+.job-row strong {
+    color: var(--brand-700);
+    font-weight: 600;
+}
+
+/* ── Employers list ──────────────────────────────────────── */
+.employers-list li a {
+    color: var(--brand-600);
+    font-weight: 500;
+    transition: color 0.14s;
+}
+
+.employers-list li:hover a {
+    color: var(--brand-500);
+}
+
+.employers-card {
+    margin-bottom: 16px;
+}
+
+/* ── Genres / filter checkboxes ─────────────────────────── */
+.genres-form {
+    padding-top: 4px;
+}
+
+.genres-list {
+    display: grid;
+    gap: 10px;
+}
+
+    .genres-list label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 13px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        background: var(--surface-2);
+        font-size: 0.92rem;
+        color: var(--text-700);
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+        user-select: none;
+    }
+
+        .genres-list label:hover {
+            background: #ddeeff;
+            border-color: var(--brand-400);
+        }
+
+    .genres-list input[type="checkbox"] {
+        accent-color: var(--brand-500);
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+/* ── Pagination ──────────────────────────────────────────── */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 20px clamp(16px, 3vw, 32px) 36px;
+    flex-wrap: wrap;
+}
+
+    .pagination button {
+        padding: 8px 18px;
+        border: 1.5px solid var(--line);
+        border-radius: 999px;
+        background: var(--glass);
+        color: var(--brand-700);
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.18s var(--ease), border-color 0.18s, color 0.18s, transform 0.18s var(--ease);
+        backdrop-filter: blur(8px);
+    }
+
+        .pagination button:hover {
+            background: var(--brand-600);
+            border-color: var(--brand-600);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+    .pagination .ellipsis {
+        color: var(--text-500);
+        font-size: 1.1rem;
+        padding: 0 4px;
+    }
