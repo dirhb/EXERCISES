@@ -10,7 +10,7 @@ public class JobApplicationRepository : Repository, IRepository<JobApplication>
 
     public bool Insert(JobApplication model)
     {
-        string sql = "INSERT INTO\r\n    JobApplications (JobID, UserID, ResumeText, Status, CreatedAt)\r\nVALUES\r\n    (@JobID, @UserID, @ResumeText, @Status, CreatedAt);";
+        string sql = "INSERT INTO\r\n    JobApplications (JobID, UserID, ResumeText, Status, CreatedAt)\r\nVALUES\r\n    (@JobID, @UserID, @ResumeText, @Status, @CreatedAt);";
         this.helperOleDb.AddParameters("@JobID", model.JobId);
         this.helperOleDb.AddParameters("@UserID", model.EmployeeId);
         this.helperOleDb.AddParameters("@ResumeText", model.ResumeSnapshot);

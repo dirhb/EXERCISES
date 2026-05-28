@@ -385,3 +385,9 @@ img {
         padding: 16px;
     }
 }
+.nav-search-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
