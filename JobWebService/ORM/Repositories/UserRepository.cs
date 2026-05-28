@@ -82,7 +82,7 @@ namespace JobWebService.ORM.Repositories
 
         public bool Insert(User model)
         {
-            string sql = $"INSERT INTO [User](FirstName,LastName,UserName,[Password],Country,PhoneNum,CreationDate,UserTypeID,Email) VALUES(@FirstName,@LastName,@UserName,@Password,@Country,@PhoneNum,@CreationDate,@UserTypeID,@Email)";
+            string sql = $"INSERT INTO [User] (FirstName,LastName,UserName,[Password],Country,PhoneNum,CreationDate,UserTypeID,Email) VALUES(@FirstName,@LastName,@UserName,@Password,@Country,@PhoneNum,@CreationDate,@UserTypeID,@Email)";
             this.helperOleDb.AddParameters("@FirstName", model.FirstName);
             this.helperOleDb.AddParameters("@LastName", model.LastName);
             this.helperOleDb.AddParameters("@UserName", model.UserName);

@@ -30,7 +30,7 @@ namespace JobWebService.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Register error: {ex.Message}");
+                Console.WriteLine(ex.ToString());
                 Trace.WriteLine(ex);
                 return false;
             }
