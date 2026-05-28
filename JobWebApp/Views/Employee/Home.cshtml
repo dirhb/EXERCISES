@@ -1,0 +1,106 @@
+@*
+    Views/Employee/Home.cshtml
+    Homepage for logged-in employees.
+    Shows job listings with an Apply button on each.
+    ViewBag.Jobs = List<Job>
+    ViewBag.FullName = string
+*@
+
+@using JobModels
+@{
+    ViewBag.Title = "Home";
+    var jobs = ViewBag.Jobs as List<Job> ?? new List<Job>();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Homepage.css" />
+}
+
+<section class="welcome-section">
+    <h1>Welcome back, @ViewBag.FullName 👋</h1>
+    <p>You have @jobs.Count jobs available. Start applying today.</p>
+    <div class="hero-cta-row">
+        <a href="/Employee/Resume" class="cta-btn">Update Resume</a>
+        <a href="/Employee/JobHistory" class="cta-btn secondary">View Applications</a>
+    </div>
+</section>
+
+<section class="stats-section">
+    <div class="stat-box">
+        <span class="stat-icon material-symbols-outlined">work</span>
+        <h2 class="stat-number">@jobs.Count</h2>
+        <p class="stat-label">Available Jobs</p>
+    </div>
+    <div class="stat-box">
+        <span class="stat-icon material-symbols-outlined">send</span>
+        <h2 class="stat-number">—</h2>
+        <p class="stat-label">Your Applications</p>
+    </div>
+    <div class="stat-box">
+        <span class="stat-icon material-symbols-outlined">star</span>
+        <h2 class="stat-number">—</h2>
+        <p class="stat-label">Saved Jobs</p>
+    </div>
+    <div class="stat-box">
+        <span class="stat-icon material-symbols-outlined">chat</span>
+        <h2 class="stat-number">—</h2>
+        <p class="stat-label">Messages</p>
+    </div>
+</section>
+
+<main class="container home-page">
+    <aside class="left-col">
+        <div class="card jobs-card equal-card">
+            <h3><span class="material-symbols-outlined">workspace_premium</span> Featured Jobs</h3>
+            <div class="jobs-box">
+                @foreach (var job in jobs)
+                {
+                    <div class="featured-job">
+                        <div class="fj-top">
+                            <div>
+                                <span class="fj-title">@job.JobTitle</span>
+                                <span class="fj-company">@job.EmployerID — @job.CountryID</span>
+                            </div>
+                            <span class="fj-badge">Featured</span>
+                        </div>
+                        <div class="fj-tags">
+                            <span>@job.JobType</span>
+                        </div>
+                        @* Apply button — posts to EmployeeController → ApplyToJob *@
+                        <form method="post" action="/Employee/ApplyToJob" style="margin-top:8px">
+                            <input type="hidden" name="jobId" value="@job.JobID" />
+                            <button type="submit" class="cta-btn" style="font-size:0.85rem;padding:7px 16px;">
+                                Apply Now
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    </aside>
+
+    <aside class="right-col">
+        <div class="card popular equal-card">
+            <h3>Quick Links</h3>
+            <ul class="popular-list">
+                <li><a href="/Employee/Resume">Update my resume</a></li>
+                <li><a href="/Employee/JobHistory">My applications</a></li>
+                <li><a href="/Employee/Profile">My profile</a></li>
+            </ul>
+        </div>
+    </aside>
+</main>
+
+@* Show success/error messages from applying *@
+@if (TempData["Success"] != null)
+{
+    <div style="position:fixed;bottom:24px;right:24px;background:var(--color-background-success);color:var(--color-text-success);padding:12px 20px;border-radius:10px;box-shadow:var(--shadow-md);font-size:0.93rem;">
+        @TempData["Success"]
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div style="position:fixed;bottom:24px;right:24px;background:var(--color-background-danger);color:var(--color-text-danger);padding:12px 20px;border-radius:10px;box-shadow:var(--shadow-md);font-size:0.93rem;">
+        @TempData["Error"]
+    </div>
+}

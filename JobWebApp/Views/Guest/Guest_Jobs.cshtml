@@ -1,0 +1,105 @@
+@*
+    Views/Guest/Jobs.cshtml
+    Shows a limited page of job listings for guests.
+    If they want to see more they must log in.
+    ViewBag.Jobs = List<Job>
+*@
+
+@using JobModels
+@{
+    ViewBag.Title = "Browse Jobs";
+    var jobs = ViewBag.Jobs as List<Job> ?? new List<Job>();
+
+    // Guest can only see 6 jobs — must log in for more
+    var visibleJobs = jobs.Take(6).ToList();
+    bool hasMore = jobs.Count > 6;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/JobHistory.css" />
+}
+
+<header class="page-header content-page-header job-history-page">
+    <h1>Browse Jobs</h1>
+    <p>Explore available opportunities. Sign in to see all listings and apply.</p>
+</header>
+
+<main class="container" style="padding-top:24px">
+    <section class="left-col">
+        <div class="card jobs-card">
+            <h3>
+                <span class="material-symbols-outlined">work</span>
+                Available Jobs
+                <span style="font-size:0.85rem;font-weight:400;color:var(--text-500);margin-left:8px">
+                    Showing @visibleJobs.Count of @jobs.Count
+                </span>
+            </h3>
+
+            <div class="jobs-box">
+                @foreach (var job in visibleJobs)
+                {
+                    <div class="featured-job">
+                        <div class="fj-top">
+                            <div>
+                                <span class="fj-title">@job.JobTitle</span>
+                                <span class="fj-company">@job.EmployerID — @job.CountryID</span>
+                            </div>
+                            <span class="fj-badge">@job.JobType</span>
+                        </div>
+                        <div class="fj-tags">
+                            <span>@job.JobType</span>
+                            @if (!string.IsNullOrEmpty(job.JobFilter))
+                            {
+                                <span>@job.JobFilter</span>
+                            }
+                        </div>
+                        @* Guest can't apply — prompt to login *@
+                        <a href="/Guest/Login" style="display:inline-block;margin-top:8px;font-size:0.85rem;color:var(--brand-500);font-weight:600;">
+                            Sign in to apply →
+                        </a>
+                    </div>
+                }
+            </div>
+
+            @* Lock message — shown if there are more jobs *@
+            @if (hasMore)
+            {
+                <div style="margin-top:20px;padding:20px;background:var(--surface-2);border:1.5px dashed var(--brand-300);border-radius:var(--radius);text-align:center;">
+                    <span class="material-symbols-outlined" style="font-size:36px;color:var(--brand-400);display:block;margin-bottom:8px">lock</span>
+                    <p style="font-weight:600;color:var(--brand-800);margin-bottom:4px">@(jobs.Count - 6) more jobs available</p>
+                    <p style="font-size:0.9rem;color:var(--text-500);margin-bottom:14px">Create a free account to see all listings and apply instantly.</p>
+                    <a href="/Guest/Login" class="cta-btn" style="background:var(--brand-600);color:#fff;padding:10px 24px;border-radius:999px;font-weight:700;display:inline-block">
+                        Sign In / Register
+                    </a>
+                </div>
+            }
+        </div>
+    </section>
+
+    <aside class="right-col">
+        <div class="card">
+            <h3>Why Join JobFind?</h3>
+            <ul class="popular-list">
+                <li>
+                    <span style="color:var(--brand-500);font-weight:700">✓</span>
+                    Apply to unlimited jobs
+                </li>
+                <li>
+                    <span style="color:var(--brand-500);font-weight:700">✓</span>
+                    Build your online resume
+                </li>
+                <li>
+                    <span style="color:var(--brand-500);font-weight:700">✓</span>
+                    Track your applications
+                </li>
+                <li>
+                    <span style="color:var(--brand-500);font-weight:700">✓</span>
+                    Message recruiters directly
+                </li>
+            </ul>
+            <a href="/Guest/Login" class="auth-submit" style="display:block;text-align:center;margin-top:16px;padding:11px;background:linear-gradient(135deg,var(--brand-500),var(--brand-700));color:#fff;border-radius:var(--radius-sm);font-weight:700;font-size:0.95rem;">
+                Get Started Free
+            </a>
+        </div>
+    </aside>
+</main>

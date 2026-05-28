@@ -160,5 +160,25 @@ namespace JobWebService.Controllers
         {
             return "Navigated to " + pageName;
         }
+
+        [HttpGet]
+        public User? GetByCredentials(string email, string password)
+        {
+            try
+            {
+                this.libraryUOW.HelperOledb.OpenConnection();
+                return this.libraryUOW.UserRepository.GetByCredentials(email, password);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return null;
+            }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
+            }
+        }
     }
 }
+

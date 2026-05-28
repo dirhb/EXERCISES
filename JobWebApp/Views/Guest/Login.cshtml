@@ -1,0 +1,177 @@
+@*
+    Views/Guest/Login.cshtml
+    The login and register page.
+    Split layout — branding on left, form on right.
+    Tab switcher toggles between Register and Sign In forms.
+*@
+
+@{
+    ViewBag.Title = "Login";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Register.css" />
+}
+
+<main class="auth-wrapper">
+
+    @* Left panel — branding *@
+    <div class="auth-panel-left">
+        <div class="auth-brand">
+            <div class="auth-logo-wrap">
+                <img src="~/images/JobFind_Logo.png" alt="JobFind logo" class="auth-logo" />
+            </div>
+            <h1>Find your next opportunity.</h1>
+            <p>JobFind connects thousands of job seekers with top employers every day. Build your profile, upload your resume, and apply to roles that match your skills — all in one place.</p>
+            <ul class="auth-perks">
+                <li>
+                    <span class="material-symbols-outlined">search</span>
+                    <span>Search thousands of live job listings</span>
+                </li>
+                <li>
+                    <span class="material-symbols-outlined">description</span>
+                    <span>Build a professional online resume</span>
+                </li>
+                <li>
+                    <span class="material-symbols-outlined">notifications_active</span>
+                    <span>Get instant alerts for matching roles</span>
+                </li>
+                <li>
+                    <span class="material-symbols-outlined">chat</span>
+                    <span>Message recruiters directly</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    @* Right panel — forms *@
+    <div class="auth-panel-right">
+        <div class="auth-card">
+
+            @* Show error or success messages if any *@
+            @if (TempData["Error"] != null)
+            {
+                <div style="background:var(--color-background-danger);color:var(--color-text-danger);padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:0.9rem;">
+                    @TempData["Error"]
+                </div>
+            }
+            @if (TempData["Success"] != null)
+            {
+                <div style="background:var(--color-background-success);color:var(--color-text-success);padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:0.9rem;">
+                    @TempData["Success"]
+                </div>
+            }
+
+            @* Tab switcher *@
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="register">Register</button>
+                <button class="auth-tab" data-tab="signin">Sign In</button>
+            </div>
+
+            @* Register form *@
+            @* action points to GuestController → Register POST method *@
+            <form class="auth-form" id="register-form" method="post" action="/Guest/Register">
+                <h2>Create your account</h2>
+                <p class="auth-subtitle">Join JobFind and start applying today.</p>
+
+                <div class="auth-field">
+                    <label for="reg-firstname">First Name</label>
+                    <div class="auth-input-wrap">
+                        <span class="material-symbols-outlined">person</span>
+                        <input type="text" id="reg-firstname" name="FirstName" placeholder="Enter your first name" required />
+                    </div>
+                </div>
+
+                <div class="auth-field">
+                    <label for="reg-lastname">Last Name</label>
+                    <div class="auth-input-wrap">
+                        <span class="material-symbols-outlined">person</span>
+                        <input type="text" id="reg-lastname" name="LastName" placeholder="Enter your last name" required />
+                    </div>
+                </div>
+
+                <div class="auth-field">
+                    <label for="reg-username">Username</label>
+                    <div class="auth-input-wrap">
+                        <span class="material-symbols-outlined">badge</span>
+                        <input type="text" id="reg-username" name="UserName" placeholder="Choose a username" required />
+                    </div>
+                </div>
+
+                <div class="auth-field">
+                    <label for="reg-email">Email</label>
+                    <div class="auth-input-wrap">
+                        <span class="material-symbols-outlined">mail</span>
+                        <input type="email" id="reg-email" name="Email" placeholder="Enter your email" required />
+                    </div>
+                </div>
+
+                <div class="auth-field">
+                    <label for="reg-password">Password</label>
+                    <div class="auth-input-wrap">
+                        <span class="material-symbols-outlined">lock</span>
+                        <input type="password" id="reg-password" name="Password" placeholder="Create a password" required />
+                        <button type="button" class="toggle-pw" aria-label="Toggle password">
+                            <span class="material-symbols-outlined">visibility</span>
+                        </button>
+                    </div>
+                </div>
+
+                @* Role toggle — Employee or Employer *@
+                <div class="auth-field">
+                    <label>I am a</label>
+                    <div class="auth-tabs" style="margin-bottom:0">
+                        <label style="flex:1;text-align:center;padding:9px 0;cursor:pointer;font-weight:600;font-size:0.93rem;">
+                            @* UserTypeID 2 = Employee *@
+                            <input type="radio" name="UserTypeID" value="2" checked style="display:none" />
+                            <span class="role-label">Employee</span>
+                        </label>
+                        <label style="flex:1;text-align:center;padding:9px 0;cursor:pointer;font-weight:600;font-size:0.93rem;">
+                            @* UserTypeID 3 = Employer *@
+                            <input type="radio" name="UserTypeID" value="3" style="display:none" />
+                            <span class="role-label">Employer</span>
+                        </label>
+                    </div>
+                </div>
+
+                <label class="auth-checkbox">
+                    <input type="checkbox" required />
+                    <span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></span>
+                </label>
+
+                <button type="submit" class="auth-submit">Create Account</button>
+            </form>
+
+            @* Sign In form *@
+            @* action points to GuestController → Login POST method *@
+            <form class="auth-form hidden" id="signin-form" method="post" action="/Guest/Login">
+                <h2>Welcome back</h2>
+                <p class="auth-subtitle">Sign in to your JobFind account.</p>
+
+                <div class="auth-field">
+                    <label for="si-email">Email</label>
+                    <div class="auth-input-wrap">
+                        <span class="material-symbols-outlined">person</span>
+                        <input type="email" id="si-email" name="email" placeholder="Enter your email" required />
+                    </div>
+                </div>
+
+                <div class="auth-field">
+                    <label for="si-password">Password</label>
+                    <div class="auth-input-wrap">
+                        <span class="material-symbols-outlined">lock</span>
+                        <input type="password" id="si-password" name="password" placeholder="Enter your password" required />
+                        <button type="button" class="toggle-pw" aria-label="Toggle password">
+                            <span class="material-symbols-outlined">visibility</span>
+                        </button>
+                    </div>
+                </div>
+
+                <a href="#" class="forgot-pw">Forgot your password?</a>
+
+                <button type="submit" class="auth-submit">Sign In</button>
+            </form>
+
+        </div>
+    </div>
+</main>

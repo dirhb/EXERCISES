@@ -1,0 +1,69 @@
+@*
+    Views/Shared/Profile.cshtml  (used by both Employee and Employer)
+    Shows the logged-in user's profile info from session.
+    ViewBag.FullName, ViewBag.UserName, ViewBag.UserID
+*@
+
+@{
+    ViewBag.Title = "Profile";
+    var isEmployer = Context.Session.GetString("UserTypeID") == "3";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Register.css" />
+}
+
+<header class="page-header content-page-header">
+    <h1>My Profile</h1>
+    <p>Your account information and settings.</p>
+</header>
+
+<main class="container content-page" style="padding-top:24px">
+    <section class="left-col">
+        <div class="card">
+            <h3>Account Details</h3>
+            <div style="display:grid;gap:16px;margin-top:8px">
+
+                <div style="padding:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm)">
+                    <span style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-500)">Full Name</span>
+                    <p style="margin-top:4px;font-weight:600;color:var(--brand-800)">@ViewBag.FullName</p>
+                </div>
+
+                <div style="padding:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm)">
+                    <span style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-500)">Username</span>
+                    <p style="margin-top:4px;font-weight:600;color:var(--brand-800)">@ViewBag.UserName</p>
+                </div>
+
+                <div style="padding:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm)">
+                    <span style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-500)">Account Type</span>
+                    <p style="margin-top:4px;font-weight:600;color:var(--brand-800)">@(isEmployer ? "Employer" : "Employee")</p>
+                </div>
+
+                <div style="padding:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm)">
+                    <span style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-500)">User ID</span>
+                    <p style="margin-top:4px;font-weight:600;color:var(--brand-800)">@ViewBag.UserID</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <aside class="right-col">
+        <div class="card">
+            <h3>Quick Actions</h3>
+            <ul class="popular-list">
+                @if (!isEmployer)
+                {
+                    <li><a href="/Employee/Resume">Update Resume</a></li>
+                    <li><a href="/Employee/JobHistory">My Applications</a></li>
+                }
+                else
+                {
+                    <li><a href="/Employer/PostJob">Post a Job</a></li>
+                    <li><a href="/Employer/JobHistory">My Postings</a></li>
+                }
+                <li><a href="/Guest/Logout" style="color:var(--color-text-danger)">Logout</a></li>
+            </ul>
+        </div>
+    </aside>
+</main>

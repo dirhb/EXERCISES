@@ -18,15 +18,19 @@ namespace JobWebService.Controllers
         }
 
         [HttpPost]
-        public bool Register(User user)
+        public bool Register([FromBody] User user)
         {
             try
             {
+                Console.WriteLine($"Registering user: {user.UserName}, Email: {user.Email}, TypeID: {user.UserTypeID}");
                 this.libraryUOW.HelperOledb.OpenConnection();
-                return this.libraryUOW.UserRepository.Create(user);
+                bool result = this.libraryUOW.UserRepository.Create(user);
+                Console.WriteLine($"Register result: {result}");
+                return result;
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Register error: {ex.Message}");
                 Trace.WriteLine(ex);
                 return false;
             }

@@ -1,0 +1,76 @@
+@*
+    Views/Employer/PostJob.cshtml
+    Form for employers to post a new job.
+    Posts to EmployerController → PostJob (POST)
+*@
+
+@{
+    ViewBag.Title = "Post a Job";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Register.css" />
+}
+
+<header class="page-header content-page-header">
+    <h1>Post a Job</h1>
+    <p>Fill in the details below to publish your job listing.</p>
+</header>
+
+<main class="container content-page" style="padding-top:24px">
+    <section class="left-col">
+        <div class="card">
+            <form method="post" action="/Employer/PostJob">
+
+                <div class="acc-fields" style="display:grid;gap:16px">
+
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:0.86rem;font-weight:600;color:var(--text-700);text-transform:uppercase;letter-spacing:0.02em">
+                        Job Title
+                        <input type="text" name="JobTitle" placeholder="e.g. Frontend Developer" required
+                               style="font-family:inherit;font-size:0.95rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;width:100%" />
+                    </label>
+
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:0.86rem;font-weight:600;color:var(--text-700);text-transform:uppercase;letter-spacing:0.02em">
+                        Job Description
+                        <textarea name="JobDescription" rows="5" placeholder="Describe the role, responsibilities, and requirements..."
+                                  style="font-family:inherit;font-size:0.95rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;width:100%;resize:vertical"></textarea>
+                    </label>
+
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:0.86rem;font-weight:600;color:var(--text-700);text-transform:uppercase;letter-spacing:0.02em">
+                        Job Type
+                        <select name="JobType" style="font-family:inherit;font-size:0.95rem;font-weight:400;text-transform:none;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;width:100%">
+                            <option value="Full-time">Full-time</option>
+                            <option value="Part-time">Part-time</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Internship">Internship</option>
+                            <option value="Remote">Remote</option>
+                        </select>
+                    </label>
+
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:0.86rem;font-weight:600;color:var(--text-700);text-transform:uppercase;letter-spacing:0.02em">
+                        Location (Country ID)
+                        <input type="text" name="CountryID" placeholder="e.g. UK, US, IL"
+                               style="font-family:inherit;font-size:0.95rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;width:100%" />
+                    </label>
+
+                    <button type="submit" class="auth-submit" style="margin-top:8px">
+                        Publish Job
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </section>
+
+    <aside class="right-col">
+        <div class="card">
+            <h3>Tips for a great listing</h3>
+            <ul class="popular-list">
+                <li>Be specific about the role and responsibilities</li>
+                <li>Mention salary range if possible</li>
+                <li>List required and preferred skills separately</li>
+                <li>Include remote/hybrid/on-site info</li>
+            </ul>
+        </div>
+    </aside>
+</main>

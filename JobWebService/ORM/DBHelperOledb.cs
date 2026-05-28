@@ -19,8 +19,8 @@ namespace JobWebService
             this.oleDbConnection = new OleDbConnection();
             //this.oleDbConnection.ConnectionString = $@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\stam\EXERCISES\JobWebService\App_Data\JobFindDataBase.accdb;Persist Security Info=True";
             this.oleDbCommand = new OleDbCommand();
-            this.oleDbConnection.ConnectionString = $@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={Directory.GetCurrentDirectory()}\App_Data\JobFindUltimate.accdb;Persist Security Info=True";
-            this.oleDbCommand = new OleDbCommand();
+            this.oleDbConnection.ConnectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\ofrig\source\repos\dirhb\EXERCISES\JobWebService\App_Data\JobFindUltimate.accdb;Persist Security Info=True"; this.oleDbCommand = new OleDbCommand();
+            Console.WriteLine("DB Path: " + this.oleDbConnection.ConnectionString);
             this.oleDbCommand.Connection = this.oleDbConnection;
         }
         public void CloseConnection()

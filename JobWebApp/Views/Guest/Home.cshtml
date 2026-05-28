@@ -1,0 +1,99 @@
+@*
+    Views/Guest/Home.cshtml
+    The homepage for non-logged-in users.
+    Shows featured jobs and platform stats.
+    ViewBag.Jobs = List<Job> passed from GuestController
+*@
+
+@using JobModels
+@{
+    ViewBag.Title = "Home";
+    var jobs = ViewBag.Jobs as List<Job> ?? new List<Job>();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Homepage.css" />
+}
+
+@* Hero section *@
+<section class="welcome-section">
+    <h1>Welcome to JobFind</h1>
+    <p>Find opportunities faster with a clean, friendly dashboard that helps you discover jobs, track progress, and stay motivated.</p>
+    <div class="hero-cta-row">
+        <a href="/Guest/Login" class="cta-btn">Get Started</a>
+        <a href="/Guest/Login" class="cta-btn secondary">Browse Jobs</a>
+    </div>
+</section>
+
+@* Stats section *@
+<section class="stats-section" aria-label="Platform statistics">
+    <div class="stat-box">
+        <span class="stat-icon material-symbols-outlined">work</span>
+        <h2 class="stat-number">@ViewBag.TotalJobs+</h2>
+        <p class="stat-label">Active Jobs</p>
+    </div>
+    <div class="stat-box">
+        <span class="stat-icon material-symbols-outlined">business</span>
+        <h2 class="stat-number">5,000+</h2>
+        <p class="stat-label">Companies</p>
+    </div>
+    <div class="stat-box">
+        <span class="stat-icon material-symbols-outlined">star</span>
+        <h2 class="stat-number">15,000+</h2>
+        <p class="stat-label">Reviews</p>
+    </div>
+    <div class="stat-box">
+        <span class="stat-icon material-symbols-outlined">group</span>
+        <h2 class="stat-number">25,000+</h2>
+        <p class="stat-label">Happy Users</p>
+    </div>
+</section>
+
+@* Featured jobs + popular sidebar *@
+<main class="container home-page">
+    <aside class="left-col">
+        <div class="card jobs-card equal-card">
+            <h3><span class="material-symbols-outlined">workspace_premium</span> Featured Jobs</h3>
+            <div class="jobs-box">
+                @if (jobs.Any())
+                {
+                    @foreach (var job in jobs)
+                    {
+                        <div class="featured-job">
+                            <div class="fj-top">
+                                <div>
+                                    <span class="fj-title">@job.JobTitle</span>
+                                    <span class="fj-company">@job.EmployerID — @job.CountryID</span>
+                                </div>
+                                <span class="fj-badge">Featured</span>
+                            </div>
+                            <div class="fj-tags">
+                                <span>@job.JobType</span>
+                                @* Guest can see but not apply — prompt to login *@
+                                <a href="/Guest/Login" class="fj-apply-hint">Sign in to apply</a>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p style="color: var(--text-500); padding: 12px;">No jobs available right now.</p>
+                }
+            </div>
+        </div>
+    </aside>
+
+    <aside class="right-col">
+        <div class="card popular equal-card">
+            <h3>Popular Jobs</h3>
+            <ul class="popular-list">
+                <li>Barista — Cafe Central</li>
+                <li>Delivery Driver — QuickShip</li>
+                <li>Customer Support — Remote</li>
+                <li>Sales Associate — Retail</li>
+                <li>Warehouse Operative — Night Shift</li>
+                <li>Cashier — Local Market</li>
+            </ul>
+        </div>
+    </aside>
+</main>

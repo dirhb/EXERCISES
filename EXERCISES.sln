@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 18
-VisualStudioVersion = 18.5.11716.220 stable
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36811.4 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JobWebService", "JobWebService\JobWebService.csproj", "{C37F9BC5-1ED7-4E44-8470-76B7B0BD727B}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobModels", "JobModels\JobModels.csproj", "{99831B3D-113A-4B9E-8C80-C2C67994DA7D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobWebApp", "JobWebApp\JobWebApp.csproj", "{8B25ABE3-4A5B-4AE6-A033-A276972705FA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryWSClient", "LibraryWSClient\LibraryWSClient.csproj", "{D5E1F273-9FE0-4620-BE9C-93B417F4D754}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{8B25ABE3-4A5B-4AE6-A033-A276972705FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B25ABE3-4A5B-4AE6-A033-A276972705FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B25ABE3-4A5B-4AE6-A033-A276972705FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5E1F273-9FE0-4620-BE9C-93B417F4D754}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5E1F273-9FE0-4620-BE9C-93B417F4D754}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5E1F273-9FE0-4620-BE9C-93B417F4D754}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5E1F273-9FE0-4620-BE9C-93B417F4D754}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

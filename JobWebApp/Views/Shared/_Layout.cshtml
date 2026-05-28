@@ -1,55 +1,100 @@
-﻿<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title></title>
-    <link rel="stylesheet" href="/css/style.css" />
-    <!-- Load Google Material Symbols -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewBag.Title - JobFind</title>
+
+    @* Shared CSS — loaded on every page *@
+    <link rel="stylesheet" href="~/css/StyleSheet.css" />
+
+    @* Page-specific CSS — each view injects its own *@
+    @RenderSection("Styles", required: false)
+
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 </head>
-
 <body>
+
+    @* Nav is here once — every page gets it automatically *@
     <nav>
         <ul class="Navigation">
-            <div class="left-nav">
-                <li>
-                    
-                    <a href="Homepage.html"><img class= "JobFindLogo" src="~/images/jobfind_logo.png" /></a>
-                </li>
-                <li>
-                    <a href="JobHistoryPage.html">Job History</a>
-                </li>
-                <li>Online Resume</li>
-                <li>Chat</li>
-                <li>Register</li>
-            </div>
-            <div class="right-nav">
-                <li class="searchBar">
-                    <span class="search-icon material-symbols-outlined">search</span>
-                    <input class="search-input" type="search" placeholder="Search" />
-                </li>
+            <li class="logo-item">
+                <a href="/Guest/Home">
+                    <img class="JobFindLogo" src="~/images/JobFind_Logo.png" alt="JobFind logo" />
+                </a>
+            </li>
+
+            @* Show nav links based on who is logged in *@
+            @if (Context.Session.GetString("UserTypeID") == "2")
+            {
+                @* Employee nav *@
+                <li><a href="/Employee/JobHistory">Job History</a></li>
+                <li><a href="/Employee/Resume">Online Resume</a></li>
+                <li><a href="/Employee/Chat">Chat</a></li>
+            }
+            else if (Context.Session.GetString("UserTypeID") == "3")
+            {
+                @* Employer nav *@
+                <li><a href="/Employer/JobHistory">Job History</a></li>
+                <li><a href="/Employer/PostJob">Post a Job</a></li>
+                <li><a href="/Employer/Chat">Chat</a></li>
+            }
+            else if (Context.Session.GetString("UserTypeID") == "4")
+            {
+                @* Admin nav *@
+                <li><a href="/Admin/Applications">Applications</a></li>
+            }
+            else
+            {
+                @* Guest nav *@
+                <li><a href="/Guest/Home">Browse Jobs</a></li>
+                <li><a href="/Guest/Login">Register</a></li>
+            }
+
+            @* Search bar — shown to everyone *@
+            <li class="searchBar">
+                <span class="search-icon material-symbols-outlined" aria-hidden="true">search</span>
+                <input class="search-input" type="search" placeholder="Search jobs, companies, or skills" aria-label="Search jobs" />
+            </li>
+
+            @* Notifications — only for logged in users *@
+            @if (Context.Session.GetString("UserID") != null)
+            {
                 <li class="notification">
-                    <button class="notification-icon material-symbols-outlined">notifications</button>
-                    <ul class="dropdown">
-                        <li>unread messages</li>
-                        <li>unread messages</li>
-                        <li>unread messages</li>
+                    <button class="notification-icon material-symbols-outlined" aria-label="Notifications">notifications</button>
+                    <ul class="dropdown" id="notification-dropdown">
+                        <li>Loading...</li>
                     </ul>
                 </li>
-                <li class="account">
-                    <button class="account-icon material-symbols-outlined">account_circle</button>
-                    <ul class="dropdown">
-                        <li>Profile</li>
-                        <li>Settings</li>
-                        <li>Logout/Login</li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
+            }
+
+            @* Account dropdown *@
+            <li class="account">
+                <button class="account-icon material-symbols-outlined" aria-label="Account menu">account_circle</button>
+                <ul class="dropdown">
+                    @if (Context.Session.GetString("UserID") != null)
+                    {
+                        <li><a href="/@(Context.Session.GetString("UserTypeID") == "2" ? "Employee" : "Employer")/Profile">Profile</a></li>
+                        <li><a href="/Guest/Logout">Logout</a></li>
+                    }
+                    else
+                    {
+                        <li><a href="/Guest/Login">Login</a></li>
+                        <li><a href="/Guest/Login">Register</a></li>
+                    }
+                </ul>
+            </li>
+        </ul>
     </nav>
 
-    <main class="container">
-        @RenderBody()
-    </main>
+    @* Page content goes here — each view fills this in *@
+    @RenderBody()
+
+    @* Shared JS *@
+    <script src="~/js/site.js"></script>
+
+    @* Page-specific JS *@
+    @RenderSection("Scripts", required: false)
+
 </body>
 </html>

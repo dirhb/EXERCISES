@@ -1,0 +1,82 @@
+@*
+    Views/Employee/JobHistory.cshtml
+    Shows all jobs the employee has applied to.
+    ViewBag.History = JobHistory object
+*@
+
+@using JobModels
+@using JobModels.ViewModels
+@{
+    ViewBag.Title = "Job History";
+    var history = ViewBag.History as JobHistory ?? new JobHistory();
+    var jobs = history.JobHistoryList ?? new List<Job>();
+    var genres = history.Genres ?? new List<Genre>();
+    var employers = history.Employers ?? new List<string>();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/JobHistory.css" />
+}
+
+<header class="page-header content-page-header job-history-page">
+    <h1>Job History</h1>
+    <p>All the jobs you have applied to, in one place.</p>
+</header>
+
+<main class="container job-history-page">
+    <section class="left-col">
+        <div class="card jobs-card">
+            <h3>My Applications</h3>
+            <div class="jobs-box" role="list">
+                @if (jobs.Any())
+                {
+                    @foreach (var job in jobs)
+                    {
+                        <div class="job-row" role="listitem">
+                            <strong>@job.JobTitle</strong><br />
+                            <span style="color:var(--text-500);font-size:0.88rem;">@job.EmployerID — @job.CountryID — @job.JobType</span>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p style="color:var(--text-500);padding:12px;">You haven't applied to any jobs yet.</p>
+                }
+            </div>
+        </div>
+    </section>
+
+    <aside class="right-col">
+        @* Employers filter *@
+        <div class="card employers-card">
+            <h3>Employers</h3>
+            <ul class="popular-list employers-list">
+                @foreach (var employer in employers)
+                {
+                    <li><a href="#">@employer</a></li>
+                }
+            </ul>
+        </div>
+
+        @* Genre filter *@
+        <div class="card genres-card">
+            <h3>Genres</h3>
+            <div class="genres-list">
+                @foreach (var genre in genres)
+                {
+                    <label>
+                        <input type="checkbox" name="genre" value="@genre.GenreID" />
+                        @genre.GenreID
+                    </label>
+                }
+            </div>
+        </div>
+    </aside>
+</main>
+
+<div class="pagination">
+    <button type="button">Page 1</button>
+    <button type="button">Page 2</button>
+    <button type="button">Page 3</button>
+    <span class="ellipsis">…</span>
+</div>

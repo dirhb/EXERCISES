@@ -240,10 +240,6 @@ img {
         background: var(--surface-2);
     }
 
-.notification:hover .dropdown,
-.account:hover .dropdown {
-    display: block;
-}
 
 /* ── Cards ───────────────────────────────────────────────── */
 .card {

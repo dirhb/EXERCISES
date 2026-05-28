@@ -1,0 +1,124 @@
+@*
+    Views/Employer/Home.cshtml
+    Homepage for employers — shows their posted jobs.
+    ViewBag.Jobs = List<Job> (only this employer's jobs)
+    ViewBag.FullName = string
+*@
+
+@using JobModels
+@{
+    ViewBag.Title = "Home";
+    var jobs = ViewBag.Jobs as List<Job> ?? new List<Job>();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Homepage.css" />
+}
+
+<section class="welcome-section">
+    <h1>Welcome back, @ViewBag.FullName 👋</h1>
+    <p>You have @jobs.Count active job postings. Manage them below.</p>
+    <div class="hero-cta-row">
+        <a href="/Employer/PostJob" class="cta-btn">Post a New Job</a>
+        <a href="/Employer/JobHistory" class="cta-btn secondary">View All Postings</a>
+    </div>
+</section>
+
+<section class="stats-section">
+    <div class="stat-box">
+        <span class="stat-icon material-symbols-outlined">work</span>
+        <h2 class="stat-number">@jobs.Count</h2>
+        <p class="stat-label">Active Postings</p>
+    </div>
+    <div class="stat-box">
+        <span class="stat-icon material-symbols-outlined">people</span>
+        <h2 class="stat-number">—</h2>
+        <p class="stat-label">Total Applicants</p>
+    </div>
+    <div class="stat-box">
+        <span class="stat-icon material-symbols-outlined">chat</span>
+        <h2 class="stat-number">—</h2>
+        <p class="stat-label">Messages</p>
+    </div>
+    <div class="stat-box">
+        <span class="stat-icon material-symbols-outlined">visibility</span>
+        <h2 class="stat-number">—</h2>
+        <p class="stat-label">Profile Views</p>
+    </div>
+</section>
+
+<main class="container home-page">
+    <aside class="left-col">
+        <div class="card jobs-card equal-card">
+            <h3><span class="material-symbols-outlined">work</span> My Job Postings</h3>
+            <div class="jobs-box">
+                @if (jobs.Any())
+                {
+                    @foreach (var job in jobs)
+                    {
+                        <div class="featured-job">
+                            <div class="fj-top">
+                                <div>
+                                    <span class="fj-title">@job.JobTitle</span>
+                                    <span class="fj-company">@job.CountryID — @job.JobType</span>
+                                </div>
+                                @if (job.JobStatus == true)
+                                {
+                                    <span class="fj-badge">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="fj-badge" style="background:var(--line);color:var(--text-500)">Closed</span>
+                                }
+                            </div>
+                            <div class="fj-tags">
+                                <span>@job.JobType</span>
+                            </div>
+                            <div style="display:flex;gap:8px;margin-top:8px">
+                                @* View applicants button *@
+                                <a href="/Employer/Applicants?jobId=@job.JobID" class="cta-btn" style="font-size:0.85rem;padding:7px 16px;">
+                                    View Applicants
+                                </a>
+                                @* Delete button *@
+                                <form method="post" action="/Employer/DeleteJob">
+                                    <input type="hidden" name="jobId" value="@job.JobID" />
+                                    <button type="submit" class="cta-btn secondary" style="font-size:0.85rem;padding:7px 16px;color:var(--color-text-danger)">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p style="color:var(--text-500);padding:12px;">You haven't posted any jobs yet. <a href="/Employer/PostJob">Post one now →</a></p>
+                }
+            </div>
+        </div>
+    </aside>
+
+    <aside class="right-col">
+        <div class="card equal-card">
+            <h3>Quick Links</h3>
+            <ul class="popular-list">
+                <li><a href="/Employer/PostJob">Post a new job</a></li>
+                <li><a href="/Employer/JobHistory">All my postings</a></li>
+                <li><a href="/Employer/Profile">My profile</a></li>
+            </ul>
+        </div>
+    </aside>
+</main>
+
+@if (TempData["Success"] != null)
+{
+    <div style="position:fixed;bottom:24px;right:24px;background:var(--color-background-success);color:var(--color-text-success);padding:12px 20px;border-radius:10px;box-shadow:var(--shadow-md);font-size:0.93rem;">
+        @TempData["Success"]
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div style="position:fixed;bottom:24px;right:24px;background:var(--color-background-danger);color:var(--color-text-danger);padding:12px 20px;border-radius:10px;box-shadow:var(--shadow-md);font-size:0.93rem;">
+        @TempData["Error"]
+    </div>
+}

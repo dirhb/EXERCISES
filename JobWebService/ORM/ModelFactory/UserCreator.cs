@@ -9,6 +9,7 @@ namespace JobWebService.ORM.ModelFactory
         {
             User User = new User()
             {
+                UserID = Convert.ToString(reader["UserID"]), // ← add this line
                 FirstName = Convert.ToString(reader["FirstName"]),
                 LastName = Convert.ToString(reader["LastName"]),
                 UserName = Convert.ToString(reader["UserName"]),
