@@ -10,8 +10,8 @@ namespace JobWebService.ORM.Repositories
         // Checks whether username exists (returns true if available)
         public bool IsAvailableUserName(string userName)
         {
-            string sql = "SELECT 1 FROM [User] WHERE UserID=@UserID";
-            this.helperOleDb.AddParameters("@UserID", userName);
+            string sql = "SELECT 1 FROM [User] WHERE UserName=@UserName";
+            this.helperOleDb.AddParameters("@UserName", userName);
             using (IDataReader dr = this.helperOleDb.Read(sql))
             {
                 return !dr.Read();
@@ -91,7 +91,7 @@ namespace JobWebService.ORM.Repositories
             this.helperOleDb.AddParameters("@PhoneNum", model.PhoneNum);
             this.helperOleDb.AddParameters("@CreationDate", model.CreationDate);
             this.helperOleDb.AddParameters("@UserTypeID", model.UserTypeID.HasValue ? model.UserTypeID.Value.ToString() : null);
-            this.helperOleDb.AddParameters("@Email", model.Email);   
+            this.helperOleDb.AddParameters("@Email", model.Email);
             return this.helperOleDb.Create(sql) > 0;
         }
 
@@ -154,6 +154,7 @@ namespace JobWebService.ORM.Repositories
                 return this.modelCreators.UserCreator.CreateModel(dataReader);
             }
         }
+
         //checks if email exists in db
         public bool ExistsByEmail(string email)
         {
@@ -179,8 +180,8 @@ namespace JobWebService.ORM.Repositories
         // Compatibility helpers used by controllers
         public bool IsExistUserName(string userName)
         {
-            string sql = "SELECT 1 FROM [User] WHERE UserID=@UserID";
-            this.helperOleDb.AddParameters("UserID", userName);
+            string sql = "SELECT 1 FROM [User] WHERE UserName=@UserName";
+            this.helperOleDb.AddParameters("UserName", userName);
             using (IDataReader dr = this.helperOleDb.Read(sql))
             {
                 return dr != null && dr.Read();

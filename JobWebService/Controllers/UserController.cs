@@ -24,6 +24,33 @@ namespace JobWebService.Controllers
             {
                 Console.WriteLine($"Registering user: {user.UserName}, Email: {user.Email}, TypeID: {user.UserTypeID}");
                 this.libraryUOW.HelperOledb.OpenConnection();
+
+                user.UserName = user.UserName?.Trim();
+                user.Email = user.Email?.Trim();
+
+                if (string.IsNullOrWhiteSpace(user.UserName)
+                    || string.IsNullOrWhiteSpace(user.Email)
+                    || string.IsNullOrWhiteSpace(user.Password))
+                {
+                    Console.WriteLine("Register failed: missing username, email, or password.");
+                    return false;
+                }
+
+                if (this.libraryUOW.UserRepository.IsExistUserName(user.UserName))
+                {
+                    Console.WriteLine("Register failed: username already exists.");
+                    return false;
+                }
+
+                if (this.libraryUOW.UserRepository.ExistsByEmail(user.Email))
+                {
+                    Console.WriteLine("Register failed: email already exists.");
+                    return false;
+                }
+
+                user.UserTypeID ??= 2;
+                user.CreationDate ??= DateTime.UtcNow.ToString("yyyy-MM-dd");
+
                 bool result = this.libraryUOW.UserRepository.Create(user);
                 Console.WriteLine($"Register result: {result}");
                 return result;

@@ -9,7 +9,7 @@ namespace JobWebService
         OleDbConnection oleDbConnection;
         //אחראי לשלוח פקודות למוסד נתונים ומחזיר תשובה ממוסד נתונים
         OleDbCommand oleDbCommand;
-        
+
         OleDbTransaction oleDbTransaction;
 
 
@@ -17,12 +17,41 @@ namespace JobWebService
         {
 
             this.oleDbConnection = new OleDbConnection();
-            //this.oleDbConnection.ConnectionString = $@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\stam\EXERCISES\JobWebService\App_Data\JobFindDataBase.accdb;Persist Security Info=True";
             this.oleDbCommand = new OleDbCommand();
-            this.oleDbConnection.ConnectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\ofrig\source\repos\dirhb\EXERCISES\JobWebService\App_Data\JobFindUltimate.accdb;Persist Security Info=True"; this.oleDbCommand = new OleDbCommand();
-            Console.WriteLine("DB Path: " + this.oleDbConnection.ConnectionString);
+
+            string databasePath = ResolveDatabasePath();
+            this.oleDbConnection.ConnectionString = $@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={databasePath};Persist Security Info=True";
+            Console.WriteLine("DB Path: " + databasePath);
             this.oleDbCommand.Connection = this.oleDbConnection;
         }
+
+        private static string ResolveDatabasePath()
+        {
+            const string databaseFileName = "JobFindUltimate.accdb";
+
+            foreach (string startPath in new[] { Directory.GetCurrentDirectory(), AppContext.BaseDirectory })
+            {
+                DirectoryInfo? directory = new DirectoryInfo(startPath);
+
+                while (directory != null)
+                {
+                    string candidate = Path.Combine(directory.FullName, "App_Data", databaseFileName);
+
+                    if (File.Exists(candidate))
+                        return candidate;
+
+                    candidate = Path.Combine(directory.FullName, "JobWebService", "App_Data", databaseFileName);
+
+                    if (File.Exists(candidate))
+                        return candidate;
+
+                    directory = directory.Parent;
+                }
+            }
+
+            return Path.Combine(Directory.GetCurrentDirectory(), "App_Data", databaseFileName);
+        }
+
         public void CloseConnection()
         {
             this.oleDbConnection.Close();
@@ -35,20 +64,18 @@ namespace JobWebService
 
         public int Delete(string sql)
         {
-            this.oleDbCommand.CommandText = sql;
-            return this.oleDbCommand.ExecuteNonQuery();
+            return ChangeDb(sql);
         }
 
         public int Insert(string sql)
         {
-            this.oleDbCommand.CommandText = sql;
-            return this.oleDbCommand.ExecuteNonQuery();
+            return ChangeDb(sql);
 
         }
 
         public void OpenConnection()
         {
-           this.oleDbConnection.Open();
+            this.oleDbConnection.Open();
         }
 
         public void OpenTransaction()
@@ -69,8 +96,7 @@ namespace JobWebService
 
         public int ExecuteNonQuery(string sql)
         {
-            this.oleDbCommand.CommandText = sql;
-            return this.oleDbCommand.ExecuteNonQuery();
+            return ChangeDb(sql);
         }
 
         public object ExecuteScalar(string sql)
@@ -103,8 +129,7 @@ namespace JobWebService
 
         public int Update(string sql)
         {
-            this.oleDbCommand.CommandText = sql;
-            return this.oleDbCommand.ExecuteNonQuery();
+            return ChangeDb(sql);
         }
 
         public void Dispose()
@@ -116,10 +141,12 @@ namespace JobWebService
         {
             throw new NotImplementedException();
         }
+
         public void AddParameters(string name, object value)
         {
-            this.oleDbCommand.Parameters.Add(new OleDbParameter(name, value));
+            this.oleDbCommand.Parameters.Add(new OleDbParameter(name, value ?? DBNull.Value));
         }
+
         public IDataReader Read(string sql)
         {
             this.oleDbCommand.CommandText = sql;
@@ -127,11 +154,20 @@ namespace JobWebService
             oleDbCommand.Parameters.Clear();
             return datareader;
         }
+
         public object ReadValue(string sql)
         {
             this.oleDbCommand.CommandText = sql;
-            return this.oleDbCommand.ExecuteScalar(); //collects the single "drop" of data
+            try
+            {
+                return this.oleDbCommand.ExecuteScalar(); //collects the single "drop" of data
+            }
+            finally
+            {
+                this.oleDbCommand.Parameters.Clear();
+            }
         }
+
         public int Create(string sql)
         {
             return ChangeDb(sql);
@@ -140,7 +176,14 @@ namespace JobWebService
         private int ChangeDb(string sql)
         {
             this.oleDbCommand.CommandText = sql;
-            return this.oleDbCommand.ExecuteNonQuery(); //Changes columms in the database, and returns the number of columms it changed
+            try
+            {
+                return this.oleDbCommand.ExecuteNonQuery(); //Changes columms in the database, and returns the number of columms it changed
+            }
+            finally
+            {
+                this.oleDbCommand.Parameters.Clear();
+            }
         }
 
         public void CreateCommand()

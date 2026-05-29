@@ -38,7 +38,7 @@ namespace JobWebApp.Controllers
         // ── GET: /Guest/Home ───────────────────────────────────
         // The main homepage — shows featured jobs and stats
         // Anyone can see this (guest, employee, employer)
-        public async Task<IActionResult> Home()
+        public async Task<IActionResult> Home(string? search)
         {
             // If user is already logged in, redirect them to their dashboard
             if (SessionHelper.IsLoggedIn(HttpContext.Session))
@@ -50,7 +50,15 @@ namespace JobWebApp.Controllers
             ApiClient<List<Job>> client = BuildClient<List<Job>>("Guest", "GetAllJobs");
             List<Job> jobs = await client.GetAsync() ?? new List<Job>();
 
-            // Pass the jobs to the view
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                jobs = jobs
+                    .Where(job => MatchesJobSearch(job, search))
+                    .ToList();
+            }
+
+            // Pass featured jobs to the view
+            ViewBag.Search = search;
             ViewBag.Jobs = jobs.Take(6).ToList();
             ViewBag.TotalJobs = jobs.Count;
 
@@ -113,7 +121,7 @@ namespace JobWebApp.Controllers
 
             if (!success)
             {
-                TempData["Error"] = "Registration failed. Username may already be taken.";
+                TempData["Error"] = "Registration failed. Please check that the username/email are not already used and try again.";
                 return RedirectToAction("Login");
             }
 
@@ -127,6 +135,16 @@ namespace JobWebApp.Controllers
         {
             SessionHelper.ClearUser(HttpContext.Session);
             return RedirectToAction("Home");
+        }
+
+        private static bool MatchesJobSearch(Job job, string search)
+        {
+            return (job.JobTitle ?? string.Empty).Contains(search, StringComparison.OrdinalIgnoreCase)
+                || (job.JobDescription ?? string.Empty).Contains(search, StringComparison.OrdinalIgnoreCase)
+                || (job.JobType ?? string.Empty).Contains(search, StringComparison.OrdinalIgnoreCase)
+                || (job.JobFilter ?? string.Empty).Contains(search, StringComparison.OrdinalIgnoreCase)
+                || (job.EmployerID ?? string.Empty).Contains(search, StringComparison.OrdinalIgnoreCase)
+                || (job.CountryID ?? string.Empty).Contains(search, StringComparison.OrdinalIgnoreCase);
         }
 
         // ── Private helper: redirect based on role ─────────────

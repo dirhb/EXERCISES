@@ -9,10 +9,11 @@
 @{
     ViewBag.Title = "Home";
     var jobs = ViewBag.Jobs as List<Job> ?? new List<Job>();
+    string search = ViewBag.Search as string ?? string.Empty;
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/Homepage.css" />
+    <link rel="stylesheet" href="~/css/HomePage.css" />
 }
 
 @* Hero section *@
@@ -54,6 +55,10 @@
     <aside class="left-col">
         <div class="card jobs-card equal-card">
             <h3><span class="material-symbols-outlined">workspace_premium</span> Featured Jobs</h3>
+            @if (!string.IsNullOrWhiteSpace(search))
+            {
+                <p style="color: var(--text-500); margin-bottom: 12px;">Featured jobs matching “@search”.</p>
+            }
             <div class="jobs-box">
                 @if (jobs.Any())
                 {

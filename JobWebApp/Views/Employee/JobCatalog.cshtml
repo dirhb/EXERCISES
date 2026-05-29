@@ -1,0 +1,125 @@
+﻿@*
+    Views/Employee/JobCatalog.cshtml
+    Employee job catalog with search, employer and genre filters, and pagination.
+*@
+
+@using JobModels
+@{
+    ViewBag.Title = "Job Catalog";
+    var jobs = ViewBag.Jobs as List<Job> ?? new List<Job>();
+    var employers = ViewBag.Employers as List<string> ?? new List<string>();
+    var genres = ViewBag.Genres as List<string> ?? new List<string>();
+    string search = ViewBag.Search as string ?? string.Empty;
+    string selectedEmployer = ViewBag.SelectedEmployer as string ?? string.Empty;
+    string selectedGenre = ViewBag.SelectedGenre as string ?? string.Empty;
+    int page = Convert.ToInt32(ViewBag.Page ?? 1);
+    int totalPages = Convert.ToInt32(ViewBag.TotalPages ?? 1);
+    int totalJobs = Convert.ToInt32(ViewBag.TotalJobs ?? jobs.Count);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/HomePage.css" />
+}
+
+<header class="page-header content-page-header catalog-header">
+    <h1>Job Catalog</h1>
+    <p>Browse every available job, search by keyword, and narrow the list by employer or genre.</p>
+</header>
+
+<main class="job-catalog-shell">
+    <section class="catalog-main card">
+        <form class="catalog-toolbar" method="get" action="/Employee/JobCatalog">
+            <label class="catalog-search">
+                <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                <input type="search" name="search" value="@search" placeholder="Search jobs, companies, locations, or skills" />
+            </label>
+            <input type="hidden" name="employerId" value="@selectedEmployer" />
+            <input type="hidden" name="genreId" value="@selectedGenre" />
+            <button type="submit" class="catalog-filter-btn">Search</button>
+            <a class="catalog-reset" href="/Employee/JobCatalog">Clear</a>
+        </form>
+
+        <div class="catalog-count">
+            Showing @jobs.Count of @totalJobs job@(totalJobs == 1 ? string.Empty : "s")
+        </div>
+
+        @if (jobs.Any())
+        {
+            <div class="catalog-grid">
+                @foreach (var job in jobs)
+                {
+                    <article class="catalog-job-card">
+                        <div>
+                            <span class="catalog-job-title">@job.JobTitle</span>
+                            <span class="catalog-job-meta">@job.EmployerID — @job.CountryID</span>
+                        </div>
+                        <p>@(string.IsNullOrWhiteSpace(job.JobDescription) ? "No description provided yet." : job.JobDescription)</p>
+                        <div class="fj-tags">
+                            @if (!string.IsNullOrWhiteSpace(job.JobType))
+                            {
+                                <span>@job.JobType</span>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(job.GenreID))
+                            {
+                                <span>@job.GenreID</span>
+                            }
+                        </div>
+                        <form method="post" action="/Employee/ApplyToJob">
+                            <input type="hidden" name="jobId" value="@job.JobID" />
+                            <button type="submit" class="catalog-apply-btn">Apply Now</button>
+                        </form>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="catalog-empty">No jobs match your current search. Try another keyword or clear the filters.</p>
+        }
+
+        <nav class="catalog-pagination" aria-label="Job catalog pages">
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <a class="@(i == page ? "active" : string.Empty)" href="/Employee/JobCatalog?search=@Uri.EscapeDataString(search)&employerId=@Uri.EscapeDataString(selectedEmployer)&genreId=@Uri.EscapeDataString(selectedGenre)&page=@i">Page @i</a>
+            }
+        </nav>
+    </section>
+
+    <aside class="catalog-sidebar">
+        <section class="card">
+            <h3>Employers</h3>
+            <ul class="catalog-filter-list">
+                @foreach (var employer in employers)
+                {
+                    <li>
+                        <a class="@(string.Equals(selectedEmployer, employer, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty)" href="/Employee/JobCatalog?search=@Uri.EscapeDataString(search)&employerId=@Uri.EscapeDataString(employer)&genreId=@Uri.EscapeDataString(selectedGenre)">@employer</a>
+                    </li>
+                }
+            </ul>
+        </section>
+
+        <section class="card">
+            <h3>Genres</h3>
+            <ul class="catalog-filter-list checkbox-list">
+                @foreach (var genre in genres)
+                {
+                    <li>
+                        <a class="@(string.Equals(selectedGenre, genre, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty)" href="/Employee/JobCatalog?search=@Uri.EscapeDataString(search)&employerId=@Uri.EscapeDataString(selectedEmployer)&genreId=@Uri.EscapeDataString(genre)">
+                            <span>@genre</span>
+                            <span class="fake-checkbox"></span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </section>
+    </aside>
+</main>
+
+@if (TempData["Success"] != null)
+{
+    <div class="toast-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="toast-error">@TempData["Error"]</div>
+}

@@ -13,14 +13,15 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/Homepage.css" />
+    <link rel="stylesheet" href="~/css/HomePage.css" />
 }
 
 <section class="welcome-section">
     <h1>Welcome back, @ViewBag.FullName 👋</h1>
     <p>You have @jobs.Count jobs available. Start applying today.</p>
     <div class="hero-cta-row">
-        <a href="/Employee/Resume" class="cta-btn">Update Resume</a>
+        <a href="/Employee/JobCatalog" class="cta-btn">Browse Job Catalog</a>
+        <a href="/Employee/Resume" class="cta-btn secondary">Update Resume</a>
         <a href="/Employee/JobHistory" class="cta-btn secondary">View Applications</a>
     </div>
 </section>
@@ -51,7 +52,7 @@
 <main class="container home-page">
     <aside class="left-col">
         <div class="card jobs-card equal-card">
-            <h3><span class="material-symbols-outlined">workspace_premium</span> Featured Jobs</h3>
+            <h3><span class="material-symbols-outlined">workspace_premium</span> Featured Jobs <a href="/Employee/JobCatalog" style="margin-left:auto;font-family:inherit;font-size:0.85rem;color:var(--brand-600);">View all</a></h3>
             <div class="jobs-box">
                 @foreach (var job in jobs)
                 {

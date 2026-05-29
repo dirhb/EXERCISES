@@ -336,3 +336,138 @@
     justify-content: space-between;
     transition: background 0.16s, border-color 0.16s, transform 0.16s var(--ease);
 }
+
+    .catalog-job-card:hover {
+        background: #ddeeff;
+        border-color: var(--brand-400);
+        transform: translateY(-3px);
+    }
+
+.catalog-job-title {
+    display: block;
+    color: var(--brand-800);
+    font-weight: 800;
+}
+
+.catalog-job-meta {
+    display: block;
+    color: var(--text-500);
+    font-size: 0.82rem;
+}
+
+.catalog-job-card p {
+    color: var(--text-700);
+    font-size: 0.88rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.catalog-apply-btn {
+    width: 100%;
+    background: var(--accent);
+    color: var(--text-900);
+}
+
+.catalog-sidebar {
+    display: grid;
+    gap: 16px;
+    align-content: start;
+}
+
+.catalog-filter-list {
+    list-style: none;
+    display: grid;
+    gap: 6px;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+    .catalog-filter-list a {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 8px 10px;
+        border-radius: var(--radius-sm);
+        color: var(--brand-700);
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+        font-size: 0.9rem;
+    }
+
+        .catalog-filter-list a.active,
+        .catalog-filter-list a:hover {
+            background: #ddeeff;
+            border-color: var(--brand-400);
+        }
+
+.fake-checkbox {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--brand-500);
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.catalog-filter-list a.active .fake-checkbox {
+    background: var(--brand-500);
+    box-shadow: inset 0 0 0 2px #fff;
+}
+
+.catalog-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+    .catalog-pagination a {
+        padding: 7px 12px;
+        border-radius: var(--radius-sm);
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+        color: var(--brand-700);
+        font-weight: 700;
+        font-size: 0.86rem;
+    }
+
+        .catalog-pagination a.active,
+        .catalog-pagination a:hover {
+            background: var(--brand-600);
+            color: #fff;
+        }
+
+.catalog-empty {
+    color: var(--text-500);
+    padding: 20px 0;
+}
+
+.toast-success,
+.toast-error {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    box-shadow: var(--shadow-md);
+    font-size: 0.93rem;
+    z-index: 300;
+}
+
+.toast-success {
+    background: var(--color-background-success, #e7f8ed);
+    color: var(--color-text-success, #0f6b34);
+}
+
+.toast-error {
+    background: var(--color-background-danger, #fdeceb);
+    color: var(--color-text-danger, #a12622);
+}
+
+@media (max-width: 900px) {
+    .job-catalog-shell {
+        grid-template-columns: 1fr;
+    }
+}

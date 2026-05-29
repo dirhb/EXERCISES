@@ -15,6 +15,11 @@
 </head>
 <body>
 
+    @{
+        string navSearch = Context.Request.Query["search"].ToString();
+        string navSearchAction = Context.Session.GetString("UserTypeID") == "2" ? "/Employee/JobCatalog" : "/Guest/Home";
+    }
+
     @* Nav is here once — every page gets it automatically *@
     <nav>
         <ul class="Navigation">
@@ -29,6 +34,7 @@
             {
                 @* Employee nav *@
                 <li><a href="/Employee/JobHistory">Job History</a></li>
+                <li><a href="/Employee/JobCatalog">Job Catalog</a></li>
                 <li><a href="/Employee/Resume">Online Resume</a></li>
                 <li><a href="/Employee/Chat">Chat</a></li>
             }
@@ -51,10 +57,12 @@
                 <li><a href="/Guest/Login">Register</a></li>
             }
 
-            @* Search bar — shown to everyone *@
+            @* Search bar — shown to everyone and routes to the right searchable page *@
             <li class="searchBar">
-                <span class="search-icon material-symbols-outlined" aria-hidden="true">search</span>
-                <input class="search-input" type="search" placeholder="Search jobs, companies, or skills" aria-label="Search jobs" />
+                <form method="get" action="@navSearchAction" class="nav-search-form">
+                    <span class="search-icon material-symbols-outlined" aria-hidden="true">search</span>
+                    <input class="search-input" name="search" type="search" value="@navSearch" placeholder="Search jobs, companies, or skills" aria-label="Search jobs" />
+                </form>
             </li>
 
             @* Notifications — only for logged in users *@

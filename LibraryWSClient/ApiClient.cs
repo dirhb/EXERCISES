@@ -34,11 +34,12 @@ namespace LibraryWSClient
 
         public void AddParameter(string key, string value)
         {
-            if (this.uriBuilder.Query == string.Empty)
-                this.uriBuilder.Query += "?";
+            string queryToAppend = $"{Uri.EscapeDataString(key)}={Uri.EscapeDataString(value ?? string.Empty)}";
+
+            if (string.IsNullOrEmpty(this.uriBuilder.Query))
+                this.uriBuilder.Query = queryToAppend;
             else
-                this.uriBuilder.Query += "&";
-            this.uriBuilder.Query += $"{key}={value}";
+                this.uriBuilder.Query = this.uriBuilder.Query.TrimStart('?') + "&" + queryToAppend;
         }
 
         public async Task<T> GetAsync()
@@ -72,17 +73,35 @@ namespace LibraryWSClient
 
         public async Task<bool> PostAsync(T model)
         {
+            string json = JsonSerializer.Serialize<T>(model);
+            StringContent content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            return await SendPostAsync(content);
+        }
+
+        public async Task<bool> PostAsync()
+        {
+            return await SendPostAsync(null);
+        }
+
+        private async Task<bool> SendPostAsync(HttpContent? content)
+        {
             using (HttpRequestMessage httpRequest = new HttpRequestMessage())
             {
                 httpRequest.Method = HttpMethod.Post;
                 httpRequest.RequestUri = this.uriBuilder.Uri;
-                string json = JsonSerializer.Serialize<T>(model);
-                StringContent content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
                 httpRequest.Content = content;
-                using (HttpResponseMessage responseMessage =
-                    await this.httpClient.SendAsync(httpRequest))
+
+                using (HttpResponseMessage responseMessage = await this.httpClient.SendAsync(httpRequest))
                 {
-                    return responseMessage.IsSuccessStatusCode == true;
+                    if (!responseMessage.IsSuccessStatusCode)
+                        return false;
+
+                    string result = await responseMessage.Content.ReadAsStringAsync();
+
+                    if (bool.TryParse(result, out bool serviceResult))
+                        return serviceResult;
+
+                    return true;
                 }
             }
         }
