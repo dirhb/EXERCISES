@@ -70,6 +70,7 @@
                         @* Apply button — posts to EmployeeController → ApplyToJob *@
                         <form method="post" action="/Employee/ApplyToJob" style="margin-top:8px">
                             <input type="hidden" name="jobId" value="@job.JobID" />
+                            <input type="hidden" name="returnUrl" value="@(Context.Request.Path.ToString() + Context.Request.QueryString.ToString())" />
                             <button type="submit" class="cta-btn" style="font-size:0.85rem;padding:7px 16px;">
                                 Apply Now
                             </button>

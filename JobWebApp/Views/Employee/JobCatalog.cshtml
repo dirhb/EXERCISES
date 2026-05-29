@@ -66,6 +66,7 @@
                         </div>
                         <form method="post" action="/Employee/ApplyToJob">
                             <input type="hidden" name="jobId" value="@job.JobID" />
+                            <input type="hidden" name="returnUrl" value="@(Context.Request.Path.ToString() + Context.Request.QueryString.ToString())" />
                             <button type="submit" class="catalog-apply-btn">Apply Now</button>
                         </form>
                     </article>
@@ -89,6 +90,9 @@
         <section class="card">
             <h3>Employers</h3>
             <ul class="catalog-filter-list">
+                <li>
+                    <a class="@(string.IsNullOrWhiteSpace(selectedEmployer) ? "active" : string.Empty)" href="/Employee/JobCatalog?search=@Uri.EscapeDataString(search)&genreId=@Uri.EscapeDataString(selectedGenre)">All employers</a>
+                </li>
                 @foreach (var employer in employers)
                 {
                     <li>
@@ -101,6 +105,12 @@
         <section class="card">
             <h3>Genres</h3>
             <ul class="catalog-filter-list checkbox-list">
+                <li>
+                    <a class="@(string.IsNullOrWhiteSpace(selectedGenre) ? "active" : string.Empty)" href="/Employee/JobCatalog?search=@Uri.EscapeDataString(search)&employerId=@Uri.EscapeDataString(selectedEmployer)">
+                        <span>All genres</span>
+                        <span class="fake-checkbox"></span>
+                    </a>
+                </li>
                 @foreach (var genre in genres)
                 {
                     <li>

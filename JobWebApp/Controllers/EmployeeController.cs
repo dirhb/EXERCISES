@@ -12,6 +12,20 @@ namespace JobWebApp.Controllers
         private const int WS_PORT = 5015;
         private const string WS_SCHEME = "http";
 
+        private static readonly List<string> CatalogGenres = new List<string>
+        {
+            "Art",
+            "Law",
+            "Information Technology",
+            "Healthcare",
+            "Education",
+            "Business, Management, and Finance",
+            "STEM",
+            "Agriculture, Food, and Natural Resources",
+            "Government",
+            "Communication"
+        };
+
         // ── Guard: make sure only employees can access this ────
         // This is called at the start of every method.
         // If the user isn't an employee, send them away.
@@ -39,7 +53,9 @@ namespace JobWebApp.Controllers
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
 
             ApiClient<List<Job>> client = BuildClient<List<Job>>("Guest", "GetAllJobs");
-            List<Job> jobs = await client.GetAsync() ?? new List<Job>();
+            List<Job> jobs = (await client.GetAsync() ?? new List<Job>())
+                .Where(job => job.JobStatus != false)
+                .ToList();
 
             // Pass their name to the view so we can say "Welcome back, John!"
             ViewBag.FullName = SessionHelper.GetFullName(HttpContext.Session);
@@ -58,7 +74,9 @@ namespace JobWebApp.Controllers
             const int pageSize = 18;
 
             ApiClient<List<Job>> client = BuildClient<List<Job>>("Guest", "GetAllJobs");
-            List<Job> allJobs = await client.GetAsync() ?? new List<Job>();
+            List<Job> allJobs = (await client.GetAsync() ?? new List<Job>())
+                .Where(job => job.JobStatus != false)
+                .ToList();
 
             List<string> employers = allJobs
                 .Select(job => job.EmployerID ?? string.Empty)
@@ -67,12 +85,7 @@ namespace JobWebApp.Controllers
                 .OrderBy(id => id)
                 .ToList();
 
-            List<string> genres = allJobs
-                .Select(job => job.GenreID ?? string.Empty)
-                .Where(id => !string.IsNullOrWhiteSpace(id))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderBy(id => id)
-                .ToList();
+            List<string> genres = CatalogGenres;
 
             IEnumerable<Job> filteredJobs = allJobs;
 
@@ -129,10 +142,16 @@ namespace JobWebApp.Controllers
 
             string userId = SessionHelper.GetUserID(HttpContext.Session)!;
 
-            // We reuse GetJobHistory to also get user info
-            // In a real app you'd have a GetUser endpoint
+            ApiClient<User> client = BuildClient<User>("User", "GetUser");
+            client.AddParameter("userId", userId);
+            User? user = await client.GetAsync();
+
             ViewBag.UserID = userId;
             ViewBag.FullName = SessionHelper.GetFullName(HttpContext.Session);
+            ViewBag.ResumeText = user?.ResumeText ?? string.Empty;
+            ViewBag.Email = user?.Email ?? string.Empty;
+            ViewBag.PhoneNum = user?.PhoneNum ?? string.Empty;
+            ViewBag.Country = user?.Country ?? string.Empty;
 
             return View();
         }
@@ -163,7 +182,8 @@ namespace JobWebApp.Controllers
         // ── POST: /Employee/ApplyToJob ─────────────────────────
         // Called when the employee clicks "Apply" on a job
         [HttpPost]
-        public async Task<IActionResult> ApplyToJob(int jobId)
+        [HttpPost]
+        public async Task<IActionResult> ApplyToJob(int jobId, string? returnUrl)
         {
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
 
@@ -177,6 +197,9 @@ namespace JobWebApp.Controllers
             TempData[success ? "Success" : "Error"] = success
                 ? "Application submitted successfully!"
                 : "Failed to apply. You may have already applied to this job.";
+
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return LocalRedirect(returnUrl);
 
             return RedirectToAction("Home");
         }

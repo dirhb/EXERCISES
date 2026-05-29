@@ -1,4 +1,5 @@
 ﻿using JobModels;
+using JobModels.ViewModels;
 using JobWebService.ORM.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -17,12 +18,34 @@ namespace JobWebService.Controllers
         }
 
         [HttpPost]
-        public bool AddJob(Job job)
+        public bool AddJob([FromBody] Job job)
         {
             try
             {
+                if (job == null
+                    || string.IsNullOrWhiteSpace(job.JobTitle)
+                    || string.IsNullOrWhiteSpace(job.JobDescription)
+                    || string.IsNullOrWhiteSpace(job.JobType)
+                    || string.IsNullOrWhiteSpace(job.EmployerID)
+                    || string.IsNullOrWhiteSpace(job.CountryID)
+                    || string.IsNullOrWhiteSpace(job.GenreID))
+                {
+                    Console.WriteLine("AddJob failed: missing required job fields.");
+                    return false;
+                }
+
+                job.JobTitle = job.JobTitle.Trim();
+                job.JobDescription = job.JobDescription.Trim();
+                job.JobType = job.JobType.Trim();
+                job.CountryID = job.CountryID.Trim();
+                job.GenreID = job.GenreID.Trim();
+                job.JobFilter = job.JobFilter?.Trim();
+                job.JobStatus ??= true;
+
                 this.libraryUOW.HelperOledb.OpenConnection();
-                return this.libraryUOW.JobRepository.Create(job);
+                bool result = this.libraryUOW.JobRepository.Create(job);
+                Console.WriteLine($"AddJob result: {result}");
+                return result;
             }
             catch (Exception ex)
             {
@@ -133,6 +156,15 @@ namespace JobWebService.Controllers
             finally
             {
                 this.libraryUOW.HelperOledb.CloseConnection();
+            }
+        }
+        [HttpGet]
+        public IActionResult PostJob()
+        {
+            try
+            {
+                this.libraryUOW.HelperOledb.OpenConnection();
+                return this.libraryUOW.
             }
         }
     }

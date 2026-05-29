@@ -35,11 +35,17 @@ namespace JobWebService.ORM.Repositories
 
         public bool Insert(Job model)
         {
+            //string sql = $@"INSERT INTO Job(JobTitle,JobDescription,JobType,
+            //                JobStatus,JobFilter,EmployerID,CountryID,GenreID) 
+            //                VALUES(@JobTitle,@JobDescription,@JobType,@JobStatus,@JobFilter,
+            //                @EmployerID,@CountryID,@GenreID)";
             string sql = $@"INSERT INTO Job(JobTitle,JobDescription,JobType,
                             JobStatus,JobFilter,EmployerID,CountryID,GenreID) 
-                            VALUES(@JobTitle,@JobDescription,@JobType,@JobStatus,@JobFilter,
-                            @EmployerID,@CountryID,@GenreID)";
-           
+                            VALUES('{model.JobTitle}','{model.JobDescription}','{model.JobType}',{model.JobStatus.HasValue},'{model.JobFilter}',
+                            {model.EmployerID},{model.CountryID}, {model.GenreID})";
+
+
+            //this is a useless comment
             this.helperOleDb.AddParameters("@JobTitle", model.JobTitle);
             this.helperOleDb.AddParameters("@JobDescription", model.JobDescription);
             this.helperOleDb.AddParameters("@JobType", model.JobType);

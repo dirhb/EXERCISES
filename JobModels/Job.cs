@@ -10,10 +10,13 @@ namespace JobModels
 {
     public class Job
     {
+        [Required]
         public string? JobID { get; set; }
         public string? JobTitle { get; set; }
         public string? JobDescription { get; set; }
+        [Required]
         public string? JobType { get; set; }
+        [Required]
         public bool? JobStatus { get; set; }
         public string? JobFilter { get; set; }
         public string? EmployerID { get; set; }

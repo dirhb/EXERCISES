@@ -146,6 +146,25 @@ namespace JobWebService.Controllers
             return false;
         }
 
+        [HttpGet]
+        public User? GetUser(string userId)
+        {
+            try
+            {
+                this.libraryUOW.HelperOledb.OpenConnection();
+                return this.libraryUOW.UserRepository.Read(userId);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+                return null;
+            }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
+            }
+        }
+
         [HttpPost]
         public bool UpdateOnlineResume(string userId, string resumeText)
         {

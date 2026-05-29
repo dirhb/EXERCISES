@@ -1,11 +1,13 @@
+
 @*
     Views/Employer/PostJob.cshtml
     Form for employers to post a new job.
     Posts to EmployerController → PostJob (POST)
-*@
-
+*@  
+@model JobModels.ViewModels.PostJobViewModel
 @{
     ViewBag.Title = "Post a Job";
+    Layout = "_layout";
 }
 
 @section Styles {
@@ -32,7 +34,7 @@
 
                     <label style="display:flex;flex-direction:column;gap:6px;font-size:0.86rem;font-weight:600;color:var(--text-700);text-transform:uppercase;letter-spacing:0.02em">
                         Job Description
-                        <textarea name="JobDescription" rows="5" placeholder="Describe the role, responsibilities, and requirements..."
+                        <textarea name="JobDescription" rows="5" placeholder="Describe the role, responsibilities, and requirements..." required
                                   style="font-family:inherit;font-size:0.95rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;width:100%;resize:vertical"></textarea>
                     </label>
 
@@ -47,9 +49,33 @@
                         </select>
                     </label>
 
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:
+                    0.86rem;font-weight:600;color:var(--text-700);text-transform:uppercase;
+                    letter-spacing:0.02em">
+                        Genre
+                        <select name="GenreID" required 
+                            style="font-family:inherit;font-size:0.95rem;font-weight:400;
+                            text-transform:none;color:var(--text-900);
+                            background:var(--surface-2);border:1.5px solid var(--line);
+                            border-radius:var(--radius-sm);
+                            padding:10px 13px;outline:none;width:100%">
+                            <option value="">Choose a genre</option>
+                            @foreach (Genre genre in Model.Genres)
+                            {
+                                <option value="@genre.GenreID">@genre.GenreTitle</option>
+                            }
+                        </select>
+                    </label>
+
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:0.86rem;font-weight:600;color:var(--text-700);text-transform:uppercase;letter-spacing:0.02em">
+                        Search Keywords / Filters
+                        <input type="text" name="JobFilter" placeholder="e.g. junior, SQL, remote, customer service"
+                               style="font-family:inherit;font-size:0.95rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;width:100%" />
+                    </label>
+
                     <label style="display:flex;flex-direction:column;gap:6px;font-size:0.86rem;font-weight:600;color:var(--text-700);text-transform:uppercase;letter-spacing:0.02em">
                         Location (Country ID)
-                        <input type="text" name="CountryID" placeholder="e.g. UK, US, IL"
+                        <input type="text" name="CountryID" placeholder="e.g. UK, US, IL" required
                                style="font-family:inherit;font-size:0.95rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;width:100%" />
                     </label>
 
