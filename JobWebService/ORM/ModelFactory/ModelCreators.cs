@@ -1,4 +1,4 @@
-﻿using JobModels;
+using JobModels;
 using JobWebService.ORM.ModelFactory;
 
 namespace JobWebService.ORM
@@ -15,6 +15,7 @@ namespace JobWebService.ORM
         ReviewCreator reviewCreator;
         EducationCreator educationCreator;
         EducationTypeCreator educationTypeCreator;
+        ChatMessageCreator chatMessageCreator;
 
         public CountryCreator CountryCreator
         {
@@ -123,6 +124,17 @@ namespace JobWebService.ORM
                     jobApplicationCreator = new JobApplicationCreator();
                 }
                 return jobApplicationCreator;
+            }
+        }
+        public ChatMessageCreator ChatMessageCreator
+        {
+            get
+            {
+                if (chatMessageCreator == null)
+                {
+                    chatMessageCreator = new ChatMessageCreator();
+                }
+                return chatMessageCreator;
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿using JobWebService.ORM.ModelFactory;
+using JobWebService.ORM.ModelFactory;
 
 namespace JobWebService.ORM.Repositories
 {
@@ -14,6 +14,7 @@ namespace JobWebService.ORM.Repositories
         UserRepository userRepository;
         UserTypeRepository userTypeRepository;
         JobApplicationRepository jobApplicationRepository;
+        ChatMessageRepository chatMessageRepository;
 
         DBHelperOledb helperOledb;
         ModelCreators modelcreators;
@@ -123,6 +124,15 @@ namespace JobWebService.ORM.Repositories
                 if (jobApplicationRepository == null)
                     jobApplicationRepository = new JobApplicationRepository(helperOledb, modelcreators);
                 return jobApplicationRepository;
+            }
+        }
+        public ChatMessageRepository ChatMessageRepository
+        {
+            get
+            {
+                if (chatMessageRepository == null)
+                    chatMessageRepository = new ChatMessageRepository(helperOledb, modelcreators);
+                return chatMessageRepository;
             }
         }
     }

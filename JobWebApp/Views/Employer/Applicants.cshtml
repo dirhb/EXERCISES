@@ -1,0 +1,90 @@
+@*
+    Views/Employer/Applicants.cshtml
+    Shows all candidates who applied to a job.
+    Displays candidate name, contact details, resume cover text, salary update form, and chat link.
+*@
+
+@using JobModels
+@{
+    ViewBag.Title = "Applicants";
+    var applicants = ViewBag.Applicants as List<JobApplication> ?? new List<JobApplication>();
+    var users = ViewBag.Users as Dictionary<string, User> ?? new Dictionary<string, User>();
+    string jobId = ViewBag.JobID as string ?? string.Empty;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Applicants.css" />
+}
+
+<header class="page-header content-page-header">
+    <h1>Applicants</h1>
+    <p>Review candidates who applied to this job.</p>
+</header>
+
+<main class="container content-page applicants-page">
+    @if (applicants.Any())
+    {
+        @foreach (var app in applicants)
+        {
+            string userId = app.EmployeeId.ToString();
+            User? user = users.ContainsKey(userId) ? users[userId] : null;
+
+            <div class="card applicant-card">
+                <div class="applicant-header">
+                    <h3>@(user != null ? $"{user.FirstName} {user.LastName}" : "Unknown Candidate")</h3>
+                    <div class="applicant-meta">
+                        @if (user != null)
+                        {
+                            <span>Email: @user.Email</span>
+                            <span>Phone: @user.PhoneNum</span>
+                            <span>Location: @user.Country</span>
+                        }
+                        <span>Applied: @app.SubmittedAtUTC</span>
+                    </div>
+                </div>
+
+                <div class="applicant-body">
+                    <h4>Professional Summary</h4>
+                    <p>@(user?.ResumeText ?? "No resume text provided.")</p>
+
+                    <h4>Application Status</h4>
+                    <p>@app.Status</p>
+                </div>
+
+                <div class="applicant-actions">
+                    <form method="post" action="/Employer/UpdateSalary" class="salary-form">
+                        <input type="hidden" name="userId" value="@userId" />
+                        <input type="hidden" name="jobId" value="@jobId" />
+                        <label>
+                            Offer Salary:
+                            <input type="number" name="salary" step="0.01" placeholder="0.00" />
+                        </label>
+                        <button type="submit">Update Salary</button>
+                    </form>
+
+                    @if (user != null)
+                    {
+                        <a href="/Employer/Chat?partnerId=@user.UserID" class="chat-btn">
+                            Chat with Candidate
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="card">
+            <p style="color:var(--text-500);padding:12px;">No applicants yet for this job.</p>
+        </div>
+    }
+</main>
+
+@if (TempData["Success"] != null)
+{
+    <div class="toast-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="toast-error">@TempData["Error"]</div>
+}

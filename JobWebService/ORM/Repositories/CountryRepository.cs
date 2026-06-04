@@ -1,4 +1,4 @@
-﻿using JobModels;
+using JobModels;
 using System.Data;
 
 namespace JobWebService.ORM.Repositories
@@ -9,32 +9,32 @@ namespace JobWebService.ORM.Repositories
 
         public bool Delete(int id)
         {
-            string sql = $"DELETE FROM Countries WHERE CountryID=@CountryID";
+            string sql = $"DELETE FROM Country WHERE CountryID=@CountryID";
             this.helperOleDb.AddParameters("CountryID", id.ToString()); //prevents SQL Injection
             return this.helperOleDb.Delete(sql) > 0;
         }
         public bool Delete(string id)
         {
-            string sql = $"DELETE FROM Countries WHERE CountryID=@CountryID";
+            string sql = $"DELETE FROM Country WHERE CountryID=@CountryID";
             this.helperOleDb.AddParameters("CountryID", id); //prevents SQL Injection
             return this.helperOleDb.Delete(sql) > 0;
         }
         public bool Delete(Country model)
         {
-            string sql = $"DELETE FROM Countries WHERE CountryID=@CountryID";
+            string sql = $"DELETE FROM Country WHERE CountryID=@CountryID";
             this.helperOleDb.AddParameters("CountryID", model.CountryID.ToString()); //prevents SQL Injection
             return this.helperOleDb.Delete(sql) > 0;
         }
         public bool Insert(Country model)
         {
-            string sql = $"INSERT INTO Countries(CountryID,CountryName) VALUES(@CountryID,@CountryName)";
+            string sql = $"INSERT INTO Country(CountryID,CountryName) VALUES(@CountryID,@CountryName)";
             this.helperOleDb.AddParameters("CountryID", model.CountryID.ToString()); //prevents SQL Injection
             this.helperOleDb.AddParameters("CountryName", model.CountryName); //prevents SQL Injection
             return this.helperOleDb.Create(sql) > 0;
         }
         public Country Read(object id)
         {
-            string sql = $"SELECT * FROM Countries WHERE CountryID=@CountryID";
+            string sql = $"SELECT * FROM Country WHERE CountryID=@CountryID";
             this.helperOleDb.AddParameters("CountryID", id.ToString()); //prevents SQL Injection
             using (IDataReader dataReader = this.helperOleDb.Read(sql))
             {
@@ -46,7 +46,7 @@ namespace JobWebService.ORM.Repositories
         public List<Country> ReadAll()
         {
             List<Country> Countries = new List<Country>();
-            string sql = "SELECT * FROM Countries";
+            string sql = "SELECT * FROM Country";
             using (IDataReader dataReader = this.helperOleDb.Read(sql))
                 while (dataReader.Read() == true)
                     Countries.Add(this.modelCreators.CountryCreator.CreateModel(dataReader));
@@ -54,12 +54,12 @@ namespace JobWebService.ORM.Repositories
         }
         public object ReadValue()
         {
-            string sql = "SELECT COUNT(*) FROM Countries";
+            string sql = "SELECT COUNT(*) FROM Country";
             return this.helperOleDb.ReadValue(sql);
         }
         public bool Update(Country model)
         {
-            string sql = $"UPDATE Countries SET CountryName=@CountryName WHERE CountryID=@CountryID";
+            string sql = $"UPDATE Country SET CountryName=@CountryName WHERE CountryID=@CountryID";
             this.helperOleDb.AddParameters("CountryID", model.CountryID.ToString()); //prevents SQL Injection
             this.helperOleDb.AddParameters("CountryName", model.CountryName); //prevents SQL Injection
             return this.helperOleDb.Update(sql) > 0;

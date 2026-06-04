@@ -1,0 +1,168 @@
+@*
+    Views/Shared/Chat.cshtml
+    Shared chat interface for Employees and Employers.
+    Uses simple AJAX polling (3-second interval) for message updates.
+*@
+
+@{
+    ViewBag.Title = "Chat";
+    string currentUserId = ViewBag.CurrentUserID as string ?? string.Empty;
+    string partnerId = ViewBag.PartnerID as string ?? string.Empty;
+    string userTypeId = ViewBag.UserTypeID as string ?? string.Empty;
+    string fullName = ViewBag.FullName as string ?? string.Empty;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Chat.css" />
+}
+
+<header class="page-header content-page-header">
+    <h1>Chat</h1>
+    <p>Message recruiters and candidates directly.</p>
+</header>
+
+<main class="container content-page chat-page">
+    <section class="left-col">
+        <div class="card chat-card">
+            <h3>Conversations</h3>
+            <div id="conversations-list" class="conversations-list">
+                <p>Loading conversations...</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="right-col">
+        <div class="card chat-card">
+            <h3 id="chat-partner-name">Select a conversation</h3>
+            <div id="chat-messages" class="chat-messages">
+                <p style="color:var(--text-500);padding:12px;">Select a conversation from the left to start messaging.</p>
+            </div>
+            <form id="chat-form" class="chat-form" hidden>
+                <input type="hidden" id="receiver-id" name="receiverId" value="@partnerId" />
+                <input type="text" id="message-input" name="messageText" placeholder="Type your message..." autocomplete="off" />
+                <button type="submit">Send</button>
+            </form>
+        </div>
+    </section>
+</main>
+
+<script>
+    const currentUserId = '@currentUserId';
+    const initialPartnerId = '@partnerId';
+    let currentPartnerId = initialPartnerId || null;
+    let pollInterval = null;
+
+    // Load conversations list
+    async function loadConversations() {
+        try {
+            const response = await fetch('/Chat/GetConversations');
+            const users = await response.json();
+            const list = document.getElementById('conversations-list');
+            
+            if (users.length === 0) {
+                list.innerHTML = '<p style="color:var(--text-500);padding:12px;">No conversations yet.</p>';
+                return;
+            }
+
+            list.innerHTML = users.map(user => `
+                <div class="conversation-item ${currentPartnerId === user.userID ? 'active' : ''}" 
+                     onclick="selectConversation('${user.userID}', '${user.firstName} ${user.lastName}')">
+                    <strong>${user.firstName} ${user.lastName}</strong>
+                    <span style="color:var(--text-500);font-size:0.85rem;">${user.email || ''}</span>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading conversations:', error);
+        }
+    }
+
+    // Select a conversation
+    function selectConversation(partnerId, partnerName) {
+        currentPartnerId = partnerId;
+        document.getElementById('receiver-id').value = partnerId;
+        document.getElementById('chat-partner-name').textContent = partnerName;
+        document.getElementById('chat-form').hidden = false;
+        
+        // Update active state in list
+        document.querySelectorAll('.conversation-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        event.currentTarget.classList.add('active');
+        
+        loadMessages();
+    }
+
+    // Load messages for current conversation
+    async function loadMessages() {
+        if (!currentPartnerId) return;
+
+        try {
+            const response = await fetch(`/Chat/GetHistory?partnerId=${encodeURIComponent(currentPartnerId)}`);
+            const messages = await response.json();
+            const container = document.getElementById('chat-messages');
+            
+            if (messages.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-500);padding:12px;">No messages yet. Start the conversation!</p>';
+                return;
+            }
+
+            container.innerHTML = messages.map(msg => {
+                const isOwn = msg.senderID === currentUserId;
+                return `
+                    <div class="message ${isOwn ? 'own' : 'other'}">
+                        <div class="message-content">${msg.messageText || ''}</div>
+                        <div class="message-time">${msg.sentAt || ''}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // Auto-scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        } catch (error) {
+            console.error('Error loading messages:', error);
+        }
+    }
+
+    // Send a message
+    document.getElementById('chat-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const receiverId = document.getElementById('receiver-id').value;
+        const messageText = document.getElementById('message-input').value;
+        
+        if (!receiverId || !messageText.trim()) return;
+
+        try {
+            const response = await fetch('/Chat/SendMessage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ receiverId, messageText })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('message-input').value = '';
+                loadMessages();
+            }
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+    });
+
+    // Start polling for updates (3-second interval)
+    function startPolling() {
+        if (pollInterval) clearInterval(pollInterval);
+        pollInterval = setInterval(() => {
+            loadConversations();
+            if (currentPartnerId) loadMessages();
+        }, 3000);
+    }
+
+    // Initialize
+    loadConversations();
+    if (currentPartnerId) {
+        document.getElementById('chat-form').hidden = false;
+        loadMessages();
+    }
+    startPolling();
+</script>

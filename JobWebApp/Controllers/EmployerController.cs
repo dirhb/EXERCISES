@@ -1,5 +1,6 @@
-﻿using JobWebApp;
+using JobWebApp;
 using JobModels;
+using JobModels.ViewModels;
 using LibraryWSClient;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,17 +34,12 @@ namespace JobWebApp.Controllers
         {
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
 
-            // Get ALL jobs then filter to only this employer's jobs
-            // In a real app you'd have a GetJobsByEmployer endpoint
             string employerId = SessionHelper.GetUserID(HttpContext.Session)!;
 
-            ApiClient<List<Job>> client = BuildClient<List<Job>>("Guest", "GetAllJobs");
-            List<Job> allJobs = await client.GetAsync() ?? new List<Job>();
-
-            // Filter to only show THIS employer's jobs
-            List<Job> myJobs = allJobs
-                .Where(j => j.EmployerID == employerId)
-                .ToList();
+            // Call the dedicated endpoint that returns only this employer's jobs
+            ApiClient<List<Job>> client = BuildClient<List<Job>>("Employer", "GetMyJobs");
+            client.AddParameter("employerId", employerId);
+            List<Job> myJobs = await client.GetAsync() ?? new List<Job>();
 
             ViewBag.FullName = SessionHelper.GetFullName(HttpContext.Session);
             ViewBag.Jobs = myJobs;
@@ -59,12 +55,10 @@ namespace JobWebApp.Controllers
 
             string employerId = SessionHelper.GetUserID(HttpContext.Session)!;
 
-            ApiClient<List<Job>> client = BuildClient<List<Job>>("Guest", "GetAllJobs");
-            List<Job> allJobs = await client.GetAsync() ?? new List<Job>();
-
-            List<Job> myJobs = allJobs
-                .Where(j => j.EmployerID == employerId)
-                .ToList();
+            // Call the dedicated endpoint — no client-side filtering needed
+            ApiClient<List<Job>> client = BuildClient<List<Job>>("Employer", "GetMyJobs");
+            client.AddParameter("employerId", employerId);
+            List<Job> myJobs = await client.GetAsync() ?? new List<Job>();
 
             ViewBag.Jobs = myJobs;
 
@@ -72,11 +66,20 @@ namespace JobWebApp.Controllers
         }
 
         // ── GET: /Employer/PostJob ─────────────────────────────
-        // Shows the form to post a new job
-        public IActionResult PostJob()
+        // Shows the form to post a new job — loads genres from the database
+        public async Task<IActionResult> PostJob()
         {
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
-            return View();
+
+            // Fetch genres from the database so the dropdown is populated live
+            ApiClient<List<Genre>> genreClient = BuildClient<List<Genre>>("Guest", "GetAllGenres");
+            List<Genre> genres = await genreClient.GetAsync() ?? new List<Genre>();
+
+            PostJobViewModel model = new PostJobViewModel();
+            model.Genres = genres;
+            model.JobTypes = new List<JobType>();
+
+            return View(model);
         }
 
         // ── POST: /Employer/PostJob ────────────────────────────
@@ -129,7 +132,22 @@ namespace JobWebApp.Controllers
             client.AddParameter("jobId", jobId);
             List<JobApplication> applicants = await client.GetAsync() ?? new List<JobApplication>();
 
+            // Fetch user profiles for each applicant
+            Dictionary<string, User> users = new Dictionary<string, User>();
+            foreach (var app in applicants)
+            {
+                string userId = app.EmployeeId.ToString();
+                ApiClient<User> userClient = BuildClient<User>("User", "GetUser");
+                userClient.AddParameter("userId", userId);
+                User? user = await userClient.GetAsync();
+                if (user != null)
+                {
+                    users[userId] = user;
+                }
+            }
+
             ViewBag.Applicants = applicants;
+            ViewBag.Users = users;
             ViewBag.JobID = jobId;
 
             return View();
@@ -164,6 +182,20 @@ namespace JobWebApp.Controllers
             ViewBag.UserID = SessionHelper.GetUserID(HttpContext.Session);
 
             return View();
+        }
+
+        // ── GET: /Employer/Chat ───────────────────────────────
+        // Shared chat view for messaging
+        public IActionResult Chat(string? partnerId)
+        {
+            if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
+
+            ViewBag.CurrentUserID = SessionHelper.GetUserID(HttpContext.Session);
+            ViewBag.PartnerID = partnerId;
+            ViewBag.UserTypeID = SessionHelper.GetUserTypeID(HttpContext.Session);
+            ViewBag.FullName = SessionHelper.GetFullName(HttpContext.Session);
+
+            return View("~/Views/Shared/Chat.cshtml");
         }
     }
 }

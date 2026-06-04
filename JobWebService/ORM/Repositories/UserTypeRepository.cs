@@ -1,4 +1,4 @@
-﻿using JobModels;
+using JobModels;
 using System.Data;
 
 namespace JobWebService.ORM.Repositories
@@ -9,28 +9,28 @@ namespace JobWebService.ORM.Repositories
 
         public bool Delete(int id)
         {
-            string sql = $"DELETE FROM UserTypes WHERE UserTypeID=@UserTypeID";
+            string sql = $"DELETE FROM UserType WHERE UserTypeID=@UserTypeID";
             this.helperOleDb.AddParameters("UserTypeID", id.ToString()); //prevents SQL Injection
             return this.helperOleDb.Delete(sql) > 0;
         }
 
         public bool Delete(string id)
         {
-            string sql = $"DELETE FROM UserTypes WHERE UserTypeID=@UserTypeID";
+            string sql = $"DELETE FROM UserType WHERE UserTypeID=@UserTypeID";
             this.helperOleDb.AddParameters("UserTypeID", id); //prevents SQL Injection
             return this.helperOleDb.Delete(sql) > 0;
         }
 
         public bool Delete(UserType model)
         {
-            string sql = $"DELETE FROM UserTypes WHERE UserTypeId=@UserTypeID";
+            string sql = $"DELETE FROM UserType WHERE UserTypeID=@UserTypeID";
             this.helperOleDb.AddParameters("UserTypeID", model.UserTypeID.ToString()); //prevents SQL Injection
             return this.helperOleDb.Delete(sql) > 0;
         }
 
         public bool Insert(UserType model)
         {
-            string sql = $"INSERT INTO UserTypes(UserTypeID,UserTypeName) VALUES(@UserTypeID,@UserTypeName)";
+            string sql = $"INSERT INTO UserType(UserTypeID,UserTypeName) VALUES(@UserTypeID,@UserTypeName)";
             this.helperOleDb.AddParameters("UserTypeID", model.UserTypeID.ToString()); //prevents SQL Injection
             this.helperOleDb.AddParameters("UserTypeName", model.UserTypeName); //prevents SQL Injection
             return this.helperOleDb.Create(sql) > 0;
@@ -38,7 +38,7 @@ namespace JobWebService.ORM.Repositories
 
         public UserType Read(object id)
         {
-            string sql = $"SELECT FROM UserTypes WHERE UserTypeID=@UserTypeID";
+            string sql = $"SELECT * FROM UserType WHERE UserTypeID=@UserTypeID";
             this.helperOleDb.AddParameters("UserTypeID", id.ToString()); //prevents SQL Injection
             using (IDataReader dataReader = this.helperOleDb.Read(sql))
             {
@@ -51,7 +51,7 @@ namespace JobWebService.ORM.Repositories
         public List<UserType> ReadAll()
         {
             List<UserType> UserTypes = new List<UserType>();
-            string sql = "SELECT * FROM UserTypes";
+            string sql = "SELECT * FROM UserType";
             using (IDataReader dataReader = this.helperOleDb.Read(sql))
                 while (dataReader.Read() == true)
                     UserTypes.Add(this.modelCreators.UserTypeCreator.CreateModel(dataReader));
@@ -65,7 +65,7 @@ namespace JobWebService.ORM.Repositories
 
         public bool Update(UserType model)
         {
-            string sql = "UPDATE UserTypes SET UserTypeName=@UserTypeName where UserTypeID=@UserTypeID";
+            string sql = "UPDATE UserType SET UserTypeName=@UserTypeName where UserTypeID=@UserTypeID";
             this.helperOleDb.AddParameters("UserTypeID", model.UserTypeID.ToString()); //prevents SQL Injection
             this.helperOleDb.AddParameters("UserTypeName", model.UserTypeName); //prevents SQL Injection
             return this.helperOleDb.Update(sql) > 0;

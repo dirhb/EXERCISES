@@ -33,7 +33,7 @@ namespace JobWebService.ORM.Repositories
         // Return UserType for given user id
         public UserType UserTypeByUserId(string userId)
         {
-            string sql = "SELECT ut.UserTypeID, ut.UserTypeName FROM UserTypes ut INNER JOIN [User] u ON ut.UserTypeID = u.UserTypeID WHERE u.UserID=@UserID";
+            string sql = "SELECT ut.UserTypeID, ut.UserTypeName FROM UserType ut INNER JOIN [User] u ON ut.UserTypeID = u.UserTypeID WHERE u.UserID=@UserID";
             this.helperOleDb.AddParameters("UserID", userId);
             using (IDataReader dr = this.helperOleDb.Read(sql))
             {

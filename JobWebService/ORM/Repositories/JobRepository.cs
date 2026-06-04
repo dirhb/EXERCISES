@@ -35,17 +35,11 @@ namespace JobWebService.ORM.Repositories
 
         public bool Insert(Job model)
         {
-            //string sql = $@"INSERT INTO Job(JobTitle,JobDescription,JobType,
-            //                JobStatus,JobFilter,EmployerID,CountryID,GenreID) 
-            //                VALUES(@JobTitle,@JobDescription,@JobType,@JobStatus,@JobFilter,
-            //                @EmployerID,@CountryID,@GenreID)";
-            string sql = $@"INSERT INTO Job(JobTitle,JobDescription,JobType,
-                            JobStatus,JobFilter,EmployerID,CountryID,GenreID) 
-                            VALUES('{model.JobTitle}','{model.JobDescription}','{model.JobType}',{model.JobStatus.HasValue},'{model.JobFilter}',
-                            {model.EmployerID},{model.CountryID}, {model.GenreID})";
+            string sql = @"INSERT INTO Job(JobTitle,JobDescription,JobType,
+                            JobStatus,JobFilter,EmployerID,CountryID,GenreID)
+                            VALUES(@JobTitle,@JobDescription,@JobType,@JobStatus,@JobFilter,
+                            @EmployerID,@CountryID,@GenreID)";
 
-
-            //this is a useless comment
             this.helperOleDb.AddParameters("@JobTitle", model.JobTitle);
             this.helperOleDb.AddParameters("@JobDescription", model.JobDescription);
             this.helperOleDb.AddParameters("@JobType", model.JobType);
@@ -91,6 +85,18 @@ namespace JobWebService.ORM.Repositories
                 while (dataReader.Read())
                     jobs.Add(this.modelCreators.JobCreator.CreateModel(dataReader));
             return jobs;
+        }
+
+        // Returns only the jobs posted by a specific employer
+        public List<Job> ReadByEmployer(string employerId)
+        {
+            List<Job> list = new List<Job>();
+            string sql = "SELECT * FROM Job WHERE EmployerID=@EmployerID";
+            this.helperOleDb.AddParameters("@EmployerID", employerId);
+            using (IDataReader dataReader = this.helperOleDb.Read(sql))
+                while (dataReader.Read())
+                    list.Add(this.modelCreators.JobCreator.CreateModel(dataReader));
+            return list;
         }
 
         public object ReadValue()

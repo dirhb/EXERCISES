@@ -28,6 +28,7 @@ namespace JobWebService
             builder.Services.AddScoped<IRepository<Education>, EducationRepository>();
             builder.Services.AddScoped<IRepository<EducationType>, EducationTypeRepository>();
             builder.Services.AddScoped<IRepository<UserType>, UserTypeRepository>();
+            builder.Services.AddScoped<IRepository<ChatMessage>, ChatMessageRepository>();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

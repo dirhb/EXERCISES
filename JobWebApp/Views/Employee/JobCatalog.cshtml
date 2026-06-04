@@ -1,4 +1,4 @@
-﻿@*
+@*
     Views/Employee/JobCatalog.cshtml
     Employee job catalog with search, employer and genre filters, and pagination.
 *@
@@ -8,7 +8,8 @@
     ViewBag.Title = "Job Catalog";
     var jobs = ViewBag.Jobs as List<Job> ?? new List<Job>();
     var employers = ViewBag.Employers as List<string> ?? new List<string>();
-    var genres = ViewBag.Genres as List<string> ?? new List<string>();
+    // Genres now come from the database as Genre objects with GenreID and GenreTitle
+    var genres = ViewBag.Genres as List<Genre> ?? new List<Genre>();
     string search = ViewBag.Search as string ?? string.Empty;
     string selectedEmployer = ViewBag.SelectedEmployer as string ?? string.Empty;
     string selectedGenre = ViewBag.SelectedGenre as string ?? string.Empty;
@@ -64,11 +65,20 @@
                                 <span>@job.GenreID</span>
                             }
                         </div>
-                        <form method="post" action="/Employee/ApplyToJob">
-                            <input type="hidden" name="jobId" value="@job.JobID" />
-                            <input type="hidden" name="returnUrl" value="@(Context.Request.Path.ToString() + Context.Request.QueryString.ToString())" />
-                            <button type="submit" class="catalog-apply-btn">Apply Now</button>
-                        </form>
+                        <div style="display:flex;gap:8px;margin-top:8px">
+                            <form method="post" action="/Employee/ApplyToJob" style="flex:1">
+                                <input type="hidden" name="jobId" value="@job.JobID" />
+                                <input type="hidden" name="returnUrl" value="@(Context.Request.Path.ToString() + Context.Request.QueryString.ToString())" />
+                                <button type="submit" class="catalog-apply-btn" style="width:100%;margin:0">Apply Now</button>
+                            </form>
+                            @if (!string.IsNullOrEmpty(job.EmployerID))
+                            {
+                                <a href="/Employee/Chat?partnerId=@job.EmployerID" class="catalog-apply-btn" 
+                                   style="background:var(--surface-3);color:var(--text-800);text-align:center;text-decoration:none;flex:1;margin:0;display:flex;align-items:center;justify-content:center">
+                                    Message
+                                </a>
+                            }
+                        </div>
                     </article>
                 }
             </div>
@@ -114,8 +124,8 @@
                 @foreach (var genre in genres)
                 {
                     <li>
-                        <a class="@(string.Equals(selectedGenre, genre, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty)" href="/Employee/JobCatalog?search=@Uri.EscapeDataString(search)&employerId=@Uri.EscapeDataString(selectedEmployer)&genreId=@Uri.EscapeDataString(genre)">
-                            <span>@genre</span>
+                        <a class="@(string.Equals(selectedGenre, genre.GenreID, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty)" href="/Employee/JobCatalog?search=@Uri.EscapeDataString(search)&employerId=@Uri.EscapeDataString(selectedEmployer)&genreId=@Uri.EscapeDataString(genre.GenreID ?? string.Empty)">
+                            <span>@genre.GenreTitle</span>
                             <span class="fake-checkbox"></span>
                         </a>
                     </li>

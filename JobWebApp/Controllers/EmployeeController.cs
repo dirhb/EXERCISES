@@ -1,4 +1,4 @@
-﻿using JobWebApp;
+using JobWebApp;
 using JobModels;
 using LibraryWSClient;
 using Microsoft.AspNetCore.Mvc;
@@ -11,20 +11,6 @@ namespace JobWebApp.Controllers
         private const string WS_HOST = "localhost";
         private const int WS_PORT = 5015;
         private const string WS_SCHEME = "http";
-
-        private static readonly List<string> CatalogGenres = new List<string>
-        {
-            "Art",
-            "Law",
-            "Information Technology",
-            "Healthcare",
-            "Education",
-            "Business, Management, and Finance",
-            "STEM",
-            "Agriculture, Food, and Natural Resources",
-            "Government",
-            "Communication"
-        };
 
         // ── Guard: make sure only employees can access this ────
         // This is called at the start of every method.
@@ -85,7 +71,9 @@ namespace JobWebApp.Controllers
                 .OrderBy(id => id)
                 .ToList();
 
-            List<string> genres = CatalogGenres;
+            // Fetch genres live from the database so filter values match real GenreIDs
+            ApiClient<List<Genre>> genreClient = BuildClient<List<Genre>>("Guest", "GetAllGenres");
+            List<Genre> genres = await genreClient.GetAsync() ?? new List<Genre>();
 
             IEnumerable<Job> filteredJobs = allJobs;
 
@@ -182,7 +170,6 @@ namespace JobWebApp.Controllers
         // ── POST: /Employee/ApplyToJob ─────────────────────────
         // Called when the employee clicks "Apply" on a job
         [HttpPost]
-        [HttpPost]
         public async Task<IActionResult> ApplyToJob(int jobId, string? returnUrl)
         {
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
@@ -227,6 +214,20 @@ namespace JobWebApp.Controllers
             ViewBag.UserID = SessionHelper.GetUserID(HttpContext.Session);
 
             return View();
+        }
+
+        // ── GET: /Employee/Chat ───────────────────────────────
+        // Shared chat view for messaging
+        public IActionResult Chat(string? partnerId)
+        {
+            if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
+
+            ViewBag.CurrentUserID = SessionHelper.GetUserID(HttpContext.Session);
+            ViewBag.PartnerID = partnerId;
+            ViewBag.UserTypeID = SessionHelper.GetUserTypeID(HttpContext.Session);
+            ViewBag.FullName = SessionHelper.GetFullName(HttpContext.Session);
+
+            return View("~/Views/Shared/Chat.cshtml");
         }
     }
 }

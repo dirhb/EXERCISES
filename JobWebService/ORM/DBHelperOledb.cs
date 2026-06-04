@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using System.Data.OleDb;
 
 namespace JobWebService
@@ -23,6 +23,7 @@ namespace JobWebService
             this.oleDbConnection.ConnectionString = $@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={databasePath};Persist Security Info=True";
             Console.WriteLine("DB Path: " + databasePath);
             this.oleDbCommand.Connection = this.oleDbConnection;
+            EnsureChatMessagesTableExists();
         }
 
         private static string ResolveDatabasePath()
@@ -189,6 +190,51 @@ namespace JobWebService
         public void CreateCommand()
         {
             this.oleDbCommand = this.oleDbConnection.CreateCommand();
+        }
+
+        private void EnsureChatMessagesTableExists()
+        {
+            bool tableExists = false;
+            try
+            {
+                this.oleDbConnection.Open();
+                using (var cmd = this.oleDbConnection.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT TOP 1 MessageID FROM ChatMessages";
+                    using (var reader = cmd.ExecuteReader()) { }
+                    tableExists = true;
+                }
+            }
+            catch
+            {
+                tableExists = false;
+            }
+            finally
+            {
+                this.oleDbConnection.Close();
+            }
+
+            if (!tableExists)
+            {
+                try
+                {
+                    this.oleDbConnection.Open();
+                    using (var cmd = this.oleDbConnection.CreateCommand())
+                    {
+                        cmd.CommandText = "CREATE TABLE ChatMessages (MessageID COUNTER PRIMARY KEY, SenderID VARCHAR(100), ReceiverID VARCHAR(100), MessageText MEMO, SentAt VARCHAR(50))";
+                        cmd.ExecuteNonQuery();
+                        Console.WriteLine("Created table ChatMessages successfully.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error creating ChatMessages table: " + ex.Message);
+                }
+                finally
+                {
+                    this.oleDbConnection.Close();
+                }
+            }
         }
     }
 }

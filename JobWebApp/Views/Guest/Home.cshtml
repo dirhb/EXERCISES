@@ -92,12 +92,15 @@
         <div class="card popular equal-card">
             <h3>Popular Jobs</h3>
             <ul class="popular-list">
-                <li>Barista — Cafe Central</li>
-                <li>Delivery Driver — QuickShip</li>
-                <li>Customer Support — Remote</li>
-                <li>Sales Associate — Retail</li>
-                <li>Warehouse Operative — Night Shift</li>
-                <li>Cashier — Local Market</li>
+                @* Replaced hardcoded entries with real jobs from the database *@
+                @foreach (var job in jobs)
+                {
+                    <li>@job.JobTitle — @job.JobType</li>
+                }
+                @if (!jobs.Any())
+                {
+                    <li style="color:var(--text-500)">No jobs available right now.</li>
+                }
             </ul>
         </div>
     </aside>

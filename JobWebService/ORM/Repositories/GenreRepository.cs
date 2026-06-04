@@ -9,14 +9,14 @@ namespace JobWebService.ORM.Repositories
 
         public bool Delete(int id)
         {
-            string sql = $"DELETE FROM Genres WHERE GenreID=@GenreID";
+            string sql = $"DELETE FROM Genre WHERE GenreID=@GenreID";
             this.helperOleDb.AddParameters("GenreID", id.ToString());
             return this.helperOleDb.Delete(sql) > 0;
         }
 
         public bool Delete(string id)
         {
-            string sql = $"DELETE FROM Genres WHERE GenreID=@GenreID";
+            string sql = $"DELETE FROM Genre WHERE GenreID=@GenreID";
             this.helperOleDb.AddParameters("GenreID", id);
             return this.helperOleDb.Delete(sql) > 0;
         }
@@ -29,7 +29,7 @@ namespace JobWebService.ORM.Repositories
 
         public bool Insert(Genre model)
         {
-            string sql = $"INSERT INTO Genres(GenreID,GenreTitle,GenreDescription) VALUES(@GenreID,@GenreTitle,@GenreDescription)";
+            string sql = $"INSERT INTO Genre(GenreID,GenreTitle,GenreDescription) VALUES(@GenreID,@GenreTitle,@GenreDescription)";
             this.helperOleDb.AddParameters("GenreID", model.GenreID);
             this.helperOleDb.AddParameters("GenreTitle", model.GenreTitle);
             this.helperOleDb.AddParameters("GenreDescription", model.GenreDescription);
@@ -38,7 +38,7 @@ namespace JobWebService.ORM.Repositories
 
         public Genre Read(object id)
         {
-            string sql = $"SELECT * FROM Genres WHERE GenreID=@GenreID";
+            string sql = $"SELECT * FROM Genre WHERE GenreID=@GenreID";
             this.helperOleDb.AddParameters("GenreID", id.ToString());
             using (IDataReader dataReader = this.helperOleDb.Read(sql))
             {
@@ -51,7 +51,7 @@ namespace JobWebService.ORM.Repositories
         public List<Genre> ReadAll()
         {
             List<Genre> list = new List<Genre>();
-            string sql = "SELECT * FROM Genres";
+            string sql = "SELECT * FROM Genre";
             using (IDataReader dataReader = this.helperOleDb.Read(sql))
                 while (dataReader.Read())
                     list.Add(this.modelCreators.GenreCreator.CreateModel(dataReader));
@@ -60,13 +60,13 @@ namespace JobWebService.ORM.Repositories
 
         public object ReadValue()
         {
-            string sql = "SELECT COUNT(*) FROM Genres";
+            string sql = "SELECT COUNT(*) FROM Genre";
             return this.helperOleDb.ReadValue(sql);
         }
 
         public bool Update(Genre model)
         {
-            string sql = "UPDATE Genres SET GenreTitle=@GenreTitle,GenreDescription=@GenreDescription WHERE GenreID=@GenreID";
+            string sql = "UPDATE Genre SET GenreTitle=@GenreTitle,GenreDescription=@GenreDescription WHERE GenreID=@GenreID";
             this.helperOleDb.AddParameters("GenreID", model.GenreID);
             this.helperOleDb.AddParameters("GenreTitle", model.GenreTitle);
             this.helperOleDb.AddParameters("GenreDescription", model.GenreDescription);

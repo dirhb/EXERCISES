@@ -1,4 +1,4 @@
-﻿using JobModels;
+using JobModels;
 using JobModels.ViewModels;
 using JobWebService.ORM.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -159,12 +159,21 @@ namespace JobWebService.Controllers
             }
         }
         [HttpGet]
-        public IActionResult PostJob()
+        public List<Job> GetMyJobs(string employerId)
         {
             try
             {
                 this.libraryUOW.HelperOledb.OpenConnection();
-                return this.libraryUOW.
+                return this.libraryUOW.JobRepository.ReadByEmployer(employerId);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+                return new List<Job>();
+            }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
             }
         }
     }

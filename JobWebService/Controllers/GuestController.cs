@@ -1,4 +1,4 @@
-﻿using JobModels;
+using JobModels;
 using JobModels.ViewModels;
 using JobWebService.ORM.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -179,6 +179,26 @@ namespace JobWebService.Controllers
                 this.libraryUOW.HelperOledb.CloseConnection();
             }
         }
+
+        // Returns all genres from the database
+        // Used by the frontend to populate dropdowns and filter sidebars
+        [HttpGet]
+        public List<Genre> GetAllGenres()
+        {
+            try
+            {
+                this.libraryUOW.HelperOledb.OpenConnection();
+                return this.libraryUOW.GenreRepository.ReadAll();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return new List<Genre>();
+            }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
+            }
+        }
     }
 }
-

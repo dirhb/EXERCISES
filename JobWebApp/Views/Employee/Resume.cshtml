@@ -1,7 +1,7 @@
 @*
     Views/Employee/Resume.cshtml
-    The online resume builder for employees.
-    Uses accordion sections — JS handles open/close.
+    Simplified online resume builder for employees.
+    Single textarea for resume/cover letter text.
     Form posts to EmployeeController → UpdateResume
 *@
 
@@ -15,113 +15,31 @@
 
 <header class="page-header content-page-header">
     <h1>Online Resume</h1>
-    <p>Build and update a clear resume that highlights your strengths.</p>
+    <p>Write and update your professional summary and cover letter.</p>
 </header>
 
 <main class="container content-page resume-page">
     <section class="left-col">
         <div class="card">
-            <h3>Resume Sections</h3>
-            <div class="accordion">
-
-                <div class="accordion-item">
-                    <button class="accordion-header" aria-expanded="false">
-                        <span class="acc-num">1</span>
-                        <span class="acc-title">Contact Information</span>
-                        <span class="acc-icon material-symbols-outlined">expand_more</span>
-                    </button>
-                    <div class="accordion-body" hidden>
-                        <div class="acc-fields">
-                            <label>Full Name<input type="text" placeholder="e.g. @ViewBag.FullName" /></label>
-                            <label>Email<input type="email" placeholder="e.g. jane@email.com" /></label>
-                            <label>Phone<input type="tel" placeholder="e.g. +44 7700 900000" /></label>
-                            <label>Location<input type="text" placeholder="e.g. London, UK" /></label>
-                            <label>LinkedIn / Website<input type="url" placeholder="https://" /></label>
-                        </div>
-                    </div>
+            <h3>Resume / Cover Letter</h3>
+            <form method="post" action="/Employee/UpdateResume">
+                <div class="acc-fields">
+                    <label>Online Resume / Cover Letter
+                        <textarea name="resumeText" rows="12" placeholder="Write your professional summary, skills, experience, and cover letter text here...">@ViewBag.ResumeText</textarea>
+                    </label>
                 </div>
-
-                <div class="accordion-item">
-                    <button class="accordion-header" aria-expanded="false">
-                        <span class="acc-num">2</span>
-                        <span class="acc-title">Professional Summary</span>
-                        <span class="acc-icon material-symbols-outlined">expand_more</span>
-                    </button>
-                    <div class="accordion-body" hidden>
-                        <form method="post" action="/Employee/UpdateResume">
-                            <div class="acc-fields">
-                                <label>Summary
-                                    <textarea name="resumeText" rows="6" placeholder="Write 2–4 sentences about your experience and skills..."></textarea>
-                                </label>
-                            </div>
-                            <button type="submit" class="auth-submit" style="margin-top:12px">Save Resume</button>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <button class="accordion-header" aria-expanded="false">
-                        <span class="acc-num">3</span>
-                        <span class="acc-title">Work Experience</span>
-                        <span class="acc-icon material-symbols-outlined">expand_more</span>
-                    </button>
-                    <div class="accordion-body" hidden>
-                        <div class="acc-fields">
-                            <label>Job Title<input type="text" placeholder="e.g. Frontend Developer" /></label>
-                            <label>Company<input type="text" placeholder="e.g. Acme Corp" /></label>
-                            <div class="field-row">
-                                <label>Start Date<input type="month" /></label>
-                                <label>End Date<input type="month" /></label>
-                            </div>
-                            <label>Description<textarea rows="4" placeholder="Describe your responsibilities..."></textarea></label>
-                        </div>
-                        <button class="add-more-btn">+ Add another role</button>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <button class="accordion-header" aria-expanded="false">
-                        <span class="acc-num">4</span>
-                        <span class="acc-title">Education</span>
-                        <span class="acc-icon material-symbols-outlined">expand_more</span>
-                    </button>
-                    <div class="accordion-body" hidden>
-                        <div class="acc-fields">
-                            <label>Degree<input type="text" placeholder="e.g. BSc Computer Science" /></label>
-                            <label>Institution<input type="text" placeholder="e.g. University of Manchester" /></label>
-                            <div class="field-row">
-                                <label>Start Year<input type="number" placeholder="2018" /></label>
-                                <label>End Year<input type="number" placeholder="2021" /></label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <button class="accordion-header" aria-expanded="false">
-                        <span class="acc-num">5</span>
-                        <span class="acc-title">Skills</span>
-                        <span class="acc-icon material-symbols-outlined">expand_more</span>
-                    </button>
-                    <div class="accordion-body" hidden>
-                        <div class="acc-fields">
-                            <label>Technical Skills<textarea rows="3" placeholder="e.g. JavaScript, React, SQL..."></textarea></label>
-                            <label>Soft Skills<textarea rows="3" placeholder="e.g. Communication, Leadership..."></textarea></label>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
+                <button type="submit" class="auth-submit" style="margin-top:12px">Save Resume</button>
+            </form>
         </div>
     </section>
 
     <aside class="right-col">
         <div class="card">
-            <h3>Quick Actions</h3>
+            <h3>Contact Info</h3>
             <ul class="popular-list">
-                <li>Upload Existing Resume</li>
-                <li>Generate PDF</li>
-                <li>Share Resume Link</li>
+                <li>Email: @ViewBag.Email</li>
+                <li>Phone: @ViewBag.PhoneNum</li>
+                <li>Location: @ViewBag.Country</li>
             </ul>
         </div>
     </aside>

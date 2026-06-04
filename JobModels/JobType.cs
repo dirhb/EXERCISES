@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace JobModels
 {
-    internal class JobType
+    public class JobType
     {
         [Required]
         public string JobTypeID { get; set; }

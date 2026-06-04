@@ -186,7 +186,7 @@ namespace JobWebService.Controllers
 
 
         [HttpPost]
-        public bool ApplyToJob(int userId, int jobId)
+        public bool ApplyToJob(string userId, string jobId)
         {
             try
             {
@@ -197,10 +197,13 @@ namespace JobWebService.Controllers
                 if (user == null)
                     return false;
 
+                // Parse string IDs to int for the JobApplication model
+                int.TryParse(userId, out int employeeIdInt);
+                int.TryParse(jobId, out int jobIdInt);
+
                 JobApplication app = new JobApplication();
-                //app.ApplicationId = Guid.NewGuid().ToString("N");
-                app.EmployeeId = userId;
-                app.JobId = jobId;
+                app.EmployeeId = employeeIdInt;
+                app.JobId = jobIdInt;
                 app.ResumeSnapshot = user.ResumeText ?? string.Empty;
                 app.Status = "Submitted";
                 app.SubmittedAtUTC = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
