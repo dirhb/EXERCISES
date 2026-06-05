@@ -200,5 +200,24 @@ namespace JobWebService.Controllers
                 this.libraryUOW.HelperOledb.CloseConnection();
             }
         }
+
+        [HttpGet]
+        public List<Country> GetAllCountries()
+        {
+            try
+            {
+                this.libraryUOW.HelperOledb.OpenConnection();
+                return this.libraryUOW.CountryRepository.ReadAll();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return new List<Country>();
+            }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
+            }
+        }
     }
 }

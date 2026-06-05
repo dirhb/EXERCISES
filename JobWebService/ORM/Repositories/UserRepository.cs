@@ -100,7 +100,7 @@ namespace JobWebService.ORM.Repositories
 
         public User Read(object id)
         {
-            string sql = $"SELECT * FROM [User] WHERE UserID=@UserID";
+            string sql = "SELECT [User].*, Country.CountryName FROM [User] LEFT JOIN Country ON [User].Country = CStr(Country.CountryID) WHERE [User].UserID=@UserID";
             this.helperOleDb.AddParameters("@UserID", id.ToString());
             using (IDataReader dataReader = this.helperOleDb.Read(sql))
             {
@@ -113,7 +113,7 @@ namespace JobWebService.ORM.Repositories
         public List<User> ReadAll()
         {
             List<User> users = new List<User>();
-            string sql = "SELECT * FROM [User]";
+            string sql = "SELECT [User].*, Country.CountryName FROM [User] LEFT JOIN Country ON [User].Country = CStr(Country.CountryID)";
             using (IDataReader dataReader = this.helperOleDb.Read(sql))
                 while (dataReader.Read())
                     users.Add(this.modelCreators.UserCreator.CreateModel(dataReader));
@@ -145,7 +145,7 @@ namespace JobWebService.ORM.Repositories
         // Additional helpers inspired by referenced implementation
         public User ReadByEmail(string email)
         {
-            string sql = "SELECT * FROM [User] WHERE Email=@Email";
+            string sql = "SELECT [User].*, Country.CountryName FROM [User] LEFT JOIN Country ON [User].Country = CStr(Country.CountryID) WHERE [User].Email=@Email";
             this.helperOleDb.AddParameters("Email", email);
             using (IDataReader dataReader = this.helperOleDb.Read(sql))
             {
@@ -154,7 +154,7 @@ namespace JobWebService.ORM.Repositories
                 return this.modelCreators.UserCreator.CreateModel(dataReader);
             }
         }
-
+        
         //checks if email exists in db
         public bool ExistsByEmail(string email)
         {
@@ -166,7 +166,7 @@ namespace JobWebService.ORM.Repositories
 
         public User GetByCredentials(string email, string password)
         {
-            string sql = "SELECT * FROM [User] WHERE Email=@Email AND Password=@Password";
+            string sql = "SELECT [User].*, Country.CountryName FROM [User] LEFT JOIN Country ON [User].Country = CStr(Country.CountryID) WHERE [User].Email=@Email AND [User].Password=@Password";
             this.helperOleDb.AddParameters("Email", email);
             this.helperOleDb.AddParameters("Password", password);
             using (IDataReader dataReader = this.helperOleDb.Read(sql))

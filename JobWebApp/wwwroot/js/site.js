@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    main.js — JobFind shared JavaScript
    ============================================================ */
 
@@ -211,4 +211,89 @@ document.addEventListener('click', () => {
     document.querySelectorAll('.dropdown').forEach(d => {
         d.style.display = 'none';
     });
+});
+
+
+/* ── 8. AUTO-SWITCH TO SIGN IN TAB VIA URL QUERY PARAM ──────
+   If the URL contains ?tab=signin, automatically switch to
+   the Sign In form on the login page.
+--------------------------------------------------------------- */
+(function () {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'signin') {
+        const signinTab = document.querySelector('.auth-tab[data-tab="signin"]');
+        if (signinTab) signinTab.click();
+    }
+})();
+
+
+/* ── 9. DELETE JOB — CONFIRMATION MODAL ──────────────────────
+   Intercepts all delete-job buttons and shows a confirmation
+   modal before actually submitting the form.
+--------------------------------------------------------------- */
+(function () {
+    const modal = document.getElementById('delete-confirm-modal');
+    if (!modal) return;
+
+    const overlay   = modal.querySelector('.modal-overlay');
+    const cancelBtn = modal.querySelector('.modal-cancel');
+    const confirmBtn = modal.querySelector('.modal-confirm');
+    const titleSpan = modal.querySelector('.modal-job-title');
+    let pendingForm = null;
+
+    function openModal(form, jobTitle) {
+        pendingForm = form;
+        if (titleSpan) titleSpan.textContent = jobTitle || 'this job';
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeModal() {
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+        pendingForm = null;
+    }
+
+    // Intercept every delete button
+    document.querySelectorAll('.delete-job-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const form = btn.closest('form');
+            const jobTitle = btn.getAttribute('data-job-title') || '';
+            openModal(form, jobTitle);
+        });
+    });
+
+    // Confirm → submit the form
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', () => {
+            if (pendingForm) pendingForm.submit();
+            closeModal();
+        });
+    }
+
+    // Cancel → close the modal
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+    // Clicking the overlay backdrop → close the modal
+    if (overlay) overlay.addEventListener('click', closeModal);
+
+    // Escape key → close the modal
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+})();
+
+
+/* ── 10. AUTO-DISMISS TOAST NOTIFICATIONS ────────────────────
+   Toast messages fade out and remove themselves after 4 seconds.
+--------------------------------------------------------------- */
+document.querySelectorAll('.toast-success, .toast-error').forEach(toast => {
+    toast.style.transition = 'opacity 0.5s ease';
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 500);
+    }, 4000);
 });

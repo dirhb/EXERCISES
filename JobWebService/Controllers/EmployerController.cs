@@ -176,5 +176,27 @@ namespace JobWebService.Controllers
                 this.libraryUOW.HelperOledb.CloseConnection();
             }
         }
+
+        [HttpPost]
+        public bool ToggleJobStatus(string jobId)
+        {
+            try
+            {
+                this.libraryUOW.HelperOledb.OpenConnection();
+                Job? job = this.libraryUOW.JobRepository.Read(jobId);
+                if (job == null) return false;
+                job.JobStatus = !(job.JobStatus ?? false);
+                return this.libraryUOW.JobRepository.Update(job);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+                return false;
+            }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
+            }
+        }
     }
 }

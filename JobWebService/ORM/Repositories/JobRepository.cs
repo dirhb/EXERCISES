@@ -53,7 +53,7 @@ namespace JobWebService.ORM.Repositories
 
         public Job Read(object id)
         {
-            string sql = $"SELECT * FROM Job WHERE JobID=@JobID";
+            string sql = "SELECT Job.*, Country.CountryName, Genre.GenreTitle FROM (Job LEFT JOIN Country ON Job.CountryID = Country.CountryID) LEFT JOIN Genre ON Job.GenreID = Genre.GenreID WHERE Job.JobID=@JobID";
             this.helperOleDb.AddParameters("JobID", id.ToString());
             using (IDataReader dataReader = this.helperOleDb.Read(sql))
             {
@@ -66,7 +66,7 @@ namespace JobWebService.ORM.Repositories
         public List<Job> ReadAll()
         {
             List<Job> list = new List<Job>();
-            string sql = "SELECT * FROM Job";
+            string sql = "SELECT Job.*, Country.CountryName, Genre.GenreTitle FROM (Job LEFT JOIN Country ON Job.CountryID = Country.CountryID) LEFT JOIN Genre ON Job.GenreID = Genre.GenreID";
             using (IDataReader dataReader = this.helperOleDb.Read(sql))
                 while (dataReader.Read())
                     list.Add(this.modelCreators.JobCreator.CreateModel(dataReader));
@@ -91,7 +91,7 @@ namespace JobWebService.ORM.Repositories
         public List<Job> ReadByEmployer(string employerId)
         {
             List<Job> list = new List<Job>();
-            string sql = "SELECT * FROM Job WHERE EmployerID=@EmployerID";
+            string sql = "SELECT Job.*, Country.CountryName, Genre.GenreTitle FROM (Job LEFT JOIN Country ON Job.CountryID = Country.CountryID) LEFT JOIN Genre ON Job.GenreID = Genre.GenreID WHERE Job.EmployerID=@EmployerID";
             this.helperOleDb.AddParameters("@EmployerID", employerId);
             using (IDataReader dataReader = this.helperOleDb.Read(sql))
                 while (dataReader.Read())
@@ -108,7 +108,6 @@ namespace JobWebService.ORM.Repositories
         public bool Update(Job model)
         {
             string sql = "UPDATE Job SET JobTitle=@JobTitle,JobDescription=@JobDescription,JobType=@JobType,JobStatus=@JobStatus,JobFilter=@JobFilter,EmployerID=@EmployerID,CountryID=@CountryID,GenreID=@GenreID WHERE JobID=@JobID";
-            this.helperOleDb.AddParameters("JobID", model.JobID);
             this.helperOleDb.AddParameters("JobTitle", model.JobTitle);
             this.helperOleDb.AddParameters("JobDescription", model.JobDescription);
             this.helperOleDb.AddParameters("JobType", model.JobType);
@@ -117,6 +116,7 @@ namespace JobWebService.ORM.Repositories
             this.helperOleDb.AddParameters("EmployerID", model.EmployerID);
             this.helperOleDb.AddParameters("CountryID", model.CountryID);
             this.helperOleDb.AddParameters("GenreID", model.GenreID);
+            this.helperOleDb.AddParameters("JobID", model.JobID);
             return this.helperOleDb.Update(sql) > 0;
         }
     }

@@ -3,6 +3,8 @@ using JobModels;
 using LibraryWSClient;
 using Microsoft.AspNetCore.Mvc;
 using JobModels.ViewModels;
+using Microsoft.AspNetCore.Http;
+using System.IO;
 
 namespace JobWebApp.Controllers
 {
@@ -53,16 +55,14 @@ namespace JobWebApp.Controllers
 
         // ── GET: /Employee/JobCatalog ─────────────────────────
         // Shows all jobs with search, employer/genre filters, and paging.
-        public async Task<IActionResult> JobCatalog(string? search, string? employerId, string? genreId, int page = 1)
+        public async Task<IActionResult> JobCatalog(string? search, string? employerId, string? genreId, bool showActiveOnly = false, int page = 1)
         {
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
 
             const int pageSize = 18;
 
             ApiClient<List<Job>> client = BuildClient<List<Job>>("Guest", "GetAllJobs");
-            List<Job> allJobs = (await client.GetAsync() ?? new List<Job>())
-                .Where(job => job.JobStatus != false)
-                .ToList();
+            List<Job> allJobs = await client.GetAsync() ?? new List<Job>();
 
             List<string> employers = allJobs
                 .Select(job => job.EmployerID ?? string.Empty)
@@ -86,6 +86,9 @@ namespace JobWebApp.Controllers
             if (!string.IsNullOrWhiteSpace(genreId))
                 filteredJobs = filteredJobs.Where(job => string.Equals(job.GenreID, genreId, StringComparison.OrdinalIgnoreCase));
 
+            if (showActiveOnly)
+                filteredJobs = filteredJobs.Where(job => job.JobStatus == true);
+
             List<Job> results = filteredJobs.ToList();
             int totalPages = Math.Max(1, (int)Math.Ceiling(results.Count / (double)pageSize));
             page = Math.Clamp(page, 1, totalPages);
@@ -94,6 +97,7 @@ namespace JobWebApp.Controllers
             ViewBag.Search = search;
             ViewBag.SelectedEmployer = employerId;
             ViewBag.SelectedGenre = genreId;
+            ViewBag.ShowActiveOnly = showActiveOnly;
             ViewBag.Employers = employers;
             ViewBag.Genres = genres;
             ViewBag.Page = page;
@@ -147,22 +151,64 @@ namespace JobWebApp.Controllers
         // ── POST: /Employee/UpdateResume ───────────────────────
         // Called when the employee saves their resume
         [HttpPost]
-        public async Task<IActionResult> UpdateResume(string resumeText)
+        public async Task<IActionResult> UpdateResume(IFormFile resumeFile)
         {
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
 
+            if (resumeFile == null || resumeFile.Length == 0)
+            {
+                TempData["Error"] = "Please select a file to upload.";
+                return RedirectToAction("Resume");
+            }
+
+            // Server-side validation
+            var extension = Path.GetExtension(resumeFile.FileName).ToLower();
+            if (extension != ".pdf")
+            {
+                TempData["Error"] = "Only PDF files are allowed.";
+                return RedirectToAction("Resume");
+            }
+
+            if (resumeFile.Length > 5 * 1024 * 1024)
+            {
+                TempData["Error"] = "File size must be less than 5MB.";
+                return RedirectToAction("Resume");
+            }
+
             string userId = SessionHelper.GetUserID(HttpContext.Session)!;
+            bool success = false;
+            try
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
 
-            ApiClient<bool> client = BuildClient<bool>("User", "UpdateOnlineResume");
-            client.AddParameter("userId", userId);
-            client.AddParameter("resumeText", resumeText ?? string.Empty);
-            bool success = await client.PostAsync();
+                var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(resumeFile.FileName)}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-            // TempData is like a sticky note — it lasts for exactly one page load
-            // Perfect for "saved successfully!" messages
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await resumeFile.CopyToAsync(fileStream);
+                }
+
+                var fileUrl = $"/uploads/{uniqueFileName}";
+
+                ApiClient<bool> client = BuildClient<bool>("User", "UpdateOnlineResume");
+                client.AddParameter("userId", userId);
+                client.AddParameter("resumeText", fileUrl);
+                success = await client.PostAsync();
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"An error occurred during file upload: {ex.Message}";
+                return RedirectToAction("Resume");
+            }
+
             TempData[success ? "Success" : "Error"] = success
-                ? "Resume saved successfully!"
-                : "Failed to save resume. Please try again.";
+                ? "Resume uploaded successfully!"
+                : "Failed to save resume to database. Please try again.";
 
             return RedirectToAction("Resume");
         }
@@ -170,24 +216,74 @@ namespace JobWebApp.Controllers
         // ── POST: /Employee/ApplyToJob ─────────────────────────
         // Called when the employee clicks "Apply" on a job
         [HttpPost]
-        public async Task<IActionResult> ApplyToJob(int jobId, string? returnUrl)
+        public async Task<IActionResult> ApplyToJob(int jobId, IFormFile? resumeFile, string? returnUrl)
         {
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
 
             string userId = SessionHelper.GetUserID(HttpContext.Session)!;
+            string? resumeUrl = null;
+
+            if (resumeFile != null && resumeFile.Length > 0)
+            {
+                // Server-side validation
+                var extension = Path.GetExtension(resumeFile.FileName).ToLower();
+                if (extension != ".pdf")
+                {
+                    TempData["Error"] = "Only PDF files are allowed.";
+                    return RedirectToReturnUrl(returnUrl);
+                }
+
+                if (resumeFile.Length > 5 * 1024 * 1024)
+                {
+                    TempData["Error"] = "File size must be less than 5MB.";
+                    return RedirectToReturnUrl(returnUrl);
+                }
+
+                try
+                {
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
+
+                    var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(resumeFile.FileName)}";
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await resumeFile.CopyToAsync(fileStream);
+                    }
+
+                    resumeUrl = $"/uploads/{uniqueFileName}";
+                }
+                catch (Exception ex)
+                {
+                    TempData["Error"] = $"An error occurred during file upload: {ex.Message}";
+                    return RedirectToReturnUrl(returnUrl);
+                }
+            }
 
             ApiClient<bool> client = BuildClient<bool>("User", "ApplyToJob");
             client.AddParameter("userId", userId);
             client.AddParameter("jobId", jobId.ToString());
+            if (resumeUrl != null)
+            {
+                client.AddParameter("resumeUrl", resumeUrl);
+            }
             bool success = await client.PostAsync();
 
             TempData[success ? "Success" : "Error"] = success
                 ? "Application submitted successfully!"
                 : "Failed to apply. You may have already applied to this job.";
 
+            return RedirectToReturnUrl(returnUrl);
+        }
+
+        private IActionResult RedirectToReturnUrl(string? returnUrl)
+        {
             if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return LocalRedirect(returnUrl);
-
             return RedirectToAction("Home");
         }
 

@@ -34,8 +34,8 @@
                 <span class="material-symbols-outlined" aria-hidden="true">search</span>
                 <input type="search" name="search" value="@search" placeholder="Search jobs, companies, locations, or skills" />
             </label>
-            <input type="hidden" name="employerId" value="@selectedEmployer" />
             <input type="hidden" name="genreId" value="@selectedGenre" />
+            <input type="hidden" name="showActiveOnly" value="@(ViewBag.ShowActiveOnly == true ? "true" : "false")" />
             <button type="submit" class="catalog-filter-btn">Search</button>
             <a class="catalog-reset" href="/Employee/JobCatalog">Clear</a>
         </form>
@@ -52,7 +52,7 @@
                     <article class="catalog-job-card">
                         <div>
                             <span class="catalog-job-title">@job.JobTitle</span>
-                            <span class="catalog-job-meta">@job.EmployerID — @job.CountryID</span>
+                            <span class="catalog-job-meta">@job.EmployerID — @(job.CountryName ?? job.CountryID)</span>
                         </div>
                         <p>@(string.IsNullOrWhiteSpace(job.JobDescription) ? "No description provided yet." : job.JobDescription)</p>
                         <div class="fj-tags">
@@ -65,18 +65,40 @@
                                 <span>@job.GenreID</span>
                             }
                         </div>
-                        <div style="display:flex;gap:8px;margin-top:8px">
-                            <form method="post" action="/Employee/ApplyToJob" style="flex:1">
-                                <input type="hidden" name="jobId" value="@job.JobID" />
-                                <input type="hidden" name="returnUrl" value="@(Context.Request.Path.ToString() + Context.Request.QueryString.ToString())" />
-                                <button type="submit" class="catalog-apply-btn" style="width:100%;margin:0">Apply Now</button>
-                            </form>
-                            @if (!string.IsNullOrEmpty(job.EmployerID))
+                        <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px; width: 100%;">
+                            @if (job.JobStatus == false)
                             {
-                                <a href="/Employee/Chat?partnerId=@job.EmployerID" class="catalog-apply-btn" 
-                                   style="background:var(--surface-3);color:var(--text-800);text-align:center;text-decoration:none;flex:1;margin:0;display:flex;align-items:center;justify-content:center">
-                                    Message
-                                </a>
+                                <div style="display:flex; gap:8px; width:100%;">
+                                    <button type="button" class="catalog-apply-btn" style="flex:1; margin:0; background:var(--line); color:var(--text-500); cursor:not-allowed;" disabled>Position Filled</button>
+                                    @if (!string.IsNullOrEmpty(job.EmployerID))
+                                    {
+                                        <a href="/Employee/Chat?partnerId=@job.EmployerID" class="catalog-apply-btn" 
+                                           style="background:var(--surface-3);color:var(--text-800);text-align:center;text-decoration:none;flex:1;margin:0;display:flex;align-items:center;justify-content:center">
+                                            Message
+                                        </a>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <form method="post" action="/Employee/ApplyToJob" enctype="multipart/form-data" style="width:100%; display:flex; flex-direction:column; gap:6px;">
+                                    <input type="hidden" name="jobId" value="@job.JobID" />
+                                    <input type="hidden" name="returnUrl" value="@(Context.Request.Path.ToString() + Context.Request.QueryString.ToString())" />
+                                    <label style="font-size:0.75rem; color:var(--text-500); display:flex; flex-direction:column; gap:2px; cursor:pointer;">
+                                        Apply with custom PDF (optional):
+                                        <input type="file" name="resumeFile" accept=".pdf" style="font-size:0.72rem; color:var(--text-700); padding: 2px;" class="custom-apply-file" />
+                                    </label>
+                                    <div style="display:flex; gap:8px; width:100%;">
+                                        <button type="submit" class="catalog-apply-btn" style="flex:1; margin:0">Apply Now</button>
+                                        @if (!string.IsNullOrEmpty(job.EmployerID))
+                                        {
+                                            <a href="/Employee/Chat?partnerId=@job.EmployerID" class="catalog-apply-btn" 
+                                               style="background:var(--surface-3);color:var(--text-800);text-align:center;text-decoration:none;flex:1;margin:0;display:flex;align-items:center;justify-content:center">
+                                                Message
+                                            </a>
+                                        }
+                                    </div>
+                                </form>
                             }
                         </div>
                     </article>
@@ -91,32 +113,29 @@
         <nav class="catalog-pagination" aria-label="Job catalog pages">
             @for (int i = 1; i <= totalPages; i++)
             {
-                <a class="@(i == page ? "active" : string.Empty)" href="/Employee/JobCatalog?search=@Uri.EscapeDataString(search)&employerId=@Uri.EscapeDataString(selectedEmployer)&genreId=@Uri.EscapeDataString(selectedGenre)&page=@i">Page @i</a>
+                <a class="@(i == page ? "active" : string.Empty)" href="/Employee/JobCatalog?search=@Uri.EscapeDataString(search)&genreId=@Uri.EscapeDataString(selectedGenre)&showActiveOnly=@(ViewBag.ShowActiveOnly == true ? "true" : "false")&page=@i">Page @i</a>
             }
         </nav>
     </section>
 
     <aside class="catalog-sidebar">
         <section class="card">
-            <h3>Employers</h3>
-            <ul class="catalog-filter-list">
-                <li>
-                    <a class="@(string.IsNullOrWhiteSpace(selectedEmployer) ? "active" : string.Empty)" href="/Employee/JobCatalog?search=@Uri.EscapeDataString(search)&genreId=@Uri.EscapeDataString(selectedGenre)">All employers</a>
-                </li>
-                @foreach (var employer in employers)
-                {
-                    <li>
-                        <a class="@(string.Equals(selectedEmployer, employer, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty)" href="/Employee/JobCatalog?search=@Uri.EscapeDataString(search)&employerId=@Uri.EscapeDataString(employer)&genreId=@Uri.EscapeDataString(selectedGenre)">@employer</a>
-                    </li>
-                }
-            </ul>
+            <h3>Job Status</h3>
+            <form id="status-filter-form" method="get" action="/Employee/JobCatalog">
+                <input type="hidden" name="search" value="@search" />
+                <input type="hidden" name="genreId" value="@selectedGenre" />
+                <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:600; padding:8px 0; color:var(--brand-800);">
+                    <input type="checkbox" name="showActiveOnly" value="true" onchange="this.form.submit()" @(ViewBag.ShowActiveOnly == true ? "checked" : "") style="width:18px; height:18px; cursor:pointer;" />
+                    <span>Show Active Jobs Only</span>
+                </label>
+            </form>
         </section>
 
         <section class="card">
             <h3>Genres</h3>
             <ul class="catalog-filter-list checkbox-list">
                 <li>
-                    <a class="@(string.IsNullOrWhiteSpace(selectedGenre) ? "active" : string.Empty)" href="/Employee/JobCatalog?search=@Uri.EscapeDataString(search)&employerId=@Uri.EscapeDataString(selectedEmployer)">
+                    <a class="@(string.IsNullOrWhiteSpace(selectedGenre) ? "active" : string.Empty)" href="/Employee/JobCatalog?search=@Uri.EscapeDataString(search)&showActiveOnly=@(ViewBag.ShowActiveOnly == true ? "true" : "false")">
                         <span>All genres</span>
                         <span class="fake-checkbox"></span>
                     </a>
@@ -124,7 +143,7 @@
                 @foreach (var genre in genres)
                 {
                     <li>
-                        <a class="@(string.Equals(selectedGenre, genre.GenreID, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty)" href="/Employee/JobCatalog?search=@Uri.EscapeDataString(search)&employerId=@Uri.EscapeDataString(selectedEmployer)&genreId=@Uri.EscapeDataString(genre.GenreID ?? string.Empty)">
+                        <a class="@(string.Equals(selectedGenre, genre.GenreID, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty)" href="/Employee/JobCatalog?search=@Uri.EscapeDataString(search)&genreId=@Uri.EscapeDataString(genre.GenreID ?? string.Empty)&showActiveOnly=@(ViewBag.ShowActiveOnly == true ? "true" : "false")">
                             <span>@genre.GenreTitle</span>
                             <span class="fake-checkbox"></span>
                         </a>

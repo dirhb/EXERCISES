@@ -1,4 +1,4 @@
-﻿// GuestController.cs
+// GuestController.cs
 // This controller handles everything a non-logged-in user can do:
 // - View the homepage
 // - View job listings
@@ -145,6 +145,14 @@ namespace JobWebApp.Controllers
                 || (job.JobFilter ?? string.Empty).Contains(search, StringComparison.OrdinalIgnoreCase)
                 || (job.EmployerID ?? string.Empty).Contains(search, StringComparison.OrdinalIgnoreCase)
                 || (job.CountryID ?? string.Empty).Contains(search, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GetAllCountries()
+        {
+            ApiClient<List<Country>> client = BuildClient<List<Country>>("Guest", "GetAllCountries");
+            List<Country> countries = await client.GetAsync() ?? new List<Country>();
+            return Json(countries);
         }
 
         // ── Private helper: redirect based on role ─────────────

@@ -41,7 +41,7 @@
             else if (Context.Session.GetString("UserTypeID") == "3")
             {
                 @* Employer nav *@
-                <li><a href="/Employer/JobHistory">Job History</a></li>
+                <li><a href="/Employer/YourJobs">Your Jobs</a></li>
                 <li><a href="/Employer/PostJob">Post a Job</a></li>
                 <li><a href="/Employer/Chat">Chat</a></li>
             }
@@ -87,7 +87,7 @@
                     }
                     else
                     {
-                        <li><a href="/Guest/Login">Login</a></li>
+                        <li><a href="/Guest/Login?tab=signin">Login</a></li>
                         <li><a href="/Guest/Login">Register</a></li>
                     }
                 </ul>
@@ -97,6 +97,22 @@
 
     @* Page content goes here — each view fills this in *@
     @RenderBody()
+
+    @* ── Delete Job Confirmation Modal (shared across all pages) ── *@
+    <div id="delete-confirm-modal" class="modal-container" aria-hidden="true">
+        <div class="modal-overlay"></div>
+        <div class="modal-dialog">
+            <div class="modal-icon">
+                <span class="material-symbols-outlined">warning</span>
+            </div>
+            <h2>Delete Job?</h2>
+            <p>Are you sure you want to permanently delete <strong class="modal-job-title">this job</strong>? This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button type="button" class="modal-cancel">Cancel</button>
+                <button type="button" class="modal-confirm">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
 
     @* Shared JS *@
     <script src="~/js/site.js"></script>

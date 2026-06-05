@@ -1,0 +1,82 @@
+@*
+    Views/Employer/YourJobs.cshtml
+    Shows all jobs the employer has posted, with active vs closed indicators, deletion modal triggers, and applications view.
+*@
+
+@using JobModels
+@{
+    ViewBag.Title = "Your Jobs";
+    var jobs = ViewBag.Jobs as List<Job> ?? new List<Job>();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Homepage.css" />
+}
+
+<header class="page-header content-page-header">
+    <h1>Your Jobs</h1>
+    <p>Manage your active and closed job postings and review candidate applications.</p>
+</header>
+
+<main class="container content-page">
+    <section class="left-col" style="grid-column: span 2;">
+        <div class="card jobs-card">
+            <h3><span class="material-symbols-outlined">work</span> All Postings</h3>
+            <div class="jobs-box" style="max-height: none;">
+                @if (jobs.Any())
+                {
+                    @foreach (var job in jobs)
+                    {
+                        <div class="featured-job" style="cursor: default; margin-bottom: 12px;">
+                            <div class="fj-top">
+                                <div>
+                                    <span class="fj-title">@job.JobTitle</span>
+                                    <span class="fj-company">@(job.CountryName ?? job.CountryID) — @job.JobType</span>
+                                </div>
+                                @if (job.JobStatus == true)
+                                {
+                                    <span class="fj-badge" style="background:var(--color-background-success, #e7f8ed);color:var(--color-text-success, #0f6b34)">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="fj-badge" style="background:var(--line);color:var(--text-500)">Closed / Inactive</span>
+                                }
+                            </div>
+                            <div class="fj-tags">
+                                <span>@job.JobType</span>
+                                @if (!string.IsNullOrEmpty(job.GenreID))
+                                {
+                                    <span>Genre: @(job.GenreTitle ?? job.GenreID)</span>
+                                }
+                            </div>
+                            <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
+                                @* View applicants button *@
+                                <a href="/Employer/Applicants?jobId=@job.JobID" class="cta-btn" style="font-size:0.85rem;padding:7px 16px;">
+                                    View Applicants
+                                </a>
+                                @* Toggle status button *@
+                                <form method="post" action="/Employer/ToggleJobStatus" style="margin:0">
+                                    <input type="hidden" name="jobId" value="@job.JobID" />
+                                    <button type="submit" class="cta-btn secondary" style="font-size:0.85rem;padding:7px 16px;">
+                                        Make @(job.JobStatus == true ? "Closed" : "Active")
+                                    </button>
+                                </form>
+                                @* Delete button — triggers confirmation modal *@
+                                <form method="post" action="/Employer/DeleteJob" style="margin:0">
+                                    <input type="hidden" name="jobId" value="@job.JobID" />
+                                    <button type="button" class="cta-btn secondary delete-job-btn" data-job-title="@job.JobTitle" style="font-size:0.85rem;padding:7px 16px;color:var(--color-text-danger)">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p style="color:var(--text-500);padding:12px;">You haven't posted any jobs yet. <a href="/Employer/PostJob">Post one now →</a></p>
+                }
+            </div>
+        </div>
+    </section>
+</main>

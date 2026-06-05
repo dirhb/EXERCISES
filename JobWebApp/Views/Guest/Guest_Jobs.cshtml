@@ -42,7 +42,7 @@
                         <div class="fj-top">
                             <div>
                                 <span class="fj-title">@job.JobTitle</span>
-                                <span class="fj-company">@job.EmployerID — @job.CountryID</span>
+                                <span class="fj-company">@job.EmployerID — @(job.CountryName ?? job.CountryID)</span>
                             </div>
                             <span class="fj-badge">@job.JobType</span>
                         </div>

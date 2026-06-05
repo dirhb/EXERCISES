@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -21,5 +21,6 @@ namespace JobModels
         public string? Email { get; set; }
         public string? ResumeText { get; set; }
         public decimal? Salary { get; set; }
+        public string? CountryName { get; set; }
     }
 }

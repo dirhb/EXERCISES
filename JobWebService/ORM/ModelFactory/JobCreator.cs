@@ -1,4 +1,4 @@
-﻿using JobModels;
+using JobModels;
 using System.Data;
 
 namespace JobWebService.ORM.ModelFactory
@@ -18,8 +18,20 @@ namespace JobWebService.ORM.ModelFactory
                 EmployerID = Convert.ToString(reader["EmployerID"]),
                 CountryID = Convert.ToString(reader["CountryID"]),
                 GenreID = Convert.ToString(reader["GenreID"]),
+                CountryName = HasColumn(reader, "CountryName") && reader["CountryName"] != DBNull.Value ? Convert.ToString(reader["CountryName"]) : null,
+                GenreTitle = HasColumn(reader, "GenreTitle") && reader["GenreTitle"] != DBNull.Value ? Convert.ToString(reader["GenreTitle"]) : null,
             };
             return Job;
+        }
+
+        private static bool HasColumn(IDataReader reader, string columnName)
+        {
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                if (reader.GetName(i).Equals(columnName, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+            return false;
         }
     }
 }

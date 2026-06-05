@@ -1,4 +1,4 @@
-﻿
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -22,5 +22,7 @@ namespace JobModels
         public string? EmployerID { get; set; }
         public string? CountryID { get; set; }
         public string? GenreID { get; set; }
+        public string? CountryName { get; set; }
+        public string? GenreTitle { get; set; }
     }
 }

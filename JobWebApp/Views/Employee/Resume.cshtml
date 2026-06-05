@@ -22,16 +22,59 @@
     <section class="left-col">
         <div class="card">
             <h3>Resume / Cover Letter</h3>
-            <form method="post" action="/Employee/UpdateResume">
-                <div class="acc-fields">
-                    <label>Online Resume / Cover Letter
-                        <textarea name="resumeText" rows="12" placeholder="Write your professional summary, skills, experience, and cover letter text here...">@ViewBag.ResumeText</textarea>
-                    </label>
+            @if (!string.IsNullOrEmpty(ViewBag.ResumeText))
+            {
+                <div style="margin-bottom: 20px; padding: 16px; background: var(--surface-2); border: 1.5px dashed var(--brand-300); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <span style="font-weight: 700; color: var(--brand-800); display: block;">Saved Resume</span>
+                        <span style="font-size: 0.85rem; color: var(--text-500);">You already have a resume uploaded.</span>
+                    </div>
+                    <a href="@ViewBag.ResumeText" target="_blank" class="cta-btn" style="padding: 8px 16px; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 6px; background: var(--brand-600); color: #fff;">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">picture_as_pdf</span>
+                        View PDF
+                    </a>
                 </div>
-                <button type="submit" class="auth-submit" style="margin-top:12px">Save Resume</button>
+            }
+
+            <form method="post" action="/Employee/UpdateResume" enctype="multipart/form-data" id="resume-upload-form">
+                <div class="acc-fields">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-700);">
+                        Upload PDF Resume (Max 5MB)
+                    </label>
+                    <div style="padding: 10px; border: 1.5px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-2);">
+                        <input type="file" name="resumeFile" accept=".pdf" required style="border: none; background: transparent; width: 100%; outline: none;" />
+                    </div>
+                </div>
+                <button type="submit" class="auth-submit" style="margin-top:16px; width: auto; padding: 10px 24px;">Upload Resume</button>
             </form>
         </div>
     </section>
+
+    @section Scripts {
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const form = document.getElementById('resume-upload-form');
+                if (form) {
+                    const fileInput = form.querySelector('input[name="resumeFile"]');
+                    fileInput.addEventListener('change', () => {
+                        const file = fileInput.files[0];
+                        if (file) {
+                            if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+                                alert('Please select a PDF file only.');
+                                fileInput.value = '';
+                                return;
+                            }
+                            if (file.size > 5 * 1024 * 1024) {
+                                alert('File size exceeds the 5MB limit.');
+                                fileInput.value = '';
+                                return;
+                            }
+                        }
+                    });
+                }
+            });
+        </script>
+    }
 
     <aside class="right-col">
         <div class="card">

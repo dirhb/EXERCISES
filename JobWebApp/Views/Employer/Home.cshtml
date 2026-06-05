@@ -20,7 +20,7 @@
     <p>You have @jobs.Count active job postings. Manage them below.</p>
     <div class="hero-cta-row">
         <a href="/Employer/PostJob" class="cta-btn">Post a New Job</a>
-        <a href="/Employer/JobHistory" class="cta-btn secondary">View All Postings</a>
+        <a href="/Employer/YourJobs" class="cta-btn secondary">View All Postings</a>
     </div>
 </section>
 
@@ -60,7 +60,7 @@
                             <div class="fj-top">
                                 <div>
                                     <span class="fj-title">@job.JobTitle</span>
-                                    <span class="fj-company">@job.CountryID — @job.JobType</span>
+                                    <span class="fj-company">@(job.CountryName ?? job.CountryID) — @job.JobType</span>
                                 </div>
                                 @if (job.JobStatus == true)
                                 {
@@ -79,10 +79,10 @@
                                 <a href="/Employer/Applicants?jobId=@job.JobID" class="cta-btn" style="font-size:0.85rem;padding:7px 16px;">
                                     View Applicants
                                 </a>
-                                @* Delete button *@
+                                @* Delete button — triggers confirmation modal *@
                                 <form method="post" action="/Employer/DeleteJob">
                                     <input type="hidden" name="jobId" value="@job.JobID" />
-                                    <button type="submit" class="cta-btn secondary" style="font-size:0.85rem;padding:7px 16px;color:var(--color-text-danger)">
+                                    <button type="button" class="cta-btn secondary delete-job-btn" data-job-title="@job.JobTitle" style="font-size:0.85rem;padding:7px 16px;color:var(--color-text-danger)">
                                         Delete
                                     </button>
                                 </form>
@@ -103,7 +103,7 @@
             <h3>Quick Links</h3>
             <ul class="popular-list">
                 <li><a href="/Employer/PostJob">Post a new job</a></li>
-                <li><a href="/Employer/JobHistory">All my postings</a></li>
+                <li><a href="/Employer/YourJobs">Your Jobs</a></li>
                 <li><a href="/Employer/Profile">My profile</a></li>
             </ul>
         </div>

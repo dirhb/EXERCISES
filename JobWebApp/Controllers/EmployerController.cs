@@ -47,9 +47,9 @@ namespace JobWebApp.Controllers
             return View();
         }
 
-        // ── GET: /Employer/JobHistory ──────────────────────────
-        // Shows the jobs this employer has posted (their history)
-        public async Task<IActionResult> JobHistory()
+        // ── GET: /Employer/YourJobs ────────────────────────────
+        // Shows the jobs this employer has posted
+        public async Task<IActionResult> YourJobs()
         {
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
 
@@ -182,6 +182,23 @@ namespace JobWebApp.Controllers
             ViewBag.UserID = SessionHelper.GetUserID(HttpContext.Session);
 
             return View();
+        }
+
+        // ── POST: /Employer/ToggleJobStatus ───────────────────
+        [HttpPost]
+        public async Task<IActionResult> ToggleJobStatus(string jobId)
+        {
+            if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
+
+            ApiClient<bool> client = BuildClient<bool>("Employer", "ToggleJobStatus");
+            client.AddParameter("jobId", jobId);
+            bool success = await client.PostAsync();
+
+            TempData[success ? "Success" : "Error"] = success
+                ? "Job status updated."
+                : "Failed to update job status.";
+
+            return RedirectToAction("YourJobs");
         }
 
         // ── GET: /Employer/Chat ───────────────────────────────

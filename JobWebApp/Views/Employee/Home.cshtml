@@ -60,7 +60,7 @@
                         <div class="fj-top">
                             <div>
                                 <span class="fj-title">@job.JobTitle</span>
-                                <span class="fj-company">@job.EmployerID — @job.CountryID</span>
+                                <span class="fj-company">@job.EmployerID — @(job.CountryName ?? job.CountryID)</span>
                             </div>
                             <span class="fj-badge">Featured</span>
                         </div>
@@ -68,13 +68,28 @@
                             <span>@job.JobType</span>
                         </div>
                         @* Apply button — posts to EmployeeController → ApplyToJob *@
-                        <form method="post" action="/Employee/ApplyToJob" style="margin-top:8px">
-                            <input type="hidden" name="jobId" value="@job.JobID" />
-                            <input type="hidden" name="returnUrl" value="@(Context.Request.Path.ToString() + Context.Request.QueryString.ToString())" />
-                            <button type="submit" class="cta-btn" style="font-size:0.85rem;padding:7px 16px;">
-                                Apply Now
-                            </button>
-                        </form>
+                        <div style="margin-top:8px; width:100%;">
+                            @if (job.JobStatus == false)
+                            {
+                                <button type="button" class="cta-btn" style="font-size:0.85rem;padding:7px 16px;background:var(--line);color:var(--text-500);cursor:not-allowed;" disabled>
+                                    Position Filled
+                                </button>
+                            }
+                            else
+                            {
+                                <form method="post" action="/Employee/ApplyToJob" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:6px;">
+                                    <input type="hidden" name="jobId" value="@job.JobID" />
+                                    <input type="hidden" name="returnUrl" value="@(Context.Request.Path.ToString() + Context.Request.QueryString.ToString())" />
+                                    <label style="font-size:0.75rem; color:var(--text-500); display:flex; flex-direction:column; gap:2px; cursor:pointer;">
+                                        Apply with custom PDF (optional):
+                                        <input type="file" name="resumeFile" accept=".pdf" style="font-size:0.72rem; color:var(--text-700); padding: 2px;" class="custom-apply-file" />
+                                    </label>
+                                    <button type="submit" class="cta-btn" style="font-size:0.85rem;padding:7px 16px; width:fit-content; margin: 0;">
+                                        Apply Now
+                                    </button>
+                                </form>
+                            }
+                        </div>
                     </div>
                 }
             </div>

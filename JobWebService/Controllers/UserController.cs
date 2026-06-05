@@ -186,7 +186,7 @@ namespace JobWebService.Controllers
 
 
         [HttpPost]
-        public bool ApplyToJob(string userId, string jobId)
+        public bool ApplyToJob(string userId, string jobId, string? resumeUrl = null)
         {
             try
             {
@@ -204,7 +204,7 @@ namespace JobWebService.Controllers
                 JobApplication app = new JobApplication();
                 app.EmployeeId = employeeIdInt;
                 app.JobId = jobIdInt;
-                app.ResumeSnapshot = user.ResumeText ?? string.Empty;
+                app.ResumeSnapshot = resumeUrl ?? user.ResumeText ?? string.Empty;
                 app.Status = "Submitted";
                 app.SubmittedAtUTC = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 
