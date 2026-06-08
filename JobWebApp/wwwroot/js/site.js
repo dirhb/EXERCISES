@@ -54,7 +54,7 @@ document.querySelectorAll('.notification-icon, .account-icon').forEach(btn => {
 document.addEventListener('click', (e) => {
     if (!e.target.closest('.notification') && !e.target.closest('.account')) {
         document.querySelectorAll('.dropdown').forEach(d => {
-            d.style.display = '';
+            d.style.display = 'none';
         });
     }
 });
@@ -195,21 +195,16 @@ document.querySelectorAll('.notification, .account').forEach(item => {
     btn.addEventListener('click', (e) => {
         e.stopPropagation(); // prevent the document click from firing immediately
 
+        // Capture visibility BEFORE closing all other dropdowns
+        const isVisible = dropdown.style.display === 'block';
+
         // Close all other dropdowns first
         document.querySelectorAll('.dropdown').forEach(d => {
             d.style.display = 'none';
         });
 
-        // Toggle this one
-        const isVisible = dropdown.style.display === 'block';
+        // Toggle this one based on its state before the close-all
         dropdown.style.display = isVisible ? 'none' : 'block';
-    });
-});
-
-// Click anywhere outside → close all dropdowns
-document.addEventListener('click', () => {
-    document.querySelectorAll('.dropdown').forEach(d => {
-        d.style.display = 'none';
     });
 });
 

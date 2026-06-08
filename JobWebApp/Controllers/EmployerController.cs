@@ -173,13 +173,20 @@ namespace JobWebApp.Controllers
         }
 
         // ── GET: /Employer/Profile ─────────────────────────────
-        public IActionResult Profile()
+        public async Task<IActionResult> Profile()
         {
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
 
+            string employerId = SessionHelper.GetUserID(HttpContext.Session)!;
+
+            // Fetch job count for this employer
+            ApiClient<List<Job>> jobClient = BuildClient<List<Job>>("Employer", "GetMyJobs");
+            jobClient.AddParameter("employerId", employerId);
+            List<Job> myJobs = await jobClient.GetAsync() ?? new List<Job>();
+
             ViewBag.FullName = SessionHelper.GetFullName(HttpContext.Session);
             ViewBag.UserName = SessionHelper.GetUserName(HttpContext.Session);
-            ViewBag.UserID = SessionHelper.GetUserID(HttpContext.Session);
+            ViewBag.JobCount = myJobs.Count;
 
             return View();
         }

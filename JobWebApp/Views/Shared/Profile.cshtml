@@ -39,10 +39,13 @@
                     <p style="margin-top:4px;font-weight:600;color:var(--brand-800)">@(isEmployer ? "Employer" : "Employee")</p>
                 </div>
 
-                <div style="padding:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm)">
-                    <span style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-500)">User ID</span>
-                    <p style="margin-top:4px;font-weight:600;color:var(--brand-800)">@ViewBag.UserID</p>
-                </div>
+                @if (isEmployer)
+                {
+                    <div style="padding:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm)">
+                        <span style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-500)">Jobs Posted</span>
+                        <p style="margin-top:4px;font-weight:600;color:var(--brand-800)">@ViewBag.JobCount active listing@(ViewBag.JobCount == 1 ? "" : "s")</p>
+                    </div>
+                }
 
             </div>
         </div>

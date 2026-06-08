@@ -55,11 +55,11 @@ namespace JobWebApp.Controllers
 
         // ── GET: /Employee/JobCatalog ─────────────────────────
         // Shows all jobs with search, employer/genre filters, and paging.
-        public async Task<IActionResult> JobCatalog(string? search, string? employerId, string? genreId, bool showActiveOnly = false, int page = 1)
+        public async Task<IActionResult> JobCatalog(string? search, string? employerId, string? genreId, string? jobType, bool showActiveOnly = false, int page = 1)
         {
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
 
-            const int pageSize = 18;
+            const int pageSize = 16;
 
             ApiClient<List<Job>> client = BuildClient<List<Job>>("Guest", "GetAllJobs");
             List<Job> allJobs = await client.GetAsync() ?? new List<Job>();
@@ -83,8 +83,16 @@ namespace JobWebApp.Controllers
             if (!string.IsNullOrWhiteSpace(employerId))
                 filteredJobs = filteredJobs.Where(job => string.Equals(job.EmployerID, employerId, StringComparison.OrdinalIgnoreCase));
 
+            // Genre filter: match by GenreID (numeric key) OR GenreTitle (text) to handle
+            // Access DB type differences. Trim both sides to eliminate whitespace mismatches.
             if (!string.IsNullOrWhiteSpace(genreId))
-                filteredJobs = filteredJobs.Where(job => string.Equals(job.GenreID, genreId, StringComparison.OrdinalIgnoreCase));
+                filteredJobs = filteredJobs.Where(job =>
+                    string.Equals((job.GenreID ?? "").Trim(), genreId.Trim(), StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals((job.GenreTitle ?? "").Trim(), genreId.Trim(), StringComparison.OrdinalIgnoreCase));
+
+            // Job type filter (Full-time, Part-time, Contract, Internship, Remote)
+            if (!string.IsNullOrWhiteSpace(jobType))
+                filteredJobs = filteredJobs.Where(job => string.Equals((job.JobType ?? "").Trim(), jobType.Trim(), StringComparison.OrdinalIgnoreCase));
 
             if (showActiveOnly)
                 filteredJobs = filteredJobs.Where(job => job.JobStatus == true);
@@ -97,6 +105,7 @@ namespace JobWebApp.Controllers
             ViewBag.Search = search;
             ViewBag.SelectedEmployer = employerId;
             ViewBag.SelectedGenre = genreId;
+            ViewBag.SelectedJobType = jobType;
             ViewBag.ShowActiveOnly = showActiveOnly;
             ViewBag.Employers = employers;
             ViewBag.Genres = genres;
@@ -143,7 +152,8 @@ namespace JobWebApp.Controllers
             ViewBag.ResumeText = user?.ResumeText ?? string.Empty;
             ViewBag.Email = user?.Email ?? string.Empty;
             ViewBag.PhoneNum = user?.PhoneNum ?? string.Empty;
-            ViewBag.Country = user?.Country ?? string.Empty;
+            // Use CountryName (populated by SQL JOIN in UserRepository) instead of the raw Country ID
+            ViewBag.CountryName = user?.CountryName ?? user?.Country ?? string.Empty;
 
             return View();
         }

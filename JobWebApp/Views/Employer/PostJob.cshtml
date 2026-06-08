@@ -7,7 +7,7 @@
 @model JobModels.ViewModels.PostJobViewModel
 @{
     ViewBag.Title = "Post a Job";
-    Layout = "_layout";
+    Layout = "_Layout";
 }
 
 @section Styles {
@@ -23,6 +23,7 @@
     <section class="left-col">
         <div class="card">
             <form method="post" action="/Employer/PostJob">
+                @Html.AntiForgeryToken()
 
                 <div class="acc-fields" style="display:grid;gap:16px">
 
