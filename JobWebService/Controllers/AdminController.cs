@@ -1,4 +1,4 @@
-﻿using JobModels;
+using JobModels;
 using JobWebService.ORM.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -98,7 +98,6 @@ namespace JobWebService.Controllers
             }
         }
 
-
         [HttpPost]
         public bool NotifyAboutWebsiteChanges(string text)
         {
@@ -116,6 +115,49 @@ namespace JobWebService.Controllers
             {
                 Trace.WriteLine(ex);
                 return false;
+            }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
+            }
+        }
+
+        // Returns all users — used by Admin Notify page for user search
+        [HttpGet]
+        public List<User> GetAllUsers()
+        {
+            try
+            {
+                this.libraryUOW.HelperOledb.OpenConnection();
+                return this.libraryUOW.UserRepository.ReadAll();
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+                return new List<User>();
+            }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
+            }
+        }
+
+        // Returns latest notifications — used by notification bell to replace fake polling
+        [HttpGet]
+        public List<Notification> GetNotifications()
+        {
+            try
+            {
+                this.libraryUOW.HelperOledb.OpenConnection();
+                return this.libraryUOW.NotificationRepository.ReadAll()
+                    .OrderByDescending(n => n.NotificationDate)
+                    .Take(10)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+                return new List<Notification>();
             }
             finally
             {

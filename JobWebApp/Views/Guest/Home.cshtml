@@ -1,8 +1,8 @@
 @*
     Views/Guest/Home.cshtml
     The homepage for non-logged-in users.
-    Shows featured jobs and platform stats.
-    ViewBag.Jobs = List<Job> passed from GuestController
+    Shows featured jobs, real platform stats, and popular job genres.
+    ViewBag.Jobs, ViewBag.TotalJobs, ViewBag.TotalUsers, ViewBag.TotalEmployers, ViewBag.PopularGenres
 *@
 
 @using JobModels
@@ -10,6 +10,10 @@
     ViewBag.Title = "Home";
     var jobs = ViewBag.Jobs as List<Job> ?? new List<Job>();
     string search = ViewBag.Search as string ?? string.Empty;
+    int totalJobs = Convert.ToInt32(ViewBag.TotalJobs ?? 0);
+    int totalUsers = Convert.ToInt32(ViewBag.TotalUsers ?? 0);
+    int totalEmployers = Convert.ToInt32(ViewBag.TotalEmployers ?? 0);
+    var popularGenres = ViewBag.PopularGenres as dynamic ?? new List<dynamic>();
 }
 
 @section Styles {
@@ -26,38 +30,43 @@
     </div>
 </section>
 
-@* Stats section *@
+@* Real Stats section — all values come from the database *@
 <section class="stats-section" aria-label="Platform statistics">
     <div class="stat-box">
         <span class="stat-icon material-symbols-outlined">work</span>
-        <h2 class="stat-number">@ViewBag.TotalJobs+</h2>
+        <h2 class="stat-number">@totalJobs</h2>
         <p class="stat-label">Active Jobs</p>
     </div>
     <div class="stat-box">
         <span class="stat-icon material-symbols-outlined">business</span>
-        <h2 class="stat-number">5,000+</h2>
-        <p class="stat-label">Companies</p>
-    </div>
-    <div class="stat-box">
-        <span class="stat-icon material-symbols-outlined">star</span>
-        <h2 class="stat-number">15,000+</h2>
-        <p class="stat-label">Reviews</p>
+        <h2 class="stat-number">@totalEmployers</h2>
+        <p class="stat-label">Employers</p>
     </div>
     <div class="stat-box">
         <span class="stat-icon material-symbols-outlined">group</span>
-        <h2 class="stat-number">25,000+</h2>
-        <p class="stat-label">Happy Users</p>
+        <h2 class="stat-number">@totalUsers</h2>
+        <p class="stat-label">Registered Users</p>
+    </div>
+    <div class="stat-box">
+        <span class="stat-icon material-symbols-outlined">category</span>
+        @{
+            var genreList = ViewBag.PopularGenres as System.Collections.IEnumerable;
+            int genreCount = 0;
+            if (genreList != null) { foreach (var _ in genreList) genreCount++; }
+        }
+        <h2 class="stat-number">@genreCount</h2>
+        <p class="stat-label">Job Genres</p>
     </div>
 </section>
 
-@* Featured jobs + popular sidebar *@
+@* Featured jobs + popular genres sidebar *@
 <main class="container home-page">
     <aside class="left-col">
         <div class="card jobs-card equal-card">
             <h3><span class="material-symbols-outlined">workspace_premium</span> Featured Jobs</h3>
             @if (!string.IsNullOrWhiteSpace(search))
             {
-                <p style="color: var(--text-500); margin-bottom: 12px;">Featured jobs matching “@search”.</p>
+                <p style="color: var(--text-500); margin-bottom: 12px;">Featured jobs matching "@search".</p>
             }
             <div class="jobs-box">
                 @if (jobs.Any())
@@ -90,16 +99,28 @@
 
     <aside class="right-col">
         <div class="card popular equal-card">
-            <h3>Popular Jobs</h3>
+            <h3>Popular Job Genres</h3>
             <ul class="popular-list">
-                @* Replaced hardcoded entries with real jobs from the database *@
-                @foreach (var job in jobs)
-                {
-                    <li>@job.JobTitle — @job.JobType</li>
-                }
-                @if (!jobs.Any())
-                {
-                    <li style="color:var(--text-500)">No jobs available right now.</li>
+                @{
+                    var genreItems = ViewBag.PopularGenres as System.Collections.IEnumerable;
+                    bool hasGenres = false;
+                    if (genreItems != null)
+                    {
+                        int rank = 1;
+                        foreach (dynamic g in genreItems)
+                        {
+                            hasGenres = true;
+                            <li style="display:flex;justify-content:space-between;align-items:center;">
+                                <span>@rank. @g.Title</span>
+                                <span style="font-size:0.8rem;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(59,123,200,0.1);color:var(--brand-600);">@g.Count jobs</span>
+                            </li>
+                            rank++;
+                        }
+                    }
+                    if (!hasGenres)
+                    {
+                        <li style="color:var(--text-500)">No genre data available.</li>
+                    }
                 }
             </ul>
         </div>

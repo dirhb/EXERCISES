@@ -25,6 +25,12 @@
     <section class="left-col">
         <div class="card chat-card">
             <h3>Conversations</h3>
+            <div class="chat-search-bar" style="margin-bottom:10px;">
+                <div class="catalog-search" style="border-radius:var(--radius-sm);padding:8px 12px;">
+                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px;">search</span>
+                    <input type="search" id="chat-contact-search" placeholder="Search contacts..." style="border:0;outline:0;background:transparent;color:var(--text-900);font-family:inherit;width:100%;" />
+                </div>
+            </div>
             <div id="conversations-list" class="conversations-list">
                 <p>Loading conversations...</p>
             </div>
@@ -165,4 +171,17 @@
         loadMessages();
     }
     startPolling();
+
+    // Contact search bar — filters conversations by username/name in real time
+    const searchInput = document.getElementById('chat-contact-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            const q = searchInput.value.toLowerCase().trim();
+            document.querySelectorAll('.conversation-item').forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = (!q || text.includes(q)) ? '' : 'none';
+            });
+        });
+    }
+
 </script>

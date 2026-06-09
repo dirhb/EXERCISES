@@ -99,15 +99,16 @@
     }
 
     .cta-btn.secondary {
-        background: transparent;
-        color: #fff;
-        border: 1.5px solid rgba(255,255,255,0.65);
+        background: var(--surface-2);
+        color: var(--brand-700);
+        border: 1.5px solid var(--brand-400);
         box-shadow: none;
     }
 
         .cta-btn.secondary:hover {
-            background: rgba(255,255,255,0.12);
-            border-color: #fff;
+            background: var(--brand-50, #eef4ff);
+            border-color: var(--brand-600);
+            color: var(--brand-800);
         }
 
 /* ── Stats section ───────────────────────────────────────── */
@@ -335,6 +336,7 @@
     flex-direction: column;
     gap: 10px;
     justify-content: space-between;
+    overflow: hidden;
     transition: background 0.16s, border-color 0.16s, transform 0.16s var(--ease);
 }
 
@@ -369,6 +371,53 @@
     width: 100%;
     background: var(--accent);
     color: var(--text-900);
+    font-size: 0.82rem;
+    padding: 7px 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Styled file input ───────────────────────────────────── */
+.custom-file-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    background: var(--surface-2);
+    border: 1.5px solid var(--brand-400);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--brand-700);
+    transition: background 0.18s, border-color 0.18s;
+    white-space: nowrap;
+}
+
+.custom-file-label:hover {
+    background: var(--brand-50, #eef4ff);
+    border-color: var(--brand-600);
+}
+
+.custom-file-label input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+}
+
+.custom-file-name {
+    font-size: 0.78rem;
+    color: var(--text-500);
+    font-weight: 400;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .catalog-sidebar {

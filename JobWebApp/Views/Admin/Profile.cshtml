@@ -1,0 +1,55 @@
+@*
+    Views/Admin/Profile.cshtml
+    Admin profile page.
+*@
+
+@{
+    ViewBag.Title = "Admin Profile";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Register.css" />
+}
+
+<header class="page-header content-page-header">
+    <h1>Admin Profile</h1>
+    <p>Your administrator account details.</p>
+</header>
+
+<main class="container content-page" style="padding-top:24px">
+    <section class="left-col">
+        <div class="card">
+            <h3>Account Details</h3>
+            <div style="display:grid;gap:16px;margin-top:8px">
+
+                <div style="padding:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm)">
+                    <span style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-500)">Full Name</span>
+                    <p style="margin-top:4px;font-weight:600;color:var(--brand-800)">@ViewBag.FullName</p>
+                </div>
+
+                <div style="padding:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm)">
+                    <span style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-500)">Username</span>
+                    <p style="margin-top:4px;font-weight:600;color:var(--brand-800)">@ViewBag.UserName</p>
+                </div>
+
+                <div style="padding:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm)">
+                    <span style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-500)">Account Type</span>
+                    <p style="margin-top:4px;font-weight:600;color:var(--brand-800)">Administrator</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <aside class="right-col">
+        <div class="card">
+            <h3>Admin Actions</h3>
+            <ul class="popular-list">
+                <li><a href="/Admin/Home">Manage Jobs</a></li>
+                <li><a href="/Admin/Applications">Applications</a></li>
+                <li><a href="/Admin/Notify">Send Notifications</a></li>
+                <li><a href="/Guest/Logout" style="color:var(--color-text-danger)">Logout</a></li>
+            </ul>
+        </div>
+    </aside>
+</main>

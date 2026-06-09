@@ -1,12 +1,13 @@
 /* ── Chat Layout & Spacing ───────────────────────────────── */
 .chat-page.container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 24px 20px;
+    padding: 16px 20px;
     display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 24px;
-    height: calc(100vh - 140px);
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+    height: calc(70vh - 80px);
+    min-height: 480px;
     align-content: stretch;
 }
 

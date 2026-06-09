@@ -32,7 +32,7 @@
             @* Show nav links based on who is logged in *@
             @if (Context.Session.GetString("UserTypeID") == "2")
             {
-                @* Employee nav *@
+                @* Employee nav (UserTypeID = 2) *@
                 <li><a href="/Employee/JobHistory">Job History</a></li>
                 <li><a href="/Employee/JobCatalog">Job Catalog</a></li>
                 <li><a href="/Employee/Resume">Online Resume</a></li>
@@ -40,15 +40,17 @@
             }
             else if (Context.Session.GetString("UserTypeID") == "3")
             {
-                @* Employer nav *@
+                @* Employer nav (UserTypeID = 3) *@
                 <li><a href="/Employer/YourJobs">Your Jobs</a></li>
                 <li><a href="/Employer/PostJob">Post a Job</a></li>
                 <li><a href="/Employer/Chat">Chat</a></li>
             }
             else if (Context.Session.GetString("UserTypeID") == "4")
             {
-                @* Admin nav *@
+                @* Admin nav (UserTypeID = 4) *@
+                <li><a href="/Admin/Home">Manage Jobs</a></li>
                 <li><a href="/Admin/Applications">Applications</a></li>
+                <li><a href="/Admin/Notify">Notify Users</a></li>
             }
             else
             {
@@ -82,7 +84,7 @@
                 <ul class="dropdown">
                     @if (Context.Session.GetString("UserID") != null)
                     {
-                        <li><a href="/@(Context.Session.GetString("UserTypeID") == "2" ? "Employee" : "Employer")/Profile">Profile</a></li>
+                        <li><a href="/@(Context.Session.GetString("UserTypeID") == "2" ? "Employee" : Context.Session.GetString("UserTypeID") == "3" ? "Employer" : "Admin")/Profile">Profile</a></li>
                         <li><a href="/Guest/Logout">Logout</a></li>
                     }
                     else

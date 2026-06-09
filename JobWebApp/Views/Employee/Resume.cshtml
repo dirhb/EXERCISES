@@ -37,12 +37,18 @@
             }
 
             <form method="post" action="/Employee/UpdateResume" enctype="multipart/form-data" id="resume-upload-form">
+                @Html.AntiForgeryToken()
                 <div class="acc-fields">
                     <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-700);">
                         Upload PDF Resume (Max 5MB)
                     </label>
-                    <div style="padding: 10px; border: 1.5px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-2);">
-                        <input type="file" name="resumeFile" accept=".pdf" required style="border: none; background: transparent; width: 100%; outline: none;" />
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px; border:1.5px solid var(--line); border-radius:var(--radius-sm); background:var(--surface-2);">
+                        <label class="custom-file-label" style="flex-shrink:0;">
+                            <span class="material-symbols-outlined" style="font-size:16px;">upload_file</span>
+                            Choose PDF
+                            <input type="file" id="resume-file-input" name="resumeFile" accept=".pdf" required />
+                        </label>
+                        <span id="resume-file-name" style="font-size:0.85rem; color:var(--text-500); font-weight:400;">No file chosen</span>
                     </div>
                 </div>
                 <button type="submit" class="auth-submit" style="margin-top:16px; width: auto; padding: 10px 24px;">Upload Resume</button>

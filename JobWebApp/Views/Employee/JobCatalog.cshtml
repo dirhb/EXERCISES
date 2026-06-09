@@ -73,7 +73,7 @@
                                     @if (!string.IsNullOrEmpty(job.EmployerID))
                                     {
                                         <a href="/Employee/Chat?partnerId=@job.EmployerID" class="catalog-apply-btn" 
-                                           style="background:var(--surface-3);color:var(--text-800);text-align:center;text-decoration:none;flex:1;margin:0;display:flex;align-items:center;justify-content:center">
+                                           style="background:var(--surface-2);color:var(--brand-700);text-align:center;text-decoration:none;flex:1;margin:0;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);">
                                             Message
                                         </a>
                                     }
@@ -82,18 +82,23 @@
                             else
                             {
                                 <form method="post" action="/Employee/ApplyToJob" enctype="multipart/form-data" style="width:100%; display:flex; flex-direction:column; gap:6px;">
+                                    @Html.AntiForgeryToken()
                                     <input type="hidden" name="jobId" value="@job.JobID" />
                                     <input type="hidden" name="returnUrl" value="@(Context.Request.Path.ToString() + Context.Request.QueryString.ToString())" />
-                                    <label style="font-size:0.75rem; color:var(--text-500); display:flex; flex-direction:column; gap:2px; cursor:pointer;">
-                                        Apply with custom PDF (optional):
-                                        <input type="file" name="resumeFile" accept=".pdf" style="font-size:0.72rem; color:var(--text-700); padding: 2px;" class="custom-apply-file" />
-                                    </label>
-                                    <div style="display:flex; gap:8px; width:100%;">
-                                        <button type="submit" class="catalog-apply-btn" style="flex:1; margin:0">Apply Now</button>
+                                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                                        <label class="custom-file-label">
+                                            <span class="material-symbols-outlined" style="font-size:15px;">upload_file</span>
+                                            PDF (optional)
+                                            <input type="file" name="resumeFile" accept=".pdf" class="custom-apply-file" />
+                                        </label>
+                                        <span class="custom-file-name" data-default="No file">No file</span>
+                                    </div>
+                                    <div style="display:flex; gap:6px; width:100%; flex-wrap:wrap;">
+                                        <button type="submit" class="catalog-apply-btn" style="flex:1; margin:0; min-width:0;">Apply Now</button>
                                         @if (!string.IsNullOrEmpty(job.EmployerID))
                                         {
                                             <a href="/Employee/Chat?partnerId=@job.EmployerID" class="catalog-apply-btn" 
-                                               style="background:var(--surface-3);color:var(--text-800);text-align:center;text-decoration:none;flex:1;margin:0;display:flex;align-items:center;justify-content:center">
+                                               style="background:var(--surface-2);color:var(--brand-700);text-align:center;text-decoration:none;flex:1;margin:0;min-width:0;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--brand-400);">
                                                 Message
                                             </a>
                                         }

@@ -10,7 +10,7 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/Homepage.css" />
+    <link rel="stylesheet" href="~/css/HomePage.css" />
 }
 
 <header class="page-header content-page-header">
@@ -56,6 +56,7 @@
                                 </a>
                                 @* Toggle status button *@
                                 <form method="post" action="/Employer/ToggleJobStatus" style="margin:0">
+                                    @Html.AntiForgeryToken()
                                     <input type="hidden" name="jobId" value="@job.JobID" />
                                     <button type="submit" class="cta-btn secondary" style="font-size:0.85rem;padding:7px 16px;">
                                         Make @(job.JobStatus == true ? "Closed" : "Active")
@@ -63,6 +64,7 @@
                                 </form>
                                 @* Delete button — triggers confirmation modal *@
                                 <form method="post" action="/Employer/DeleteJob" style="margin:0">
+                                    @Html.AntiForgeryToken()
                                     <input type="hidden" name="jobId" value="@job.JobID" />
                                     <button type="button" class="cta-btn secondary delete-job-btn" data-job-title="@job.JobTitle" style="font-size:0.85rem;padding:7px 16px;color:var(--color-text-danger)">
                                         Delete

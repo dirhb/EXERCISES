@@ -1,4 +1,4 @@
-﻿using JobWebApp;
+using JobWebApp;
 using JobModels;
 using LibraryWSClient;
 using Microsoft.AspNetCore.Mvc;
@@ -71,7 +71,7 @@ namespace JobWebApp.Controllers
 
             ApiClient<bool> client = BuildClient<bool>("Admin", "DeleteJob");
             client.AddParameter("jobId", jobId);
-            bool success = await client.GetAsync();
+            bool success = await client.PostAsync();
 
             TempData[success ? "Success" : "Error"] = success
                 ? "Job deleted."
@@ -81,7 +81,7 @@ namespace JobWebApp.Controllers
         }
 
         // ── POST: /Admin/SendNotification ──────────────────────
-        // Sends a notification to all users on the platform
+        // Broadcasts a notification to all users
         [HttpPost]
         public async Task<IActionResult> SendNotification(string text)
         {
@@ -89,13 +89,56 @@ namespace JobWebApp.Controllers
 
             ApiClient<bool> client = BuildClient<bool>("Admin", "NotifyAboutWebsiteChanges");
             client.AddParameter("text", text);
-            bool success = await client.GetAsync();
+            bool success = await client.PostAsync();
 
             TempData[success ? "Success" : "Error"] = success
                 ? "Notification sent to all users!"
                 : "Failed to send notification.";
 
             return RedirectToAction("Home");
+        }
+
+        // ── GET: /Admin/Notify ─────────────────────────────────
+        // Notify page: search users and send targeted notifications
+        public async Task<IActionResult> Notify(string? userSearch)
+        {
+            if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
+
+            List<User> users = new List<User>();
+
+            if (!string.IsNullOrWhiteSpace(userSearch))
+            {
+                ApiClient<List<User>> client = BuildClient<List<User>>("Admin", "GetAllUsers");
+                List<User> allUsers = await client.GetAsync() ?? new List<User>();
+                users = allUsers.Where(u =>
+                    (u.FirstName ?? "").Contains(userSearch, StringComparison.OrdinalIgnoreCase) ||
+                    (u.LastName ?? "").Contains(userSearch, StringComparison.OrdinalIgnoreCase) ||
+                    (u.UserName ?? "").Contains(userSearch, StringComparison.OrdinalIgnoreCase) ||
+                    (u.Email ?? "").Contains(userSearch, StringComparison.OrdinalIgnoreCase)
+                ).ToList();
+            }
+
+            ViewBag.Users = users;
+            ViewBag.UserSearch = userSearch;
+            return View();
+        }
+
+        // ── POST: /Admin/SendNotificationToUser ────────────────
+        // Sends a notification targeted at a specific user
+        [HttpPost]
+        public async Task<IActionResult> SendNotificationToUser(string userId, string text)
+        {
+            if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
+
+            ApiClient<bool> client = BuildClient<bool>("Admin", "NotifyAboutWebsiteChanges");
+            client.AddParameter("text", $"[To User {userId}]: {text}");
+            bool success = await client.PostAsync();
+
+            TempData[success ? "Success" : "Error"] = success
+                ? $"Notification sent to user {userId}."
+                : "Failed to send notification.";
+
+            return RedirectToAction("Notify");
         }
 
         // ── GET: /Admin/Profile ────────────────────────────────

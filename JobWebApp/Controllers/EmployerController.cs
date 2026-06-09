@@ -99,9 +99,11 @@ namespace JobWebApp.Controllers
 
             TempData[success ? "Success" : "Error"] = success
                 ? "Job posted successfully!"
-                : "Failed to post job. Please try again.";
+                : "Failed to post job. Please check all fields (Title, Description, Job Type, Genre, and Location) are filled correctly.";
 
-            return RedirectToAction("Home");
+            return success
+                ? RedirectToAction("Home")
+                : RedirectToAction("PostJob");
         }
 
         // ── POST: /Employer/DeleteJob ──────────────────────────

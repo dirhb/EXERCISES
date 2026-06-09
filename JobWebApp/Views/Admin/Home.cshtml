@@ -1,0 +1,91 @@
+@*
+    Views/Admin/Home.cshtml
+    Admin dashboard — view and delete all jobs on the platform.
+*@
+
+@using JobModels
+@{
+    ViewBag.Title = "Admin Dashboard";
+    var jobs = ViewBag.Jobs as List<Job> ?? new List<Job>();
+    int totalJobs = Convert.ToInt32(ViewBag.TotalJobs ?? jobs.Count);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/HomePage.css" />
+}
+
+<header class="page-header content-page-header">
+    <h1>Admin Dashboard</h1>
+    <p>Manage all job listings on the platform. Total: @totalJobs jobs.</p>
+</header>
+
+<main class="container content-page" style="padding-top:24px">
+    <section class="left-col" style="grid-column: span 2;">
+
+        @* Send Notification Form *@
+        <div class="card" style="margin-bottom:20px">
+            <h3><span class="material-symbols-outlined" style="font-size:20px;color:var(--accent)">notifications</span> Broadcast Notification</h3>
+            <form method="post" action="/Admin/SendNotification" style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
+                @Html.AntiForgeryToken()
+                <input type="text" name="text" placeholder="Type a message to send to all users..." required
+                       style="flex:1;min-width:220px;font-family:inherit;font-size:0.95rem;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;" />
+                <button type="submit" class="cta-btn" style="border:none;cursor:pointer;background:var(--brand-600);color:#fff;padding:10px 20px;border-radius:var(--radius-sm);font-weight:600;">
+                    Send to All
+                </button>
+            </form>
+        </div>
+
+        @* Jobs Table *@
+        <div class="card jobs-card">
+            <h3><span class="material-symbols-outlined" style="font-size:20px;color:var(--accent)">work</span> All Jobs</h3>
+            <div class="jobs-box" style="max-height:none;">
+                @if (jobs.Any())
+                {
+                    @foreach (var job in jobs)
+                    {
+                        <div class="featured-job" style="cursor:default;margin-bottom:10px;">
+                            <div class="fj-top">
+                                <div>
+                                    <span class="fj-title">@job.JobTitle</span>
+                                    <span class="fj-company">@job.EmployerID — @(job.CountryName ?? job.CountryID) — @job.JobType</span>
+                                </div>
+                                @if (job.JobStatus == true)
+                                {
+                                    <span class="fj-badge" style="background:var(--color-background-success,#e7f8ed);color:var(--color-text-success,#0f6b34)">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="fj-badge" style="background:var(--line);color:var(--text-500)">Closed</span>
+                                }
+                            </div>
+                            <div style="display:flex;gap:8px;margin-top:6px;">
+                                <form method="post" action="/Admin/DeleteJob" style="margin:0">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="jobId" value="@job.JobID" />
+                                    <button type="button" class="cta-btn secondary delete-job-btn"
+                                            data-job-title="@job.JobTitle"
+                                            style="font-size:0.85rem;padding:7px 14px;color:var(--color-text-danger,#a12622);border:none;cursor:pointer;">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p style="color:var(--text-500);padding:12px;">No jobs found.</p>
+                }
+            </div>
+        </div>
+    </section>
+</main>
+
+@if (TempData["Success"] != null)
+{
+    <div class="toast-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="toast-error">@TempData["Error"]</div>
+}

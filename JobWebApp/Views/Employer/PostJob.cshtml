@@ -60,7 +60,7 @@
                             background:var(--surface-2);border:1.5px solid var(--line);
                             border-radius:var(--radius-sm);
                             padding:10px 13px;outline:none;width:100%">
-                            <option value="">Choose a genre</option>
+                            <option value="" disabled selected>Choose a genre</option>
                             @foreach (Genre genre in Model.Genres)
                             {
                                 <option value="@genre.GenreID">@genre.GenreTitle</option>
@@ -107,6 +107,7 @@
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
+            const form = document.querySelector("form[action='/Employer/PostJob']");
             const searchInput = document.getElementById("country-search-input");
             const hiddenInput = document.getElementById("country-id-hidden");
             const suggestionsDiv = document.getElementById("country-suggestions");
@@ -159,6 +160,20 @@
                     suggestionsDiv.style.display = "none";
                 }
             });
+
+            // Validate that country was selected from list before form submit
+            if (form) {
+                form.addEventListener("submit", (e) => {
+                    if (!hiddenInput.value) {
+                        e.preventDefault();
+                        searchInput.style.borderColor = "#d63031";
+                        searchInput.placeholder = "Please select a country from the dropdown list";
+                        searchInput.focus();
+                        alert("Please select a country from the suggestions list.");
+                    }
+                });
+            }
         });
     </script>
 }
+

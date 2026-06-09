@@ -32,7 +32,7 @@
                 {
                     @foreach (var job in jobs)
                     {
-                        <div class="job-row" role="listitem" style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px; border-bottom:1px solid var(--line);">
+                        <div class="job-row" role="listitem" data-genre="@job.GenreID" style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px; border-bottom:1px solid var(--line);">
                             <div>
                                 <strong>@job.JobTitle</strong><br />
                                 <span style="color:var(--text-500);font-size:0.88rem;">@job.EmployerID — @(job.CountryName ?? job.CountryID) — @job.JobType</span>

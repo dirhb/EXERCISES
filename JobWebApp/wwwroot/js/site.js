@@ -136,45 +136,40 @@ if (document.querySelector('.role-label')) {
 }
 
 
-/* ── 7. DYNAMIC DISPLAY — POLLING (הצגה דינאמית) ────────────
-   Every 10 seconds, fetch new notifications and update the dropdown.
-   Right now uses fake data — replace getFakeNotifications() with
-   a real fetch() call when you have the API endpoint ready.
+/* ── 7. DYNAMIC DISPLAY — REAL NOTIFICATION POLLING —————————─
+   Fetches real notifications from the database via the API.
+   Replaces the old fake-data polling approach.
 --------------------------------------------------------------- */
-function getFakeNotifications() {
-    const all = [
-        '3 unread messages',
-        '2 interview reminders',
-        '1 new saved job match',
-        'New job alert: Frontend Developer',
-        'Your resume was viewed by Acme Logistics',
-        'BlueWave Services replied to your message',
-    ];
-    const count = Math.floor(Math.random() * 3) + 2;
-    return all.slice(0, count);
-}
-
-function pollNotifications() {
-    const dropdown = document.querySelector('.notification .dropdown');
+async function pollNotifications() {
+    const dropdown = document.getElementById('notification-dropdown');
     if (!dropdown) return;
 
-    const notifications = getFakeNotifications();
-    dropdown.innerHTML = '';
+    try {
+        const res = await fetch('http://localhost:5015/api/Admin/GetNotifications');
+        if (!res.ok) throw new Error('Failed to fetch');
+        const notifications = await res.json();
 
-    notifications.forEach(message => {
-        const li = document.createElement('li');
-        li.textContent = message;
-        dropdown.appendChild(li);
-    });
-
-    console.log('Polling ran — notifications updated');
+        dropdown.innerHTML = '';
+        if (notifications && notifications.length > 0) {
+            notifications.forEach(n => {
+                const li = document.createElement('li');
+                li.textContent = n.notificationText || n.NotificationText || '';
+                dropdown.appendChild(li);
+            });
+        } else {
+            const li = document.createElement('li');
+            li.textContent = 'No new notifications.';
+            li.style.color = 'var(--text-500)';
+            dropdown.appendChild(li);
+        }
+    } catch (err) {
+        // Silently ignore if WS is not running; don't spam the console
+    }
 }
 
-// Run immediately on page load
+// Run immediately on page load, then repeat every 30 seconds
 pollNotifications();
-
-// Then repeat every 10 seconds
-setInterval(pollNotifications, 10000);
+setInterval(pollNotifications, 30000);
 
 /* ── ACCOUNT & NOTIFICATION DROPDOWNS — CLICK TO TOGGLE ─────
    
@@ -292,3 +287,59 @@ document.querySelectorAll('.toast-success, .toast-error').forEach(toast => {
         setTimeout(() => toast.remove(), 500);
     }, 4000);
 });
+
+
+/* ── 11. CUSTOM FILE INPUT — SHOW FILENAME AFTER PICK ────────
+   For any label.custom-file-label, when the hidden input
+   changes, update the nearest .custom-file-name span.
+--------------------------------------------------------------- */
+document.querySelectorAll('.custom-file-label input[type="file"]').forEach(input => {
+    input.addEventListener('change', () => {
+        const label = input.closest('.custom-file-label');
+        if (!label) return;
+        // Find the sibling .custom-file-name span
+        const nameSpan = label.parentElement.querySelector('.custom-file-name');
+        if (!nameSpan) return;
+        const defaultText = nameSpan.dataset.default || 'No file';
+        nameSpan.textContent = input.files.length > 0
+            ? input.files[0].name
+            : defaultText;
+    });
+});
+
+// Resume page specific file name display
+const resumeInput = document.getElementById('resume-file-input');
+const resumeNameSpan = document.getElementById('resume-file-name');
+if (resumeInput && resumeNameSpan) {
+    resumeInput.addEventListener('change', () => {
+        resumeNameSpan.textContent = resumeInput.files.length > 0
+            ? resumeInput.files[0].name
+            : 'No file chosen';
+    });
+}
+
+
+/* ── 12. JOB HISTORY — GENRE FILTER ──────────────────────────
+   When genre checkboxes are clicked, filter the job rows
+   shown in the left column by matching data-genre attribute.
+--------------------------------------------------------------- */
+(function () {
+    const genreCheckboxes = document.querySelectorAll('.genres-list input[type="checkbox"]');
+    if (!genreCheckboxes.length) return;
+
+    genreCheckboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+            const checked = Array.from(genreCheckboxes)
+                .filter(c => c.checked)
+                .map(c => c.value);
+
+            document.querySelectorAll('.job-row[data-genre]').forEach(row => {
+                if (checked.length === 0) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = checked.includes(row.dataset.genre) ? '' : 'none';
+                }
+            });
+        });
+    });
+})();

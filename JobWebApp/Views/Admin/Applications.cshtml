@@ -1,0 +1,79 @@
+@*
+    Views/Admin/Applications.cshtml
+    Admin view — review all job applications across the platform.
+*@
+
+@using JobModels
+@{
+    ViewBag.Title = "Review Applications";
+    var apps = ViewBag.Applications as List<JobApplication> ?? new List<JobApplication>();
+    string statusFilter = ViewBag.StatusFilter as string ?? string.Empty;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/JobHistory.css" />
+}
+
+<header class="page-header content-page-header job-history-page">
+    <h1>Review Applications</h1>
+    <p>All job applications submitted across the platform.</p>
+</header>
+
+<main class="container job-history-page">
+    <section class="left-col">
+        <div class="card jobs-card">
+            <h3>Applications (@apps.Count total)</h3>
+
+            @* Status filter links *@
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+                <a href="/Admin/Applications" style="padding:5px 12px;border-radius:999px;font-size:0.85rem;font-weight:600;background:@(string.IsNullOrEmpty(statusFilter) ? "var(--brand-600)" : "var(--surface-2)");color:@(string.IsNullOrEmpty(statusFilter) ? "#fff" : "var(--brand-700)");border:1px solid var(--line);">
+                    All
+                </a>
+                <a href="/Admin/Applications?status=Submitted" style="padding:5px 12px;border-radius:999px;font-size:0.85rem;font-weight:600;background:@(statusFilter=="Submitted" ? "var(--brand-600)" : "var(--surface-2)");color:@(statusFilter=="Submitted" ? "#fff" : "var(--brand-700)");border:1px solid var(--line);">
+                    Submitted
+                </a>
+                <a href="/Admin/Applications?status=Reviewed" style="padding:5px 12px;border-radius:999px;font-size:0.85rem;font-weight:600;background:@(statusFilter=="Reviewed" ? "var(--brand-600)" : "var(--surface-2)");color:@(statusFilter=="Reviewed" ? "#fff" : "var(--brand-700)");border:1px solid var(--line);">
+                    Reviewed
+                </a>
+            </div>
+
+            <div class="jobs-box" role="list">
+                @if (apps.Any())
+                {
+                    @foreach (var app in apps)
+                    {
+                        <div class="job-row" role="listitem" style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--line);">
+                            <div>
+                                <strong>Application #@app.ApplicationId</strong><br />
+                                <span style="color:var(--text-500);font-size:0.88rem;">
+                                    Job ID: @app.JobId — User ID: @app.EmployeeId — Status: @app.Status
+                                </span><br />
+                                <span style="color:var(--text-500);font-size:0.82rem;">@app.SubmittedAtUTC</span>
+                            </div>
+                            <span style="padding:4px 10px;border-radius:999px;font-size:0.78rem;font-weight:700;
+                                background:@(app.Status=="Submitted" ? "rgba(59,123,200,0.12)" : "rgba(15,107,52,0.12)");
+                                color:@(app.Status=="Submitted" ? "var(--brand-600)" : "#0f6b34");">
+                                @app.Status
+                            </span>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p style="color:var(--text-500);padding:12px;">No applications found.</p>
+                }
+            </div>
+        </div>
+    </section>
+
+    <aside class="right-col">
+        <div class="card">
+            <h3>Admin Actions</h3>
+            <ul class="popular-list">
+                <li><a href="/Admin/Home">Manage Jobs</a></li>
+                <li><a href="/Admin/Applications">All Applications</a></li>
+                <li><a href="/Guest/Logout" style="color:var(--color-text-danger)">Logout</a></li>
+            </ul>
+        </div>
+    </aside>
+</main>

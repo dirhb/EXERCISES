@@ -1,4 +1,4 @@
-﻿// SessionHelper.cs
+// SessionHelper.cs
 // This is a helper class — it's not a controller or a model,
 // it's just a utility that makes working with sessions easier.
 //
@@ -56,10 +56,10 @@ namespace JobWebApp
         }
 
         // ── Check role ─────────────────────────────────────────
-        // UserTypeID: 1 = Guest, 2 = Employee, 3 = Employer, 4 = Admin
+        // UserTypeID (from DB UserType table): 1 = Guest, 2 = Employee, 3 = Employer, 4 = Admin
         public static bool IsEmployee(ISession session) => GetUserTypeID(session) == 2;
         public static bool IsEmployer(ISession session) => GetUserTypeID(session) == 3;
-        public static bool IsAdmin(ISession session) => GetUserTypeID(session) == 4;
+        public static bool IsAdmin(ISession session)    => GetUserTypeID(session) == 4;
 
         // ── Clear session (called on logout) ───────────────────
         public static void ClearUser(ISession session)

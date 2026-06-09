@@ -36,7 +36,7 @@ namespace JobWebApp.Controllers
         }
 
         // ── GET: /Guest/Home ───────────────────────────────────
-        // The main homepage — shows featured jobs and stats
+        // The main homepage — shows featured jobs, real stats, and popular genres
         // Anyone can see this (guest, employee, employer)
         public async Task<IActionResult> Home(string? search)
         {
@@ -46,10 +46,11 @@ namespace JobWebApp.Controllers
                 return RedirectBasedOnRole();
             }
 
-            // Call the web service to get all jobs
-            ApiClient<List<Job>> client = BuildClient<List<Job>>("Guest", "GetAllJobs");
-            List<Job> jobs = await client.GetAsync() ?? new List<Job>();
+            // Load all jobs
+            ApiClient<List<Job>> jobClient = BuildClient<List<Job>>("Guest", "GetAllJobs");
+            List<Job> allJobs = await jobClient.GetAsync() ?? new List<Job>();
 
+            List<Job> jobs = allJobs;
             if (!string.IsNullOrWhiteSpace(search))
             {
                 jobs = jobs
@@ -57,10 +58,34 @@ namespace JobWebApp.Controllers
                     .ToList();
             }
 
-            // Pass featured jobs to the view
+            // Load all users for the Users stat box
+            ApiClient<List<User>> userClient = BuildClient<List<User>>("Admin", "GetAllUsers");
+            List<User> users = await userClient.GetAsync() ?? new List<User>();
+
+            // Load all genres for popular genres ranked sidebar
+            ApiClient<List<Genre>> genreClient = BuildClient<List<Genre>>("Guest", "GetAllGenres");
+            List<Genre> genres = await genreClient.GetAsync() ?? new List<Genre>();
+
+            // Build popular genres ranked by number of jobs in that genre
+            var popularGenres = genres
+                .Select(g => new
+                {
+                    Title = g.GenreTitle,
+                    Count = allJobs.Count(j =>
+                        string.Equals((j.GenreID ?? "").Trim(), (g.GenreID ?? "").Trim(), StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals((j.GenreTitle ?? "").Trim(), (g.GenreTitle ?? "").Trim(), StringComparison.OrdinalIgnoreCase))
+                })
+                .OrderByDescending(g => g.Count)
+                .Take(8)
+                .ToList();
+
+            // Pass data to view
             ViewBag.Search = search;
             ViewBag.Jobs = jobs.Take(6).ToList();
-            ViewBag.TotalJobs = jobs.Count;
+            ViewBag.TotalJobs = allJobs.Count;
+            ViewBag.TotalUsers = users.Count;
+            ViewBag.TotalEmployers = users.Count(u => u.UserTypeID == 3);
+            ViewBag.PopularGenres = popularGenres;
 
             return View();
         }

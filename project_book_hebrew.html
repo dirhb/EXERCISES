@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>תיק פרויקט: JobFindUltimate</title>
+    <style>
+        body {
+            font-family: 'Arial', 'David', sans-serif;
+            font-size: 12pt;
+            line-height: 1.6;
+            margin: 40px;
+            color: #333333;
+        }
+        h1, h2, h3, h4 {
+            color: #0b3c5d;
+            font-family: 'Arial', sans-serif;
+        }
+        h1 {
+            font-size: 24pt;
+            text-align: center;
+            margin-top: 50px;
+        }
+        h2 {
+            font-size: 18pt;
+            border-bottom: 2px solid #0b3c5d;
+            padding-bottom: 5px;
+            margin-top: 40px;
+        }
+        h3 {
+            font-size: 14pt;
+            margin-top: 30px;
+        }
+        h4 {
+            font-size: 12pt;
+            margin-top: 20px;
+            color: #328cc1;
+        }
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        ul, ol {
+            margin-bottom: 15px;
+            padding-right: 25px;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            padding: 8px 12px;
+            text-align: right;
+        }
+        th {
+            background-color: #f2f2f2;
+            color: #0b3c5d;
+        }
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #eaecf0;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 10pt;
+            direction: ltr;
+            text-align: left;
+        }
+        code {
+            font-family: 'Consolas', 'Courier New', monospace;
+            background-color: #f8f9fa;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 10pt;
+        }
+        .cover-page {
+            text-align: center;
+            page-break-after: always;
+            margin-top: 100px;
+        }
+        .alert-box {
+            background-color: #f0f7ff;
+            border-right: 5px solid #0066cc;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .alert-box-title {
+            font-weight: bold;
+            color: #0066cc;
+            margin-bottom: 5px;
+        }
+        .diagram-container {
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- דף שער -->
+    <div class="cover-page">
+        <p><strong>מדינת ישראל - משרד החינוך</strong></p>
+        <p>מינהל מדע וטכנולוגיה, האגף לחינוך טכנולוגי מקצועי</p>
+        <p>הפיקוח על הוראת מדעי המחשב והנדסת תוכנה</p>
+        <br><br>
+        <hr style="width: 60%; border: 1px solid #0b3c5d;">
+        <br>
+        <h1>ספר פרויקט: JobFindUltimate</h1>
+        <h3>מערכת לחיפוש עבודה, ניהול מועמדויות ותקשורת בין מעסיקים למחפשי עבודה</h3>
+        <p><strong>חלופה לימודית:</strong> שירותי רשת (Web Services), תכנות אסינכרוני ומסדי נתונים</p>
+        <p><strong>סמל שאלון:</strong> 883589</p>
+        <br>
+        <hr style="width: 40%; border: 1px solid #0b3c5d;">
+        <br><br><br>
+        <table style="width: 50%; margin: 0 auto; border: none;">
+            <tr style="border: none;">
+                <td style="border: none; text-align: left; font-weight: bold; width: 40%;">מוגש על ידי:</td>
+                <td style="border: none; text-align: right;">[שם התלמיד] (ת.ז: [תעודת זהות])</td>
+            </tr>
+            <tr style="border: none;">
+                <td style="border: none; text-align: left; font-weight: bold;">מנחה הפרויקט:</td>
+                <td style="border: none; text-align: right;">[שם המנחה]</td>
+            </tr>
+            <tr style="border: none;">
+                <td style="border: none; text-align: left; font-weight: bold;">בית הספר:</td>
+                <td style="border: none; text-align: right;">[שם בית הספר]</td>
+            </tr>
+            <tr style="border: none;">
+                <td style="border: none; text-align: left; font-weight: bold;">תאריך הגשה:</td>
+                <td style="border: none; text-align: right;">יוני 2026</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- תוכן עניינים -->
+    <h2>תוכן עניינים</h2>
+    <ul>
+        <li>1. מבוא</li>
+        <li>2. ניתוח המערכת</li>
+        <li>3. בסיס הנתונים (Database)</li>
+        <li>4. מימוש הפרויקט (צד שרת וצד לקוח)</li>
+        <li>5. מדריך למשתמש</li>
+        <li>6. סיכום אישי ורפלקציה</li>
+        <li>7. ביבליוגרפיה</li>
+        <li>8. נספחים וקוד המקור</li>
+    </ul>
+
+    <!-- פרק 1: מבוא -->
+    <h2>1. מבוא</h2>
+    
+    <h3>רקע ומטרות המערכת</h3>
+    <p>בעולם התעסוקה המודרני, מציאת משרה מתאימה וגיוס עובדים איכותיים הם אתגרים מורכבים הדורשים כלים טכנולוגיים מתקדמים. פרויקט זה מציג את מערכת <strong>JobFindUltimate</strong>, פלטפורמת אינטרנט מקיפה המתווכת בין מחפשי עבודה (Employees) לבין מעסיקים (Employers) ומנוהלת על ידי מנהלי מערכת (Admins).</p>
+
+    <h4>מטרת על:</h4>
+    <p>יצירת פלטפורמה אמינה, מהירה וידידותית למשתמש המאפשרת למחפשי עבודה למצוא משרות רלוונטיות, להגיש מועמדות ולעקוב אחר ההיסטוריה התעסוקתית שלהם, בעוד שמעסיקים יכולים לפרסם משרות, לנהל מועמדים ולעדכן פרטי העסקה ושכר בצורה יעילה ומאובטחת.</p>
+
+    <h4>מטרות נלוות:</h4>
+    <ul>
+        <li>פיתוח מנגנון תקשורת מבוסס צ'אט מובנה בין מעסיקים למועמדים לשיפור תהליך הגיוס.</li>
+        <li>הגדרת בקרת גישה וסמכויות מבוססות תפקיד (Role-Based Authorization) להפרדה מוחלטת בין פנל המנהל, המעסיק ומחפש העבודה.</li>
+        <li>מתן התראות אוטומטיות למשתמשים על שינויים ועדכונים באתר.</li>
+    </ul>
+
+    <h3>קהל היעד וגבולות המערכת</h3>
+    <p>המערכת מיועדת לשלושה קהלי יעד מרכזיים:</p>
+    <ol>
+        <li><strong>מחפשי עבודה (Employees):</strong> אנשים המחפשים משרות פנויות, המעוניינים לבנות קורות חיים מקוונים ולהגיש מועמדות למשרות שונות.</li>
+        <li><strong>מעסיקים (Employers):</strong> חברות ומגייסים המעוניינים לפרסם משרות, לצפות בקורות החיים של המועמדים, ולנהל את תהליך הקבלה.</li>
+        <li><strong>מנהלי מערכת (Admins):</strong> גורם מפקח האחראי על ניטור תוכן המשרות, מחיקת משתמשים פוגעניים או משרות לא רלוונטיות, ושליחת הודעות מערכת גלובליות.</li>
+    </ol>
+
+    <h4>גבולות המערכת:</h4>
+    <p>המערכת פועלת כרשת סגורה שבה המעסיק ומחפש העבודה פועלים תחת ישות ניהולית אחת. תהליך הריאיון הראשוני יכול להתבצע בצ'אט הפנימי, אך הליכים משפטיים וחוזיים של קבלה לעבודה מתבצעים מחוץ למערכת (המערכת מספקת רק את הפלטפורמה לאיתור המועמדים ועדכון הסטטוס הראשוני).</p>
+
+    <h3>סביבות פיתוח וטכנולוגיות</h3>
+    <p>הפרויקט ממומש בארכיטקטורת Client-Server מודרנית המופרדת לשני פרויקטים עצמאיים:</p>
+    <ul>
+        <li><strong>צד שרת (Backend - Web Service):</strong> נבנה באמצעות טכנולוגיית <strong>ASP.NET Core Web API</strong> בשפת <strong>#C</strong>. השרת מנהל את הגישה למסד הנתונים ומספק קצוות קצה (API Endpoints) בפורמט JSON.</li>
+        <li><strong>צד לקוח (Frontend - Web Client):</strong> נבנה בטכנולוגיית <strong>ASP.NET Core MVC</strong> המבצעת קריאות HTTP א-סינכרוניות לשרת ה-API ומציגה דפי אינטרנט דינמיים המעוצבים ב-HTML, CSS ו-JavaScript.</li>
+        <li><strong>מסד הנתונים (Database):</strong> מסד נתונים יחסי מסוג <strong>Microsoft Access (.accdb)</strong>, הגישה אליו מתבצעת באמצעות פרוטוקול <strong>OleDb</strong> בשילוב מנגנון פרמטרים להגנה מפני SQL Injection.</li>
+        <li><strong>סביבת הפיתוח המרכזית:</strong> <strong>Microsoft Visual Studio 2022</strong>.</li>
+    </ul>
+
+    <h3>אתגרים ופתרונות</h3>
+    <ul>
+        <li><strong>עבודה אסינכרונית וביצועים:</strong> כדי למנוע חסימה של ה-Thread הראשי בעת ביצוע קריאות רשת מהלקוח לשרת ובעת גישה למסד הנתונים, השרת והלקוח ממומשים במלואם בעזרת מנגנון <code>async</code> ו-<code>await</code> ב-#C.</li>
+        <li><strong>ניהול נעילות במסד הנתונים (MS Access):</strong> מסד הנתונים MS Access אינו מיועד לעומסים מרובי משתמשים במקביל. הפתרון היה מימוש מחלקת עזר מאוחדת לניהול החיבור (<code>DBHelperOledb</code>) וניהול מחזור החיים של החיבורים בצורה אחראית (פתיחה וסגירה מיידית של חיבור ה-OleDb בכל פעולה בקריאות השרת).</li>
+        <li><strong>הגנה על נתונים רגישים:</strong> אבטחת סיסמאות משתמשים במסד הנתונים והגנה על שאילתות מפני פריצות SQL Injection על ידי שימוש ב-Parameterized Queries בכל מחלקות ה-Repository.</li>
+    </ul>
+
+    <!-- פרק 2: ניתוח המערכת -->
+    <h2>2. ניתוח המערכת</h2>
+    
+    <h3>מסמך ייזום ותיאור המצב הקיים</h3>
+    <p>במצב הקיים, חיפוש משרות וניהול מועמדים מתבצע לרוב באופן לא ריכוזי (שליחת קבצי PDF בדוא"ל, מעקב בטבלאות אקסל ידניות, וכדומה). תהליך זה מוביל לאובדן מידע, חוסר יכולת לעקוב אחר סטטוס המועמדות, ועיכובים בתקשורת בין המגייס למועמד.</p>
+    <p>מערכת <strong>JobFindUltimate</strong> מיישמת מסמך ייזום המגדיר מערכת אחודה שבה כל מחזור החיים של המועמדות - החל מהחיפוש, דרך הסינון, ההגשה ועד לסטטוס הסופי והצ'אט - מרוכזים תחת קורת גג אחת דיגיטלית.</p>
+
+    <h3>עץ תהליכים</h3>
+    <p>המערכת מורכבת מהתהליכים הראשיים הבאים:</p>
+    <ol>
+        <li><strong>רישום והתחברות (Authentication):</strong> אימות משתמשים, זיהוי סוג המשתמש (מחפש עבודה/מעסיק/מנהל).</li>
+        <li><strong>ניהול משרות (Job Management):</strong> פרסום משרה, עדכון משרה, מחיקת משרה, וקטלוג משרות לפי תחומים (Genres) ומיקומים.</li>
+        <li><strong>ניהול מועמדויות (Application Tracking):</strong> הגשת מועמדות למשרה (צירוף קורות חיים), צפייה ברשימת המועמדים, עדכון סטטוס מועמדות ("Submitted", "Accepted", "Rejected").</li>
+        <li><strong>ניהול עובדים ושכר (Employee & Salary Management):</strong> שינוי שכר המועמד על ידי המעסיק, פיטורין/הפסקת העסקה.</li>
+        <li><strong>תקשורת (Chat & Notifications):</strong> ניהול צ'אט חי בין מועמדים למעסיקים ושליחת התראות גלובליות על ידי מנהל המערכת.</li>
+    </ol>
+
+    <h3>דיאגרמות Use Case ו-DFD</h3>
+    <p>בשלב זה של הפרויקט, הוגדרו תרחישי השימוש (Use Cases) ודיאגרמות זרימת הנתונים (DFD) לכל סוג משתמש:</p>
+    
+    <h4>מחפש עבודה ואורח (Guest & Employee)</h4>
+    <p><strong>Use Case:</strong> האורח יכול לצפות בדף הבית ובקטלוג המשרות, להפעיל סינונים (מיקום, סוג משרה, שכר, ניסיון, גמישות) ולהירשם למערכת. מחפש העבודה המחובר (Employee) יכול להשתמש בכל כלי הניווט, לצפות בהיסטוריית הגשות המשרות שלו, לעדכן את קורות החיים שלו באופן מקוון, ולהגיש מועמדות למשרה בקטלוג.</p>
+    <p><strong>זרימת נתונים (DFD):</strong> האורח שולף נתונים מקטלוג המשרות (השואב ממאגר <code>D1 - Jobs</code>) ומבצע רישום (המעדכן את מאגר <code>D3 - Employee</code>). מחפש העבודה מעדכן את קורות החיים (במאגר <code>D5 - Resume</code>) ומגיש מועמדות, תהליך היוצר רשומה חדשה במאגר <code>D4 - Application</code>.</p>
+
+    <h4>מעסיק (Employer)</h4>
+    <p><strong>Use Case:</strong> המעסיק יכול לבצע ארבע פעולות ראשיות: הוספת משרה (תוך קביעת קטגוריה, שכר בסיס, ניסיון נדרש, מיקום, והטבות), ניהול משרות (עדכון או מחיקה), צפייה במועמדויות (כולל סינון לפי קורות חיים), וניהול עובדים (עדכון שכר או פיטורין).</p>
+    <p><strong>זרימת נתונים (DFD):</strong> הוספת המשרות מעדכנת את מאגר <code>D1 - Jobs</code>. צפייה במועמדויות מושכת נתונים ממאגר המועמדויות <code>D4 - Application</code> ומאגר העובדים <code>D3 - Employee</code>. ניהול עובדים מעדכן את השכר ב-<code>D3</code> או מוחק מועמדות מ-<code>D4</code>.</p>
+
+    <h4>מנהל מערכת (Admin)</h4>
+    <p><strong>Use Case:</strong> מנהל המערכת יכול לנהל משרות גלובלית (ולמחוק משרות מיושנות או לא ראויות), למחוק או לחסום משתמשים בעייתיים, לסקור את כל המועמדויות במערכת, ולשלוח התראות גלובליות לכל המשתמשים על שינויים או עדכונים באתר.</p>
+    <p><strong>זרימת נתונים (DFD):</strong> מחיקת משרות מעדכנת את מאגר <code>D1 - Jobs</code>. מחיקת משתמשים מעדכנת את מאגר <code>D2 - Users</code>. יצירת התראה מעדכנת את מאגר <code>D4 - Notifications</code>.</p>
+
+    <!-- פרק 3: בסיס הנתונים -->
+    <h2>3. בסיס הנתונים (Database)</h2>
+    
+    <h3>דיאגרמת קשרי גומלין (DSD / ERD)</h3>
+    <p>בסיס הנתונים מבוסס על מודל טבלאות יחסי המקושרות ביניהן באמצעות מפתחות זרים (Foreign Keys). הקשרים מבוססים על ישויות מרכזיות: משתמשים, תפקידים, משרות, מועמדויות, ארצות, תחומי משרה, הודעות צ'אט, ביקורות והתראות.</p>
+
+    <h3>טבלאות ראשיות וטבלאות קישור</h3>
+    
+    <h4>1. טבלת משתמשים (<code>User</code> / <code>Users</code>)</h4>
+    <table>
+        <tr>
+            <th>שם השדה</th>
+            <th>סוג נתונים</th>
+            <th>מפתח</th>
+            <th>תיאור ותפקיד</th>
+        </tr>
+        <tr>
+            <td><code>UserID</code></td>
+            <td>VARCHAR</td>
+            <td>ראשי (PK)</td>
+            <td>מזהה ייחודי של המשתמש (תעודת זהות)</td>
+        </tr>
+        <tr>
+            <td><code>FirstName</code></td>
+            <td>VARCHAR</td>
+            <td>-</td>
+            <td>שם פרטי</td>
+        </tr>
+        <tr>
+            <td><code>LastName</code></td>
+            <td>VARCHAR</td>
+            <td>-</td>
+            <td>שם משפחה</td>
+        </tr>
+        <tr>
+            <td><code>UserName</code></td>
+            <td>VARCHAR</td>
+            <td>-</td>
+            <td>שם המשתמש המשמש להתחברות (ייחודי)</td>
+        </tr>
+        <tr>
+            <td><code>Password</code></td>
+            <td>VARCHAR</td>
+            <td>-</td>
+            <td>סיסמת המשתמש מוצפנת/מאובטחת</td>
+        </tr>
+        <tr>
+            <td><code>UserTypeID</code></td>
+            <td>INTEGER</td>
+            <td>זר (FK)</td>
+            <td>מזהה תפקיד (מנהל/עובד/מעסיק)</td>
+        </tr>
+        <tr>
+            <td><code>ResumeText</code></td>
+            <td>MEMO/TEXT</td>
+            <td>-</td>
+            <td>טקסט קורות החיים של מחפש העבודה</td>
+        </tr>
+    </table>
+
+    <h4>2. טבלת משרות (<code>Jobs</code>)</h4>
+    <table>
+        <tr>
+            <th>שם השדה</th>
+            <th>סוג נתונים</th>
+            <th>מפתח</th>
+            <th>תיאור ותפקיד</th>
+        </tr>
+        <tr>
+            <td><code>JobID</code></td>
+            <td>VARCHAR</td>
+            <td>ראשי (PK)</td>
+            <td>מזהה ייחודי של המשרה</td>
+        </tr>
+        <tr>
+            <td><code>JobTitle</code></td>
+            <td>VARCHAR</td>
+            <td>-</td>
+            <td>כותרת המשרה</td>
+        </tr>
+        <tr>
+            <td><code>JobDescription</code></td>
+            <td>MEMO/TEXT</td>
+            <td>-</td>
+            <td>תיאור ודרישות המשרה</td>
+        </tr>
+        <tr>
+            <td><code>EmployerID</code></td>
+            <td>VARCHAR</td>
+            <td>זר (FK)</td>
+            <td>מזהה המעסיק שפרסם את המשרה</td>
+        </tr>
+        <tr>
+            <td><code>GenreID</code></td>
+            <td>VARCHAR</td>
+            <td>זר (FK)</td>
+            <td>מזהה תחום המשרה (קטגוריה)</td>
+        </tr>
+    </table>
+
+    <h4>3. טבלת הגשת מועמדות (<code>JobApplication</code> - טבלת קישור חובה)</h4>
+    <p>טבלה זו משמשת כטבלת קישור (Many-to-Many Bridge Table) המקשרת בין טבלת המשתמשים (העובדים) לטבלת המשרות. היא מתעדת את אירוע הגשת המועמדות.</p>
+    <table>
+        <tr>
+            <th>שם השדה</th>
+            <th>סוג נתונים</th>
+            <th>מפתח</th>
+            <th>תיאור ותפקיד</th>
+        </tr>
+        <tr>
+            <td><code>ApplicationID</code></td>
+            <td>COUNTER</td>
+            <td>ראשי (PK)</td>
+            <td>מזהה ייחודי של הגשת המועמדות (רץ אוטומטית)</td>
+        </tr>
+        <tr>
+            <td><code>JobID</code></td>
+            <td>INTEGER</td>
+            <td>זר (FK)</td>
+            <td>מזהה המשרה שאליה הוגשה המועמדות</td>
+        </tr>
+        <tr>
+            <td><code>EmployeeID</code></td>
+            <td>INTEGER</td>
+            <td>זר (FK)</td>
+            <td>מזהה העובד שהגיש את מועמדותו</td>
+        </tr>
+        <tr>
+            <td><code>ResumeSnapshot</code></td>
+            <td>MEMO</td>
+            <td>-</td>
+            <td>צילום מצב של קורות החיים של המועמד בעת ההגשה</td>
+        </tr>
+        <tr>
+            <td><code>Status</code></td>
+            <td>VARCHAR</td>
+            <td>-</td>
+            <td>סטטוס המועמדות הנוכחי ("Submitted", "Accepted", "Rejected")</td>
+        </tr>
+    </table>
+
+    <!-- פרק 4: מימוש הפרויקט -->
+    <h2>4. מימוש הפרויקט (צד שרת וצד לקוח)</h2>
+    
+    <h3>מימוש צד שרת (Web Service API)</h3>
+    <p>השרת ממומש באמצעות ארכיטקטורת REST API מבוססת בקרים (Controllers) המזריקים מחסני נתונים (Repositories) דרך יחידת עבודה (Unit of Work). כל שאילתות ה-SQL ממומשות בצורה מאובטחת ומנוהלות א-סינכרונית.</p>
+
+    <h4>קוד מחלקת המודל <code>Job.cs</code>:</h4>
+    <pre>
+using System.ComponentModel.DataAnnotations;
+
+namespace JobModels
+{
+    public class Job
+    {
+        [Required]
+        public string? JobID { get; set; }
+        public string? JobTitle { get; set; }
+        public string? JobDescription { get; set; }
+        [Required]
+        public string? JobType { get; set; }
+        [Required]
+        public bool? JobStatus { get; set; }
+        public string? JobFilter { get; set; }
+        public string? EmployerID { get; set; }
+        public string? CountryID { get; set; }
+        public string? GenreID { get; set; }
+        public string? CountryName { get; set; }
+        public string? GenreTitle { get; set; }
+    }
+}
+    </pre>
+
+    <h4>קוד מחסן הנתונים <code>UserRepository.cs</code> (קטע מתוך עדכון קורות חיים):</h4>
+    <p>מציג שימוש בפרמטריזציה להגנה מפני SQL Injection:</p>
+    <pre>
+public bool UpdateResume(string userId, string resumeText)
+{
+    string sql = "UPDATE [User] SET ResumeText=@ResumeText WHERE UserID=@UserID";
+    
+    this.helperOleDb.ClearParameters();
+    this.helperOleDb.AddParameters("@ResumeText", resumeText);
+    this.helperOleDb.AddParameters("@UserID", userId);
+    
+    return this.helperOleDb.Update(sql) > 0;
+}
+    </pre>
+
+    <h3>מימוש צד לקוח (MVC Web Client)</h3>
+    <p>צד הלקוח פונה בצורה א-סינכרונית לשרת ה-API באמצעות מחלקת עזר גנרית <code>ApiClient&lt;T&gt;</code>.</p>
+
+    <h4>קוד מתוך <code>ApiClient.cs</code> (קריאת GET א-סינכרונית):</h4>
+    <pre>
+public async Task&lt;T&gt; GetAsync()
+{
+    using (HttpRequestMessage httpRequest = new HttpRequestMessage())
+    {
+        httpRequest.Method = HttpMethod.Get;
+        httpRequest.RequestUri = this.uriBuilder.Uri;
+        using (HttpResponseMessage httpResponse = await this.httpClient.SendAsync(httpRequest))
+        {
+            if (httpResponse.IsSuccessStatusCode == true)
+            {
+                string result = await httpResponse.Content.ReadAsStringAsync();
+                JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions();
+                jsonSerializerOptions.PropertyNameCaseInsensitive = true;
+                return JsonSerializer.Deserialize&lt;T&gt;(result, jsonSerializerOptions);
+            }
+            return default(T);
+        }
+    }
+}
+    </pre>
+
+    <h3>מנגנוני אבטחה והרחבות</h3>
+    <div class="alert-box">
+        <div class="alert-box-title">הגנה מ-SQL Injection באמצעות Parameterized Queries</div>
+        <p>כל שאילתות מסד הנתונים בפרויקט מבוצעות על ידי הזרקת פרמטרים ייעודיים לתוך <code>OleDbCommand</code>. הפרמטרים מנוקים ומתווספים באופן הבא: <code>this.helperOleDb.AddParameters("@UserName", userName)</code>. שיטה זו מפרידה לחלוטין בין הקוד של פקודת ה-SQL לבין הנתונים המוזנים על ידי המשתמש, ומגינה על המערכת מפני ניסיונות פריצה ושיבוש שאילתות.</p>
+    </div>
+
+    <!-- פרק 5: מדריך למשתמש -->
+    <h2>5. מדריך למשתמש</h2>
+    <p>מערכת <strong>JobFindUltimate</strong> מגדירה ממשק שונה לחלוטין עבור שלושה סוגי משתמשים עיקריים:</p>
+
+    <h3>אורח ומחפש עבודה (Guest & Employee)</h3>
+    <ul>
+        <li><strong>רישום והתחברות:</strong> לחיצה על כפתור המשתמש בפינה השמאלית העליונה פותחת את עמוד ההתחברות. משתמש חדש יכול להירשם על ידי בחירת תפקיד (מחפש עבודה או מעסיק) והזנת פרטים אישיים.</li>
+        <li><strong>קטלוג משרות:</strong> ניווט לקטלוג המשרות מציג משרות פנויות. ניתן לסנן את המשרות בעזרת סרגל הסינון הימני לפי ארץ (Country) ותחום (Genre).</li>
+        <li><strong>הגשת מועמדות:</strong> עובד מחובר יכול ללחוץ על כפתור הגשת המועמדות בכרטיס המשרה כדי לשלוח מיידית את קורות החיים המעודכנים שלו.</li>
+        <li><strong>ניהול קורות חיים:</strong> בעמוד הפרופיל שלו, העובד יכול לערוך ולשמור את קורות החיים שלו בתיבת הטקסט המקוונת.</li>
+    </ul>
+
+    <h3>מעסיק (Employer)</h3>
+    <ul>
+        <li><strong>פרסום משרה חדשה:</strong> מעסיק יכול לגשת לטופס "פרסום משרה" ולהזין את כותרת המשרה, התיאור, השכר המוצע, ודרישות הניסיון.</li>
+        <li><strong>ניהול מועמדים:</strong> בלשונית "Applicants" (מועמדים), המעסיק יכול לצפות בכל האנשים שהגישו מועמדות למשרות שלו, לקרוא את קורות החיים שלהם ולשנות את סטטוס המועמדות ל-"Accepted" או "Rejected".</li>
+        <li><strong>ניהול עובדים ושכר:</strong> במסך המועמדים שהתקבלו, המעסיק יכול לעדכן את שכרם ישירות או להפסיק את העסקתם ("פיטורין").</li>
+    </ul>
+
+    <h3>מנהל מערכת (Admin)</h3>
+    <ul>
+        <li><strong>ניקוי תוכן:</strong> המנהל יכול למחוק משרות מיושנות או משתמשים המפרים את כללי הקהילה.</li>
+        <li><strong>שליחת הודעות מערכת:</strong> המנהל יכול להזין תוכן הודעה שיופץ כהתראה לכל המשתמשים במערכת בעת כניסתם.</li>
+    </ul>
+
+    <!-- פרק 6: סיכום אישי ורפלקציה -->
+    <h2>6. סיכום אישי ורפלקציה</h2>
+    <p>העבודה על פרויקט <strong>JobFindUltimate</strong> הייתה חוויה מלמדת ומאתגרת במיוחד. הפרויקט אפשר לי לחבר בין מספר תחומים מרכזיים בהנדסת תוכנה: תכנון בסיס נתונים יחסי, יצירת שירותי רשת (Web Services) א-סינכרוניים, ובניית ממשק משתמש דינמי בטכנולוגיית MVC.</p>
+    <p>הצלחת הפרויקט נבעה בעיקר מתכנון מוקדם נכון של בסיס הנתונים ודיאגרמות ה-ERD וה-DFD, אשר מנעו תקלות רבות בשלבי הפיתוח המאוחרים. האתגר המרכזי שעימו התמודדתי היה מניעת חסימות ונעילות במסד הנתונים MS Access בעת ביצוע קריאות רשת א-סינכרוניות במקביל. פתרתי בעיה זו על ידי ניהול קפדני של מחזור החיים של חיבור ה-OleDb דרך יחידת העבודה (Unit of Work), תוך הקפדה על סגירת החיבור בסיום כל פעולה.</p>
+    <p>תובנה מרכזית מהתהליך היא חשיבותו של קוד אסינכרוני נכון. שימוש ב-<code>async</code> ו-<code>await</code> מאפשר למערכת לעבוד בצורה חלקה וריספונסיבית יותר. בראייה לאחור, אם היו לי משאבים נוספים, הייתי בוחר להחליף את מסד הנתונים MS Access במסד נתונים מתקדם יותר כגון SQL Server או PostgreSQL כדי לאפשר תאימות מלאה וביצועים גבוהים יותר בסביבה מרובת משתמשים.</p>
+
+    <!-- פרק 7: ביבליוגרפיה -->
+    <h2>7. ביבליוגרפיה</h2>
+    <p>להלן מקורות המידע המרכזיים ששימשו למחקר ולפיתוח הפרויקט (בפורמט APA):</p>
+    <ol>
+        <li>Microsoft Corporation. (2024). <em>ASP.NET Core Web API documentation</em>. Retrieved from Microsoft Learn: <a href="https://learn.microsoft.com/en-us/aspnet/core/web-api/">https://learn.microsoft.com/en-us/aspnet/core/web-api/</a></li>
+        <li>Microsoft Corporation. (2024). <em>Async/Await Asynchronous Programming in C#</em>. Retrieved from Microsoft Learn: <a href="https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/">https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/</a></li>
+        <li>Watson, K., & Hammer, C. (2021). <em>Beginning Visual C# 2021</em>. Wrox Press.</li>
+        <li>משרד החינוך - הפיקוח על הוראת מדעי המחשב. (2023). <em>תוכנית הלימודים בהנדסת תוכנה - חלופת שירותי רשת ותכנות אסינכרוני (שאלון 883589)</em>. משרד החינוך, ירושלים.</li>
+    </ol>
+
+    <!-- פרק 8: נספחים וקוד המקור -->
+    <h2>8. נספחים וקוד המקור</h2>
+    <p>בנספח זה מובא קוד האתחול הראשי של השרת ושל הלקוח בפרויקט:</p>
+
+    <h4>קובץ אתחול השרת <code>Program.cs</code> (בפרויקט JobWebService):</h4>
+    <pre>
+using JobWebService.ORM;
+using JobWebService.ORM.Repositories;
+using JobModels;
+
+namespace JobWebService
+{
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddControllers();
+            builder.Services.AddSingleton&lt;DBHelperOledb&gt;();
+            builder.Services.AddSingleton&lt;ModelCreators&gt;();
+
+            builder.Services.AddScoped&lt;IRepository&lt;User&gt;, UserRepository&gt;();
+            builder.Services.AddScoped&lt;IRepository&lt;Job&gt;, JobRepository&gt;();
+            builder.Services.AddScoped&lt;IRepository&lt;Genre&gt;, GenreRepository&gt;();
+            builder.Services.AddScoped&lt;IRepository&lt;Review&gt;, ReviewRepository&gt;();
+            builder.Services.AddScoped&lt;IRepository&lt;Notification&gt;, NotificationRepository&gt;();
+            builder.Services.AddScoped&lt;IRepository&lt;Country&gt;, CountryRepository&gt;();
+            builder.Services.AddScoped&lt;IRepository&lt;Education&gt;, EducationRepository&gt;();
+            builder.Services.AddScoped&lt;IRepository&lt;EducationType&gt;, EducationTypeRepository&gt;();
+            builder.Services.AddScoped&lt;IRepository&lt;UserType&gt;, UserTypeRepository&gt;();
+            builder.Services.AddScoped&lt;IRepository&lt;ChatMessage&gt;, ChatMessageRepository&gt;();
+            
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+
+            var app = builder.Build();
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+            app.UseAuthorization();
+            app.MapControllers();
+            app.Run();
+        }
+    }
+}
+    </pre>
+
+    <h4>קובץ אתחול הלקוח <code>Program.cs</code> (בפרויקט JobWebApp):</h4>
+    <pre>
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllersWithViews();
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+var app = builder.Build();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Guest/Error");
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+app.UseSession();
+app.UseAuthorization();
+app.MapStaticAssets();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Guest}/{action=Home}/{id?}");
+
+app.Run();
+    </pre>
+
+</body>
+</html>
