@@ -67,6 +67,7 @@ namespace JobWebApp.Controllers
 
         // ── GET: /Employer/PostJob ─────────────────────────────
         // Shows the form to post a new job — loads genres from the database
+        [HttpGet]
         public async Task<IActionResult> PostJob()
         {
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
@@ -75,9 +76,13 @@ namespace JobWebApp.Controllers
             ApiClient<List<Genre>> genreClient = BuildClient<List<Genre>>("Guest", "GetAllGenres");
             List<Genre> genres = await genreClient.GetAsync() ?? new List<Genre>();
 
+            // Fetch job types so their IDs (not names) can be posted to the DB
+            ApiClient<List<JobType>> jobTypeClient = BuildClient<List<JobType>>("Guest", "GetAllJobTypes");
+            List<JobType> jobTypes = await jobTypeClient.GetAsync() ?? new List<JobType>();
+
             PostJobViewModel model = new PostJobViewModel();
             model.Genres = genres;
-            model.JobTypes = new List<JobType>();
+            model.JobTypes = jobTypes;
 
             return View(model);
         }
@@ -85,7 +90,7 @@ namespace JobWebApp.Controllers
         // ── POST: /Employer/PostJob ────────────────────────────
         // Called when the employer submits the post job form
         [HttpPost]
-        public async Task<IActionResult> PostJob(Job job)
+        public async Task<IActionResult> PostAJob(Job job)
         {
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
 

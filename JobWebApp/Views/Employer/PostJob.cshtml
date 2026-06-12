@@ -22,7 +22,7 @@
 <main class="container content-page" style="padding-top:24px">
     <section class="left-col">
         <div class="card">
-            <form method="post" action="/Employer/PostJob">
+            <form method="post" action="/Employer/PostAJob">
                 @Html.AntiForgeryToken()
 
                 <div class="acc-fields" style="display:grid;gap:16px">
@@ -41,12 +41,12 @@
 
                     <label style="display:flex;flex-direction:column;gap:6px;font-size:0.86rem;font-weight:600;color:var(--text-700);text-transform:uppercase;letter-spacing:0.02em">
                         Job Type
-                        <select name="JobType" style="font-family:inherit;font-size:0.95rem;font-weight:400;text-transform:none;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;width:100%">
-                            <option value="Full-time">Full-time</option>
-                            <option value="Part-time">Part-time</option>
-                            <option value="Contract">Contract</option>
-                            <option value="Internship">Internship</option>
-                            <option value="Remote">Remote</option>
+                        <select name="JobType" required style="font-family:inherit;font-size:0.95rem;font-weight:400;text-transform:none;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;width:100%">
+                            <option value="" disabled selected>Choose a job type</option>
+                            @foreach (JobType jobType in Model.JobTypes)
+                            {
+                                <option value="@jobType.JobTypeID">@jobType.JobTypeName</option>
+                            }
                         </select>
                     </label>
 
@@ -104,10 +104,23 @@
     </aside>
 </main>
 
+@if (TempData["Success"] != null)
+{
+    <div style="position:fixed;bottom:24px;right:24px;background:var(--color-background-success);color:var(--color-text-success);padding:12px 20px;border-radius:10px;box-shadow:var(--shadow-md);font-size:0.93rem;">
+        @TempData["Success"]
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div style="position:fixed;bottom:24px;right:24px;background:var(--color-background-danger);color:var(--color-text-danger);padding:12px 20px;border-radius:10px;box-shadow:var(--shadow-md);font-size:0.93rem;">
+        @TempData["Error"]
+    </div>
+}
+
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
-            const form = document.querySelector("form[action='/Employer/PostJob']");
+            const form = document.querySelector("form[action='/Employer/PostAJob']");
             const searchInput = document.getElementById("country-search-input");
             const hiddenInput = document.getElementById("country-id-hidden");
             const suggestionsDiv = document.getElementById("country-suggestions");

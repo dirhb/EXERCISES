@@ -201,6 +201,27 @@ namespace JobWebService.Controllers
             }
         }
 
+        // Returns all job types from the database
+        // Used to populate the Job Type dropdown when posting a job
+        [HttpGet]
+        public List<JobType> GetAllJobTypes()
+        {
+            try
+            {
+                this.libraryUOW.HelperOledb.OpenConnection();
+                return this.libraryUOW.JobTypeRepository.ReadAll();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return new List<JobType>();
+            }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
+            }
+        }
+
         [HttpGet]
         public List<Country> GetAllCountries()
         {
