@@ -9,6 +9,7 @@ namespace JobWebService.ORM.Repositories
         EducationTypeRepository educationTypeRepository;
         GenreRepository genreRepository;
         JobRepository jobRepository;
+        JobTypeRepository jobTypeRepository;
         NotificationRepository notificationRepository;
         ReviewRepository reviewRepository;
         UserRepository userRepository;
@@ -74,6 +75,16 @@ namespace JobWebService.ORM.Repositories
                 if (jobRepository == null)
                     jobRepository = new JobRepository(helperOledb, modelcreators);
                 return jobRepository;
+            }
+        }
+
+        public JobTypeRepository JobTypeRepository
+        {
+            get
+            {
+                if (jobTypeRepository == null)
+                    jobTypeRepository = new JobTypeRepository(helperOledb, modelcreators);
+                return jobTypeRepository;
             }
         }
 

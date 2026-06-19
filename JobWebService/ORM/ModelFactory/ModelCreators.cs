@@ -10,6 +10,7 @@ namespace JobWebService.ORM
         UserCreator userCreator;
         GenreCreator genreCreator;
         JobCreator jobCreator;
+        JobTypeCreator jobTypeCreator;
         JobApplicationCreator jobApplicationCreator;
         NotificationCreator notificationCreator;
         ReviewCreator reviewCreator;
@@ -69,6 +70,17 @@ namespace JobWebService.ORM
                     jobCreator = new JobCreator();
                 }
                 return jobCreator;
+            }
+        }
+        public JobTypeCreator JobTypeCreator
+        {
+            get
+            {
+                if (jobTypeCreator == null)
+                {
+                    jobTypeCreator = new JobTypeCreator();
+                }
+                return jobTypeCreator;
             }
         }
         public NotificationCreator NotificationCreator
