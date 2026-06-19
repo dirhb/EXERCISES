@@ -82,6 +82,17 @@ public class JobApplicationRepository : Repository, IRepository<JobApplication>
         return this.helperOleDb.ReadValue(sql);
     }
 
+    // Focused update for just the status (Accept / Reject).
+    // Params are added in the same order they appear in the SQL because
+    // the OLE DB provider binds parameters by position, not by name.
+    public bool UpdateStatus(string applicationId, string status)
+    {
+        string sql = "UPDATE JobApplications SET Status=@Status WHERE ApplicationID=@ApplicationID";
+        this.helperOleDb.AddParameters("@Status", status);
+        this.helperOleDb.AddParameters("@ApplicationID", applicationId);
+        return this.helperOleDb.Update(sql) > 0;
+    }
+
     public bool Update(JobApplication model)
     {
         string sql = "UPDATE JobApplications SET JobID=@JobID,UserID=@UserID,ResumeText=@ResumeText,Status=@Status,CreatedAt=@CreatedAt WHERE ApplicationID=@ApplicationID";

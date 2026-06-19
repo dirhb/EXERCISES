@@ -122,6 +122,25 @@ namespace JobWebService.Controllers
         }
 
         [HttpPost]
+        public bool UpdateApplicationStatus(string applicationId, string status)
+        {
+            try
+            {
+                this.libraryUOW.HelperOledb.OpenConnection();
+                return this.libraryUOW.JobApplicationRepository.UpdateStatus(applicationId, status);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+                return false;
+            }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
+            }
+        }
+
+        [HttpPost]
         public bool FireEmployee(string userId)
         {
             try

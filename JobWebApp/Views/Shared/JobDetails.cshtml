@@ -1,0 +1,154 @@
+@*
+    Views/Shared/JobDetails.cshtml
+    Dedicated individual job page, reached by clicking a job card.
+    ViewBag.Job  = Job
+    ViewBag.Role = "Employee" | "Employer"
+*@
+
+@using JobModels
+@{
+    var job = ViewBag.Job as Job ?? new Job();
+    string role = ViewBag.Role as string ?? "Employee";
+    bool isEmployer = role == "Employer";
+    bool isActive = job.JobStatus == true;
+    string backUrl = isEmployer ? "/Employer/YourJobs" : "/Employee/JobCatalog";
+    string backText = isEmployer ? "Back to Your Jobs" : "Back to Job Catalog";
+    ViewBag.Title = job.JobTitle ?? "Job Details";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/HomePage.css" asp-append-version="true" />
+}
+
+<header class="page-header content-page-header">
+    <h1>Job Details</h1>
+    <p>Everything you need to know about this opportunity.</p>
+</header>
+
+<main class="job-detail-shell">
+    <a class="jd-back" href="@backUrl"><span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>@backText</a>
+
+    <article class="jd-card">
+        <div class="jd-head">
+            <div>
+                <div class="jd-title">@job.JobTitle</div>
+                <div class="jd-company">@(string.IsNullOrWhiteSpace(job.EmployerID) ? "JobFind Employer" : job.EmployerID)</div>
+            </div>
+            <div class="jd-badges">
+                @if (isActive)
+                {
+                    <span class="jcl-badge active">Active</span>
+                }
+                else
+                {
+                    <span class="jcl-badge closed">Position Filled</span>
+                }
+                @if (!string.IsNullOrWhiteSpace(job.JobType))
+                {
+                    <span class="jcl-badge type">@job.JobType</span>
+                }
+            </div>
+        </div>
+
+        <div class="jd-meta-grid">
+            <div class="jd-meta">
+                <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+                <span>
+                    <span class="jd-meta-label">Location</span>
+                    <span class="jd-meta-value">@(job.CountryName ?? job.CountryID ?? "Not specified")</span>
+                </span>
+            </div>
+            <div class="jd-meta">
+                <span class="material-symbols-outlined" aria-hidden="true">work</span>
+                <span>
+                    <span class="jd-meta-label">Employment Type</span>
+                    <span class="jd-meta-value">@(string.IsNullOrWhiteSpace(job.JobType) ? "Not specified" : job.JobType)</span>
+                </span>
+            </div>
+            <div class="jd-meta">
+                <span class="material-symbols-outlined" aria-hidden="true">category</span>
+                <span>
+                    <span class="jd-meta-label">Category</span>
+                    <span class="jd-meta-value">@(job.GenreTitle ?? job.GenreID ?? "General")</span>
+                </span>
+            </div>
+            <div class="jd-meta">
+                <span class="material-symbols-outlined" aria-hidden="true">@(isActive ? "check_circle" : "lock")</span>
+                <span>
+                    <span class="jd-meta-label">Status</span>
+                    <span class="jd-meta-value">@(isActive ? "Accepting applications" : "Closed")</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="jd-section">
+            <div class="jd-section-title">Job Description</div>
+            <p class="jd-desc">@(string.IsNullOrWhiteSpace(job.JobDescription) ? "No description provided yet." : job.JobDescription)</p>
+
+            @if (!string.IsNullOrWhiteSpace(job.JobFilter))
+            {
+                <div class="jd-tags">
+                    <span>@job.JobFilter</span>
+                </div>
+            }
+        </div>
+
+        <div class="jd-actions">
+            @if (isEmployer)
+            {
+                @* ── Employer (owner) management actions ── *@
+                <a href="/Employer/Applicants?jobId=@job.JobID" class="catalog-apply-btn" style="text-decoration:none;display:inline-flex;align-items:center;">View Applicants</a>
+                <form method="post" action="/Employer/ToggleJobStatus" style="margin:0">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="jobId" value="@job.JobID" />
+                    <button type="submit" class="cta-btn secondary" style="font-size:0.9rem;padding:9px 18px;">
+                        Make @(isActive ? "Closed" : "Active")
+                    </button>
+                </form>
+                <form method="post" action="/Employer/DeleteJob" style="margin:0">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="jobId" value="@job.JobID" />
+                    <button type="button" class="cta-btn secondary delete-job-btn" data-job-title="@job.JobTitle" style="font-size:0.9rem;padding:9px 18px;color:var(--color-text-danger)">
+                        Delete
+                    </button>
+                </form>
+            }
+            else
+            {
+                @* ── Employee apply / message actions ── *@
+                @if (isActive)
+                {
+                    <form method="post" action="/Employee/ApplyToJob" enctype="multipart/form-data" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="jobId" value="@job.JobID" />
+                        <input type="hidden" name="returnUrl" value="@(Context.Request.Path.ToString() + Context.Request.QueryString.ToString())" />
+                        <label class="custom-file-label">
+                            <span class="material-symbols-outlined" style="font-size:15px;">upload_file</span>
+                            Attach PDF (optional)
+                            <input type="file" name="resumeFile" accept=".pdf" class="custom-apply-file" />
+                        </label>
+                        <span class="custom-file-name" data-default="No file">No file</span>
+                        <button type="submit" class="catalog-apply-btn">Apply Now</button>
+                    </form>
+                }
+                else
+                {
+                    <button type="button" class="catalog-apply-btn" style="background:var(--line);color:var(--text-500);cursor:not-allowed;" disabled>Position Filled</button>
+                }
+                @if (!string.IsNullOrEmpty(job.EmployerID))
+                {
+                    <a href="/Employee/Chat?partnerId=@job.EmployerID" class="cta-btn secondary" style="font-size:0.9rem;padding:9px 18px;">Message Employer</a>
+                }
+            }
+        </div>
+    </article>
+</main>
+
+@if (TempData["Success"] != null)
+{
+    <div class="toast-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="toast-error">@TempData["Error"]</div>
+}

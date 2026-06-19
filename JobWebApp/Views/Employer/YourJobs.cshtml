@@ -7,10 +7,15 @@
 @{
     ViewBag.Title = "Your Jobs";
     var jobs = ViewBag.Jobs as List<Job> ?? new List<Job>();
+    int page = Convert.ToInt32(ViewBag.Page ?? 1);
+    int totalPages = Convert.ToInt32(ViewBag.TotalPages ?? 1);
+    int totalJobs = Convert.ToInt32(ViewBag.TotalJobs ?? jobs.Count);
+
+    Func<int, string> pageUrl = p => $"/Employer/YourJobs?page={p}";
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/HomePage.css" />
+    <link rel="stylesheet" href="~/css/HomePage.css" asp-append-version="true" />
 }
 
 <header class="page-header content-page-header">
@@ -22,39 +27,55 @@
     <section class="left-col" style="grid-column: span 2;">
         <div class="card jobs-card">
             <h3><span class="material-symbols-outlined">work</span> All Postings</h3>
-            <div class="jobs-box" style="max-height: none;">
-                @if (jobs.Any())
-                {
+            <div class="catalog-count">Showing @jobs.Count of @totalJobs posting@(totalJobs == 1 ? string.Empty : "s")</div>
+            @if (jobs.Any())
+            {
+                <div class="job-list">
                     @foreach (var job in jobs)
                     {
-                        <div class="featured-job" style="cursor: default; margin-bottom: 12px;">
-                            <div class="fj-top">
-                                <div>
-                                    <span class="fj-title">@job.JobTitle</span>
-                                    <span class="fj-company">@(job.CountryName ?? job.CountryID) — @job.JobType</span>
+                        <article class="job-card-lg">
+                            @* Clickable body → individual job page *@
+                            <a class="jcl-body" href="/Employer/JobDetails?jobId=@job.JobID">
+                                <div class="jcl-head">
+                                    <div>
+                                        <div class="jcl-title">@job.JobTitle</div>
+                                        <div class="jcl-company">@(job.CountryName ?? job.CountryID ?? "Location not set")</div>
+                                    </div>
+                                    <div class="jcl-badges">
+                                        @if (job.JobStatus == true)
+                                        {
+                                            <span class="jcl-badge active">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="jcl-badge closed">Closed / Inactive</span>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(job.JobType))
+                                        {
+                                            <span class="jcl-badge type">@job.JobType</span>
+                                        }
+                                    </div>
                                 </div>
-                                @if (job.JobStatus == true)
-                                {
-                                    <span class="fj-badge" style="background:var(--color-background-success, #e7f8ed);color:var(--color-text-success, #0f6b34)">Active</span>
-                                }
-                                else
-                                {
-                                    <span class="fj-badge" style="background:var(--line);color:var(--text-500)">Closed / Inactive</span>
-                                }
-                            </div>
-                            <div class="fj-tags">
-                                <span>@job.JobType</span>
-                                @if (!string.IsNullOrEmpty(job.GenreID))
-                                {
-                                    <span>Genre: @(job.GenreTitle ?? job.GenreID)</span>
-                                }
-                            </div>
-                            <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
-                                @* View applicants button *@
+                                <div class="jcl-meta-row">
+                                    <span class="jcl-meta"><span class="material-symbols-outlined" aria-hidden="true">location_on</span>@(job.CountryName ?? job.CountryID ?? "Not specified")</span>
+                                    @if (!string.IsNullOrWhiteSpace(job.JobType))
+                                    {
+                                        <span class="jcl-meta"><span class="material-symbols-outlined" aria-hidden="true">work</span>@job.JobType</span>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(job.GenreTitle ?? job.GenreID))
+                                    {
+                                        <span class="jcl-meta"><span class="material-symbols-outlined" aria-hidden="true">category</span>@(job.GenreTitle ?? job.GenreID)</span>
+                                    }
+                                </div>
+                                <p class="jcl-desc">@(string.IsNullOrWhiteSpace(job.JobDescription) ? "No description provided yet." : job.JobDescription)</p>
+                                <span class="jcl-viewlink">View details →</span>
+                            </a>
+
+                            @* Management footer — outside the link *@
+                            <div class="jcl-actions">
                                 <a href="/Employer/Applicants?jobId=@job.JobID" class="cta-btn" style="font-size:0.85rem;padding:7px 16px;">
                                     View Applicants
                                 </a>
-                                @* Toggle status button *@
                                 <form method="post" action="/Employer/ToggleJobStatus" style="margin:0">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="jobId" value="@job.JobID" />
@@ -62,7 +83,6 @@
                                         Make @(job.JobStatus == true ? "Closed" : "Active")
                                     </button>
                                 </form>
-                                @* Delete button — triggers confirmation modal *@
                                 <form method="post" action="/Employer/DeleteJob" style="margin:0">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="jobId" value="@job.JobID" />
@@ -71,14 +91,72 @@
                                     </button>
                                 </form>
                             </div>
-                        </div>
+                        </article>
                     }
-                }
-                else
+                </div>
+
+                @if (totalPages > 1)
                 {
-                    <p style="color:var(--text-500);padding:12px;">You haven't posted any jobs yet. <a href="/Employer/PostJob">Post one now →</a></p>
+                    <nav class="pager" aria-label="Your jobs pages">
+                        @if (page > 1)
+                        {
+                            <a class="pager-step" href="@pageUrl(page - 1)" aria-label="Previous page"><span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>Prev</a>
+                        }
+                        else
+                        {
+                            <span class="pager-step disabled"><span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>Prev</span>
+                        }
+
+                        @{
+                            int windowStart = Math.Max(1, page - 1);
+                            int windowEnd = Math.Min(totalPages, page + 1);
+                        }
+
+                        @if (windowStart > 1)
+                        {
+                            <a href="@pageUrl(1)">1</a>
+                            if (windowStart > 2)
+                            {
+                                <span class="ellipsis">…</span>
+                            }
+                        }
+
+                        @for (int i = windowStart; i <= windowEnd; i++)
+                        {
+                            if (i == page)
+                            {
+                                <span class="current" aria-current="page">@i</span>
+                            }
+                            else
+                            {
+                                <a href="@pageUrl(i)">@i</a>
+                            }
+                        }
+
+                        @if (windowEnd < totalPages)
+                        {
+                            if (windowEnd < totalPages - 1)
+                            {
+                                <span class="ellipsis">…</span>
+                            }
+                            <a href="@pageUrl(totalPages)">@totalPages</a>
+                        }
+
+                        @if (page < totalPages)
+                        {
+                            <a class="pager-step" href="@pageUrl(page + 1)" aria-label="Next page">Next<span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></a>
+                        }
+                        else
+                        {
+                            <span class="pager-step disabled">Next<span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></span>
+                        }
+                    </nav>
                 }
-            </div>
+            }
+            else
+            {
+                <p style="color:var(--text-500);padding:12px;">You haven't posted any jobs yet. <a href="/Employer/PostJob">Post one now →</a></p>
+            }
         </div>
     </section>
 </main>

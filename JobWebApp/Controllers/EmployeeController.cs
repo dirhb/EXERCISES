@@ -59,7 +59,8 @@ namespace JobWebApp.Controllers
         {
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
 
-            const int pageSize = 16;
+            // Smaller page size now that each job is shown as a large, detailed card.
+            const int pageSize = 8;
 
             ApiClient<List<Job>> client = BuildClient<List<Job>>("Guest", "GetAllJobs");
             List<Job> allJobs = await client.GetAsync() ?? new List<Job>();
@@ -115,6 +116,28 @@ namespace JobWebApp.Controllers
             ViewBag.Jobs = results.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
             return View();
+        }
+
+        // ── GET: /Employee/JobDetails ─────────────────────────
+        // Dedicated individual job page, reached by clicking a catalog card.
+        public async Task<IActionResult> JobDetails(string jobId)
+        {
+            if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
+
+            ApiClient<Job> client = BuildClient<Job>("Guest", "GetJob");
+            client.AddParameter("JobID", jobId);
+            Job? job = await client.GetAsync();
+
+            if (job == null)
+            {
+                TempData["Error"] = "That job could not be found.";
+                return RedirectToAction("JobCatalog");
+            }
+
+            ViewBag.Job = job;
+            ViewBag.Role = "Employee";
+            ViewBag.FullName = SessionHelper.GetFullName(HttpContext.Session);
+            return View("~/Views/Shared/JobDetails.cshtml");
         }
 
         // ── GET: /Employee/JobHistory ──────────────────────────

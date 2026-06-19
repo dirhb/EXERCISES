@@ -142,17 +142,47 @@ namespace JobWebService.Controllers
             }
         }
 
-        // Returns latest notifications — used by notification bell to replace fake polling
+        // Returns latest notifications — used by the notification bell.
+        // When a userId is supplied, the user sees broadcasts plus the
+        // notifications targeted at them ("[To User {id}]: ..."), with the
+        // targeting prefix stripped off for display. Notifications aimed at
+        // other users are filtered out.
         [HttpGet]
-        public List<Notification> GetNotifications()
+        public List<Notification> GetNotifications(string? userId)
         {
             try
             {
                 this.libraryUOW.HelperOledb.OpenConnection();
-                return this.libraryUOW.NotificationRepository.ReadAll()
+
+                List<Notification> all = this.libraryUOW.NotificationRepository.ReadAll()
                     .OrderByDescending(n => n.NotificationDate)
-                    .Take(10)
                     .ToList();
+
+                const string targetPrefix = "[To User ";
+                List<Notification> visible = new List<Notification>();
+
+                foreach (Notification notification in all)
+                {
+                    string text = notification.NotificationText ?? string.Empty;
+
+                    if (!text.StartsWith(targetPrefix))
+                    {
+                        // Broadcast — everyone sees it
+                        visible.Add(notification);
+                    }
+                    else if (!string.IsNullOrWhiteSpace(userId))
+                    {
+                        // Targeted — only the addressed user sees it
+                        string marker = $"[To User {userId}]:";
+                        if (text.StartsWith(marker))
+                        {
+                            notification.NotificationText = text.Substring(marker.Length).Trim();
+                            visible.Add(notification);
+                        }
+                    }
+                }
+
+                return visible.Take(10).ToList();
             }
             catch (Exception ex)
             {

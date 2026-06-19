@@ -232,6 +232,7 @@ namespace JobWebService.Controllers
 
                 List<JobApplication> apps = this.libraryUOW.JobApplicationRepository.ReadByUserId(userId);
                 List<Job> historyJobs = new List<Job>();
+                List<AppliedJob> appliedJobs = new List<AppliedJob>();
 
                 foreach (JobApplication app in apps)
                 {
@@ -240,11 +241,20 @@ namespace JobWebService.Controllers
 
                     Job? job = this.libraryUOW.JobRepository.Read(app.JobId);
                     if (job != null)
+                    {
                         historyJobs.Add(job);
+                        appliedJobs.Add(new AppliedJob
+                        {
+                            Job = job,
+                            Status = app.Status,
+                            AppliedAt = app.SubmittedAtUTC
+                        });
+                    }
                 }
 
                 JobHistory vm = new JobHistory();
                 vm.JobHistoryList = historyJobs;
+                vm.AppliedJobs = appliedJobs;
                 vm.PageNumber = 1;
                 vm.Pages = 1;
                 vm.Genres = this.libraryUOW.GenreRepository.ReadAll();
@@ -257,6 +267,7 @@ namespace JobWebService.Controllers
                 return new JobHistory
                 {
                     JobHistoryList = new List<Job>(),
+                    AppliedJobs = new List<AppliedJob>(),
                     Genres = new List<Genre>(),
                     Employers = new List<string>(),
                     PageNumber = 1,

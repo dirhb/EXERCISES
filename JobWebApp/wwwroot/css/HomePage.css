@@ -521,3 +521,408 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ── Large job cards (catalog + your jobs) ───────────────────
+   Big, prominent, vertically stacked cards that surface enough
+   detail to catch a candidate's eye at a glance. The body is a
+   link to the individual job page; the action buttons sit in a
+   separate footer so they stay fully clickable.
+------------------------------------------------------------- */
+.job-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.job-card-lg {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: background 0.16s, border-color 0.16s, box-shadow 0.2s var(--ease), transform 0.16s var(--ease);
+}
+
+    .job-card-lg:hover {
+        background: #ddeeff;
+        border-color: var(--brand-400);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-3px);
+    }
+
+/* clickable body — routes to the individual job page */
+.jcl-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px 22px 16px;
+    color: inherit;
+}
+
+.jcl-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.jcl-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.35rem;
+    line-height: 1.2;
+    color: var(--brand-800);
+    margin-bottom: 4px;
+}
+
+.jcl-company {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--brand-600);
+}
+
+.jcl-badges {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.jcl-badge {
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 999px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+    .jcl-badge.type {
+        background: var(--accent-lt);
+        color: #a06b00;
+    }
+
+    .jcl-badge.active {
+        background: var(--color-background-success, #e7f8ed);
+        color: var(--color-text-success, #0f6b34);
+    }
+
+    .jcl-badge.closed {
+        background: var(--line);
+        color: var(--text-500);
+    }
+
+/* meta row — location, type, genre with icons */
+.jcl-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    color: var(--text-500);
+    font-size: 0.88rem;
+}
+
+.jcl-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+    .jcl-meta .material-symbols-outlined {
+        font-size: 18px;
+        color: var(--brand-400);
+    }
+
+.jcl-desc {
+    color: var(--text-700);
+    font-size: 0.94rem;
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.jcl-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+    .jcl-tags span {
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: rgba(59,123,200,0.1);
+        color: var(--brand-600);
+        border: 1px solid rgba(59,123,200,0.18);
+    }
+
+.jcl-viewlink {
+    margin-top: 2px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--brand-500);
+}
+
+/* footer with action buttons — sits outside the link */
+.jcl-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 22px;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+}
+
+    .jcl-actions .catalog-apply-btn,
+    .jcl-actions .cta-btn {
+        width: auto;
+        margin: 0;
+    }
+
+/* ── Windowed pager (catalog + your jobs) ────────────────────
+   Prev / first … window … last / Next — instead of dumping
+   every page number in a single row.
+------------------------------------------------------------- */
+.pager {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: fit-content;
+    margin: 28px auto 0;
+    padding: 7px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    box-shadow: var(--shadow-sm);
+}
+
+    /* Page-number items — circular */
+    .pager a:not(.pager-step),
+    .pager .current,
+    .pager .ellipsis {
+        min-width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--brand-700);
+        transition: background 0.16s var(--ease), color 0.16s var(--ease);
+    }
+
+        .pager a:not(.pager-step):hover {
+            background: var(--surface-2);
+            color: var(--brand-800);
+        }
+
+    .pager .current {
+        background: linear-gradient(135deg, var(--brand-500), var(--brand-700));
+        color: #fff;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .pager .ellipsis {
+        color: var(--text-500);
+        cursor: default;
+    }
+
+    /* Prev / Next — pill buttons */
+    .pager .pager-step {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        height: 40px;
+        padding: 0 16px;
+        border-radius: 999px;
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+        color: var(--brand-700);
+        font-weight: 700;
+        font-size: 0.88rem;
+        transition: background 0.16s var(--ease), border-color 0.16s var(--ease);
+    }
+
+        .pager a.pager-step:hover {
+            background: #ddeeff;
+            border-color: var(--brand-400);
+        }
+
+        .pager .pager-step .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+    .pager .disabled {
+        opacity: 0.4;
+        pointer-events: none;
+    }
+
+/* ── Individual job page ─────────────────────────────────────
+   Clean, token-based detail layout that matches the site —
+   NOT a copy of any external reference layout.
+------------------------------------------------------------- */
+.job-detail-shell {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 clamp(16px, 3vw, 32px) 48px;
+    display: grid;
+    gap: 18px;
+}
+
+.jd-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--brand-600);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+    .jd-back .material-symbols-outlined {
+        font-size: 18px;
+    }
+
+.jd-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: clamp(22px, 4vw, 36px);
+}
+
+.jd-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+.jd-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    color: var(--brand-800);
+    line-height: 1.15;
+    margin-bottom: 6px;
+}
+
+.jd-company {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--brand-600);
+}
+
+.jd-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.jd-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.jd-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+}
+
+    .jd-meta .material-symbols-outlined {
+        font-size: 24px;
+        color: var(--brand-500);
+    }
+
+.jd-meta-label {
+    display: block;
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-500);
+    font-weight: 600;
+}
+
+.jd-meta-value {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-900);
+}
+
+.jd-section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--brand-800);
+    margin-bottom: 10px;
+}
+
+.jd-desc {
+    color: var(--text-700);
+    font-size: 1rem;
+    line-height: 1.7;
+    white-space: pre-line;
+}
+
+.jd-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+    .jd-tags span {
+        font-size: 0.82rem;
+        font-weight: 600;
+        padding: 5px 13px;
+        border-radius: 999px;
+        background: rgba(59,123,200,0.1);
+        color: var(--brand-600);
+        border: 1px solid rgba(59,123,200,0.18);
+    }
+
+.jd-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-top: 26px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+}
+
+    .jd-actions .catalog-apply-btn,
+    .jd-actions .cta-btn {
+        width: auto;
+        margin: 0;
+    }
+
+@media (max-width: 560px) {
+    .jcl-head {
+        flex-direction: column;
+    }
+
+    .jcl-badges {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+}

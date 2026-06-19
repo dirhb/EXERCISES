@@ -10,6 +10,15 @@
     var applicants = ViewBag.Applicants as List<JobApplication> ?? new List<JobApplication>();
     var users = ViewBag.Users as Dictionary<string, User> ?? new Dictionary<string, User>();
     string jobId = ViewBag.JobID as string ?? string.Empty;
+
+    // Status → badge colors + friendly label ("Submitted" shows as "Pending").
+    Func<string, (string bg, string fg, string label)> statusBadge = s =>
+    {
+        string st = (s ?? "").Trim();
+        if (string.Equals(st, "Accepted", StringComparison.OrdinalIgnoreCase)) return ("var(--color-background-success, #e7f8ed)", "var(--color-text-success, #0f6b34)", "Accepted");
+        if (string.Equals(st, "Rejected", StringComparison.OrdinalIgnoreCase)) return ("var(--color-background-danger, #fdeceb)", "var(--color-text-danger, #a12622)", "Rejected");
+        return ("var(--accent-lt)", "#a06b00", "Pending");
+    };
 }
 
 @section Styles {
@@ -71,7 +80,26 @@
                     }
 
                     <h4>Application Status</h4>
-                    <p>@app.Status</p>
+                    @{ var badge = statusBadge(app.Status); }
+                    <p style="margin-bottom:10px;">
+                        <span style="display:inline-block;font-size:0.78rem;font-weight:700;padding:4px 12px;border-radius:999px;letter-spacing:0.03em;background:@badge.bg;color:@badge.fg;">@badge.label</span>
+                    </p>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <form method="post" action="/Employer/UpdateApplicationStatus" style="margin:0;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="applicationId" value="@app.ApplicationId" />
+                            <input type="hidden" name="jobId" value="@jobId" />
+                            <input type="hidden" name="status" value="Accepted" />
+                            <button type="submit" class="cta-btn" style="font-size:0.85rem;padding:7px 16px;background:var(--color-text-success,#0f6b34);color:#fff;border-radius:var(--radius-sm);">Accept</button>
+                        </form>
+                        <form method="post" action="/Employer/UpdateApplicationStatus" style="margin:0;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="applicationId" value="@app.ApplicationId" />
+                            <input type="hidden" name="jobId" value="@jobId" />
+                            <input type="hidden" name="status" value="Rejected" />
+                            <button type="submit" class="cta-btn secondary" style="font-size:0.85rem;padding:7px 16px;color:var(--color-text-danger,#a12622);border-radius:var(--radius-sm);">Reject</button>
+                        </form>
+                    </div>
                 </div>
 
                 <div class="applicant-actions">

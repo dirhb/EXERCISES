@@ -137,15 +137,25 @@ if (document.querySelector('.role-label')) {
 
 
 /* ── 7. DYNAMIC DISPLAY — REAL NOTIFICATION POLLING —————————─
-   Fetches real notifications from the database via the API.
-   Replaces the old fake-data polling approach.
+   Fetches real notifications from the database via the same-origin
+   proxy (/Notifications/Get). We can't call the web service directly
+   from the browser — it lives on another origin and is plain http,
+   so the page's https request would be blocked. The proxy forwards
+   the call server-side, exactly like the chat does.
 --------------------------------------------------------------- */
+function formatNotificationDate(raw) {
+    if (!raw) return '';
+    const d = new Date(raw);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
 async function pollNotifications() {
     const dropdown = document.getElementById('notification-dropdown');
     if (!dropdown) return;
 
     try {
-        const res = await fetch('http://localhost:5015/api/Admin/GetNotifications');
+        const res = await fetch('/Notifications/Get');
         if (!res.ok) throw new Error('Failed to fetch');
         const notifications = await res.json();
 
@@ -153,7 +163,21 @@ async function pollNotifications() {
         if (notifications && notifications.length > 0) {
             notifications.forEach(n => {
                 const li = document.createElement('li');
-                li.textContent = n.notificationText || n.NotificationText || '';
+                const text = n.notificationText || n.NotificationText || '';
+                const when = formatNotificationDate(n.notificationDate || n.NotificationDate);
+
+                const msg = document.createElement('div');
+                msg.textContent = text;
+                li.appendChild(msg);
+
+                if (when) {
+                    const time = document.createElement('div');
+                    time.textContent = when;
+                    time.style.color = 'var(--text-500)';
+                    time.style.fontSize = '0.78rem';
+                    time.style.marginTop = '2px';
+                    li.appendChild(time);
+                }
                 dropdown.appendChild(li);
             });
         } else {

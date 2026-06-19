@@ -15,6 +15,8 @@ namespace JobModels.ViewModels
         public List<string> Employers { get; set; }
         public string? EmployerID { get; set; }
         public List<Job> JobHistoryList { get; set; }
+        // Each applied job paired with its application status and date.
+        public List<AppliedJob> AppliedJobs { get; set; }
         public string? JobID { get; set; }
         public int PageNumber { get; set; }
         public int Pages { get; set; }

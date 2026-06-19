@@ -26,6 +26,40 @@
     font-weight: 600;
 }
 
+/* ── Application status badges ──────────────────────────── */
+.app-status {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    letter-spacing: 0.03em;
+    vertical-align: middle;
+}
+
+    .app-status.pending {
+        background: var(--accent-lt);
+        color: #a06b00;
+    }
+
+    .app-status.accepted {
+        background: var(--color-background-success, #e7f8ed);
+        color: var(--color-text-success, #0f6b34);
+    }
+
+    .app-status.rejected {
+        background: var(--color-background-danger, #fdeceb);
+        color: var(--color-text-danger, #a12622);
+    }
+
+.app-applied {
+    display: block;
+    margin-top: 2px;
+    color: var(--text-500);
+    font-size: 0.8rem;
+}
+
 /* ── Employers list ──────────────────────────────────────── */
 .employers-list li a {
     color: var(--brand-600);

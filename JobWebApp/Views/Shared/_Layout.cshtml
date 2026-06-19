@@ -6,7 +6,7 @@
     <title>@ViewBag.Title - JobFind</title>
 
     @* Shared CSS — loaded on every page *@
-    <link rel="stylesheet" href="~/css/StyleSheet.css" />
+    <link rel="stylesheet" href="~/css/StyleSheet.css" asp-append-version="true" />
 
     @* Page-specific CSS — each view injects its own *@
     @RenderSection("Styles", required: false)

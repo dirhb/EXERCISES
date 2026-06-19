@@ -48,10 +48,12 @@ namespace JobWebApp.Controllers
         }
 
         // ── GET: /Employer/YourJobs ────────────────────────────
-        // Shows the jobs this employer has posted
-        public async Task<IActionResult> YourJobs()
+        // Shows the jobs this employer has posted, paged for the larger cards.
+        public async Task<IActionResult> YourJobs(int page = 1)
         {
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
+
+            const int pageSize = 6;
 
             string employerId = SessionHelper.GetUserID(HttpContext.Session)!;
 
@@ -60,9 +62,39 @@ namespace JobWebApp.Controllers
             client.AddParameter("employerId", employerId);
             List<Job> myJobs = await client.GetAsync() ?? new List<Job>();
 
-            ViewBag.Jobs = myJobs;
+            int totalPages = Math.Max(1, (int)Math.Ceiling(myJobs.Count / (double)pageSize));
+            page = Math.Clamp(page, 1, totalPages);
+
+            ViewBag.Page = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalJobs = myJobs.Count;
+            ViewBag.Jobs = myJobs.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
             return View();
+        }
+
+        // ── GET: /Employer/JobDetails ──────────────────────────
+        // Individual job page for the employer's own posting.
+        public async Task<IActionResult> JobDetails(string jobId)
+        {
+            if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
+
+            ApiClient<Job> client = BuildClient<Job>("Guest", "GetJob");
+            client.AddParameter("JobID", jobId);
+            Job? job = await client.GetAsync();
+
+            // Only let an employer open the detail page for jobs they own.
+            string employerId = SessionHelper.GetUserID(HttpContext.Session)!;
+            if (job == null || !string.Equals(job.EmployerID, employerId, StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Error"] = "That job could not be found.";
+                return RedirectToAction("YourJobs");
+            }
+
+            ViewBag.Job = job;
+            ViewBag.Role = "Employer";
+            ViewBag.FullName = SessionHelper.GetFullName(HttpContext.Session);
+            return View("~/Views/Shared/JobDetails.cshtml");
         }
 
         // ── GET: /Employer/PostJob ─────────────────────────────
@@ -172,6 +204,25 @@ namespace JobWebApp.Controllers
                 : "Failed to update salary.";
 
             return RedirectToAction("Applicants", new { jobId = Request.Form["jobId"] });
+        }
+
+        // ── POST: /Employer/UpdateApplicationStatus ───────────
+        // Accept or reject a candidate's application for one of this employer's jobs
+        [HttpPost]
+        public async Task<IActionResult> UpdateApplicationStatus(string applicationId, string status, string jobId)
+        {
+            if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
+
+            ApiClient<bool> client = BuildClient<bool>("Employer", "UpdateApplicationStatus");
+            client.AddParameter("applicationId", applicationId);
+            client.AddParameter("status", status);
+            bool success = await client.PostAsync();
+
+            TempData[success ? "Success" : "Error"] = success
+                ? $"Application marked as {status}."
+                : "Failed to update application.";
+
+            return RedirectToAction("Applicants", new { jobId });
         }
 
         // ── GET: /Employer/Profile ─────────────────────────────
