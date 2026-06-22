@@ -197,6 +197,37 @@ namespace JobWebService.ORM.Repositories
             return this.helperOleDb.Update(sql) > 0;
         }
 
+        // Updates editable profile fields only — never touches the password.
+        public bool UpdateProfile(User user)
+        {
+            string sql = "UPDATE [User] SET FirstName=@FirstName,LastName=@LastName,Email=@Email,PhoneNum=@PhoneNum,Country=@Country WHERE UserID=@UserID";
+            this.helperOleDb.AddParameters("@FirstName", user.FirstName);
+            this.helperOleDb.AddParameters("@LastName", user.LastName);
+            this.helperOleDb.AddParameters("@Email", user.Email);
+            this.helperOleDb.AddParameters("@PhoneNum", string.IsNullOrWhiteSpace(user.PhoneNum) ? null : user.PhoneNum.Trim());
+            this.helperOleDb.AddParameters("@Country", user.Country);
+            this.helperOleDb.AddParameters("@UserID", user.UserID);
+            return this.helperOleDb.Update(sql) > 0;
+        }
+
+        // Updates the user's preferred display currency (e.g. USD, ILS, EUR).
+        public bool UpdateCurrency(string userId, string currency)
+        {
+            string sql = "UPDATE [User] SET PreferredCurrency=@PreferredCurrency WHERE UserID=@UserID";
+            this.helperOleDb.AddParameters("@PreferredCurrency", currency);
+            this.helperOleDb.AddParameters("@UserID", userId);
+            return this.helperOleDb.Update(sql) > 0;
+        }
+
+        // Ban / unban a user (1 = banned). Banned users can't log in.
+        public bool SetBanned(string userId, bool banned)
+        {
+            string sql = "UPDATE [User] SET IsBanned=@IsBanned WHERE UserID=@UserID";
+            this.helperOleDb.AddParameters("@IsBanned", banned ? "1" : "0");
+            this.helperOleDb.AddParameters("@UserID", userId);
+            return this.helperOleDb.Update(sql) > 0;
+        }
+
         public bool UpdateResume(string userId, string resumeText)
         {
             string sql = "UPDATE [User] SET ResumeText=@ResumeText WHERE UserID=@UserID";

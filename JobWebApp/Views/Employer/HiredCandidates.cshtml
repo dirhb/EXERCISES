@@ -1,0 +1,88 @@
+@*
+    Views/Employer/HiredCandidates.cshtml
+    Everyone the employer has accepted, across all their jobs.
+*@
+
+@using JobModels
+@{
+    ViewBag.Title = "Hired Candidates";
+    var accepted = ViewBag.Accepted as List<JobApplication> ?? new List<JobApplication>();
+    var users = ViewBag.Users as Dictionary<string, User> ?? new Dictionary<string, User>();
+    var jobTitles = ViewBag.JobTitles as Dictionary<string, string> ?? new Dictionary<string, string>();
+
+    Func<int, string> jobTitle = id => jobTitles.TryGetValue(id.ToString(), out var t) ? t : "Job";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Applicants.css" />
+}
+
+<header class="page-header content-page-header">
+    <h1>Hired Candidates</h1>
+    <p>Everyone you've accepted, across all your jobs.</p>
+</header>
+
+<main class="container content-page applicants-page">
+    @if (accepted.Any())
+    {
+        @foreach (var app in accepted)
+        {
+            User? u = users.TryGetValue(app.EmployeeId.ToString(), out var uu) ? uu : null;
+
+            <div class="card applicant-card">
+                <div class="applicant-header">
+                    <h3>@(u != null ? $"{u.FirstName} {u.LastName}" : "Candidate")</h3>
+                    <div class="applicant-meta">
+                        <span>Hired for: @jobTitle(app.JobId)</span>
+                        @if (u != null)
+                        {
+                            <span>Email: @u.Email</span>
+                            <span>Phone: @u.PhoneNum</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="applicant-actions">
+                    <div class="offer-block">
+                        <div class="offer-title">Agreed salary</div>
+                        <div class="offer-current">
+                            @if (app.OfferedSalary != null && app.OfferedSalary.Value > 0)
+                            {
+                                <strong class="money" data-usd="@app.OfferedSalary.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)">$@app.OfferedSalary.Value.ToString("N0")</strong>
+                            }
+                            else
+                            {
+                                <strong>no offer set yet</strong>
+                            }
+                        </div>
+                        <div class="offer-hint">Set or change the offer on the applicant's review page.</div>
+                    </div>
+
+                    @if (u != null)
+                    {
+                        <a href="/Employer/Chat?partnerId=@u.UserID" class="chat-btn">Message</a>
+                    }
+                    <a href="/Employer/Applicants?jobId=@app.JobId" class="chat-btn">View application</a>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="card">
+            <p style="color:var(--text-500);padding:12px;">
+                No hired candidates yet. Accept an applicant from a job's
+                <a href="/Employer/YourJobs">Applicants</a> page and they'll appear here.
+            </p>
+        </div>
+    }
+</main>
+
+@if (TempData["Success"] != null)
+{
+    <div class="toast-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="toast-error">@TempData["Error"]</div>
+}

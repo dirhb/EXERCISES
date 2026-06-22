@@ -4,9 +4,14 @@
     ViewBag.FullName, ViewBag.UserName, ViewBag.UserID
 *@
 
+@using JobModels
 @{
     ViewBag.Title = "Profile";
     var isEmployer = Context.Session.GetString("UserTypeID") == "3";
+    var user = ViewBag.User as User;
+    var countries = ViewBag.Countries as List<Country> ?? new List<Country>();
+    string fieldLabel = "display:flex;flex-direction:column;gap:6px;font-size:0.84rem;font-weight:600;color:var(--text-700);";
+    string fieldInput = "font-family:inherit;font-size:0.95rem;font-weight:400;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;width:100%";
 }
 
 @section Styles {
@@ -49,6 +54,76 @@
 
             </div>
         </div>
+
+        <div class="card" style="margin-top:20px;">
+            <h3>Edit Profile</h3>
+            <form method="post" action="/Account/UpdateProfile" id="profile-form" style="display:grid;gap:14px;margin-top:10px;">
+                @Html.AntiForgeryToken()
+                <label style="@fieldLabel">First Name
+                    <input type="text" name="firstName" value="@(user?.FirstName)" style="@fieldInput" />
+                </label>
+                <label style="@fieldLabel">Last Name
+                    <input type="text" name="lastName" value="@(user?.LastName)" style="@fieldInput" />
+                </label>
+                <label style="@fieldLabel">Email
+                    <input type="text" name="email" value="@(user?.Email)" style="@fieldInput" />
+                </label>
+                <label style="@fieldLabel">Phone
+                    <input type="text" name="phoneNum" value="@(user?.PhoneNum)" style="@fieldInput" />
+                </label>
+                <label style="@fieldLabel">Country
+                    <select name="country" style="@fieldInput">
+                        <option value="">— Select country —</option>
+                        @foreach (var c in countries)
+                        {
+                            <option value="@c.CountryID" selected="@(user?.Country == c.CountryID)">@c.CountryName</option>
+                        }
+                    </select>
+                </label>
+                <button type="submit" class="auth-submit" style="width:auto;padding:10px 24px;">Save Changes</button>
+            </form>
+        </div>
+
+        <div class="card" style="margin-top:20px;">
+            <h3>Change Password</h3>
+            <form method="post" action="/Account/ChangePassword" id="changepw-form" style="display:grid;gap:14px;margin-top:10px;max-width:420px;">
+                @Html.AntiForgeryToken()
+                <label style="@fieldLabel">Current Password
+                    <input type="password" name="currentPassword" style="@fieldInput" />
+                </label>
+                <label style="@fieldLabel">New Password
+                    <input type="password" name="newPassword" style="@fieldInput" />
+                </label>
+                <label style="@fieldLabel">Confirm New Password
+                    <input type="password" name="confirmPassword" style="@fieldInput" />
+                </label>
+                <button type="submit" class="auth-submit" style="width:auto;padding:10px 24px;">Update Password</button>
+            </form>
+        </div>
+
+        <div class="card" style="margin-top:20px;">
+            <h3>Display Currency</h3>
+            <p style="color:var(--text-500);font-size:0.88rem;margin:6px 0 12px;">All salaries on the site are shown in this currency. Everyone starts on USD — change it here anytime.</p>
+            @{
+                var currentCurrency = user?.PreferredCurrency ?? Context.Session.GetString("Currency") ?? "USD";
+                var currencyOptions = new[] {
+                    ("USD","US Dollar ($)"), ("ILS","Israeli Shekel (₪)"), ("EUR","Euro (€)"), ("GBP","British Pound (£)"),
+                    ("JPY","Japanese Yen (¥)"), ("CAD","Canadian Dollar"), ("AUD","Australian Dollar"), ("CHF","Swiss Franc"),
+                    ("INR","Indian Rupee (₹)"), ("BRL","Brazilian Real"), ("MXN","Mexican Peso"), ("ZAR","South African Rand"),
+                    ("SGD","Singapore Dollar"), ("AED","UAE Dirham"), ("TRY","Turkish Lira")
+                };
+            }
+            <form method="post" action="/Account/UpdateCurrency" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                @Html.AntiForgeryToken()
+                <select name="currency" style="@(fieldInput);max-width:280px;">
+                    @foreach (var opt in currencyOptions)
+                    {
+                        <option value="@opt.Item1" selected="@(string.Equals(currentCurrency, opt.Item1, StringComparison.OrdinalIgnoreCase))">@opt.Item2</option>
+                    }
+                </select>
+                <button type="submit" class="auth-submit" style="width:auto;padding:10px 24px;">Save</button>
+            </form>
+        </div>
     </section>
 
     <aside class="right-col">
@@ -70,3 +145,12 @@
         </div>
     </aside>
 </main>
+
+@if (TempData["Success"] != null)
+{
+    <div class="toast-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="toast-error">@TempData["Error"]</div>
+}

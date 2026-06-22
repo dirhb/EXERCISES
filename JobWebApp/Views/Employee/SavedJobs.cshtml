@@ -1,0 +1,79 @@
+@*
+    Views/Employee/SavedJobs.cshtml
+    The jobs this employee has bookmarked.
+*@
+
+@using JobModels
+@{
+    ViewBag.Title = "Saved Jobs";
+    var jobs = ViewBag.Jobs as List<Job> ?? new List<Job>();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Register.css" />
+}
+
+<header class="page-header content-page-header">
+    <h1>Saved Jobs</h1>
+    <p>Jobs you've bookmarked to revisit.</p>
+</header>
+
+<main class="container content-page" style="padding-top:24px">
+    <section class="left-col">
+        <div class="card">
+            <h3>@jobs.Count saved job@(jobs.Count == 1 ? "" : "s")</h3>
+
+            @if (jobs.Any())
+            {
+                <div style="display:grid;gap:12px;margin-top:10px;">
+                    @foreach (var job in jobs)
+                    {
+                        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px;border:1px solid var(--line);border-radius:var(--radius-sm);">
+                            <div>
+                                <a href="/Employee/JobDetails?jobId=@job.JobID" style="font-weight:700;color:var(--brand-800);text-decoration:none;">@job.JobTitle</a>
+                                <div style="color:var(--text-500);font-size:0.86rem;margin-top:2px;">
+                                    @(job.EmployerName ?? "JobFind Employer") — @(job.CountryName ?? "Remote")
+                                    @if (job.Salary.HasValue)
+                                    {
+                                        <span> — </span><span class="money" data-usd="@job.Salary.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)">$@job.Salary.Value.ToString("N0")</span>
+                                    }
+                                </div>
+                            </div>
+                            <form method="post" action="/Employee/ToggleSavedJob" style="margin:0;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="jobId" value="@job.JobID" />
+                                <input type="hidden" name="returnUrl" value="/Employee/SavedJobs" />
+                                <button type="submit" class="cta-btn secondary" style="font-size:0.83rem;padding:7px 12px;display:inline-flex;align-items:center;gap:4px;">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">bookmark</span>Remove
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p style="color:var(--text-500);padding:12px;">You haven't saved any jobs yet. Browse the <a href="/Employee/JobCatalog">job catalog</a> and tap Save.</p>
+            }
+        </div>
+    </section>
+
+    <aside class="right-col">
+        <div class="card">
+            <h3>Quick Links</h3>
+            <ul class="popular-list">
+                <li><a href="/Employee/JobCatalog">Job Catalog</a></li>
+                <li><a href="/Employee/JobHistory">My Applications</a></li>
+            </ul>
+        </div>
+    </aside>
+</main>
+
+@if (TempData["Success"] != null)
+{
+    <div class="toast-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="toast-error">@TempData["Error"]</div>
+}

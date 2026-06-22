@@ -150,6 +150,37 @@ function formatNotificationDate(raw) {
     return d.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
+/* ── Unread badge helpers ──
+   "Read" state is tracked client-side: we remember the highest notification id
+   the user has opened the bell on, and count anything newer as unread. */
+function notifId(n) {
+    return parseInt(n.notificationID || n.NotificationID || 0, 10) || 0;
+}
+
+function updateNotifBadge(notifications) {
+    const badge = document.getElementById('notif-badge');
+    if (!badge) return;
+    const maxId = (notifications || []).reduce((m, n) => Math.max(m, notifId(n)), 0);
+    badge.dataset.maxId = maxId;
+    const lastSeen = parseInt(localStorage.getItem('lastSeenNotifId') || '0', 10) || 0;
+    const unread = (notifications || []).filter(n => notifId(n) > lastSeen).length;
+    if (unread > 0) {
+        badge.textContent = unread > 9 ? '9+' : String(unread);
+        badge.style.display = '';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+function markNotifsRead() {
+    const badge = document.getElementById('notif-badge');
+    if (!badge) return;
+    const maxId = parseInt(badge.dataset.maxId || '0', 10) || 0;
+    const lastSeen = parseInt(localStorage.getItem('lastSeenNotifId') || '0', 10) || 0;
+    if (maxId > lastSeen) localStorage.setItem('lastSeenNotifId', String(maxId));
+    badge.style.display = 'none';
+}
+
 async function pollNotifications() {
     const dropdown = document.getElementById('notification-dropdown');
     if (!dropdown) return;
@@ -186,6 +217,8 @@ async function pollNotifications() {
             li.style.color = 'var(--text-500)';
             dropdown.appendChild(li);
         }
+
+        updateNotifBadge(notifications);
     } catch (err) {
         // Silently ignore if WS is not running; don't spam the console
     }
@@ -224,6 +257,9 @@ document.querySelectorAll('.notification, .account').forEach(item => {
 
         // Toggle this one based on its state before the close-all
         dropdown.style.display = isVisible ? 'none' : 'block';
+
+        // Mark notifications as read when the bell is opened.
+        if (!isVisible && item.classList.contains('notification')) markNotifsRead();
     });
 });
 
@@ -348,22 +384,30 @@ if (resumeInput && resumeNameSpan) {
    shown in the left column by matching data-genre attribute.
 --------------------------------------------------------------- */
 (function () {
-    const genreCheckboxes = document.querySelectorAll('.genres-list input[type="checkbox"]');
-    if (!genreCheckboxes.length) return;
+    const genreBoxes = document.querySelectorAll('.genres-list input[name="genre"]');
+    const statusBoxes = document.querySelectorAll('input[name="status"]');
+    const rows = document.querySelectorAll('.job-row[data-genre]');
+    if (!rows.length || (!genreBoxes.length && !statusBoxes.length)) return;
 
-    genreCheckboxes.forEach(cb => {
-        cb.addEventListener('change', () => {
-            const checked = Array.from(genreCheckboxes)
-                .filter(c => c.checked)
-                .map(c => c.value);
+    function checkedValues(boxes) {
+        // Ignore empty values (e.g. the "All" radio) so they mean "no filter".
+        return Array.from(boxes).filter(b => b.checked).map(b => (b.value || '').toLowerCase()).filter(v => v !== '');
+    }
 
-            document.querySelectorAll('.job-row[data-genre]').forEach(row => {
-                if (checked.length === 0) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = checked.includes(row.dataset.genre) ? '' : 'none';
-                }
-            });
+    function applyFilters() {
+        const genres = checkedValues(genreBoxes);
+        const statuses = checkedValues(statusBoxes);
+        rows.forEach(row => {
+            // Remember the row's ORIGINAL display (it's flex) so re-showing it
+            // restores that instead of clearing it and collapsing the layout.
+            if (row.dataset.origDisplay === undefined) {
+                row.dataset.origDisplay = row.style.display || '';
+            }
+            const genreOk = genres.length === 0 || genres.includes((row.dataset.genre || '').toLowerCase());
+            const statusOk = statuses.length === 0 || statuses.includes((row.dataset.status || '').toLowerCase());
+            row.style.display = (genreOk && statusOk) ? row.dataset.origDisplay : 'none';
         });
-    });
+    }
+
+    [...genreBoxes, ...statusBoxes].forEach(b => b.addEventListener('change', applyFilters));
 })();

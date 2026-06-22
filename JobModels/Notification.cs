@@ -13,5 +13,7 @@ namespace JobModels
         public string? NotificationID {  get; set; }
         public string? NotificationText { get; set; }
         public string? NotificationDate { get; set; }
+        // NULL = broadcast (everyone). Otherwise the UserID this is targeted at.
+        public string? RecipientUserID { get; set; }
     }
 }

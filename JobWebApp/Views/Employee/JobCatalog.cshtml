@@ -15,9 +15,12 @@
     string selectedGenre = ViewBag.SelectedGenre as string ?? string.Empty;
     string selectedJobType = ViewBag.SelectedJobType as string ?? string.Empty;
     bool showActiveOnly = ViewBag.ShowActiveOnly == true;
+    string minSalary = ViewBag.MinSalary != null ? ViewBag.MinSalary.ToString() : string.Empty;
+    string maxSalary = ViewBag.MaxSalary != null ? ViewBag.MaxSalary.ToString() : string.Empty;
     int page = Convert.ToInt32(ViewBag.Page ?? 1);
     int totalPages = Convert.ToInt32(ViewBag.TotalPages ?? 1);
     int totalJobs = Convert.ToInt32(ViewBag.TotalJobs ?? jobs.Count);
+    var savedJobIds = ViewBag.SavedJobIds as HashSet<string> ?? new HashSet<string>();
 
     // Build a catalog URL for a given page, preserving every active filter.
     Func<int, string> pageUrl = p =>
@@ -25,6 +28,7 @@
         $"&genreId={Uri.EscapeDataString(selectedGenre)}" +
         $"&employerId={Uri.EscapeDataString(selectedEmployer)}" +
         $"&jobType={Uri.EscapeDataString(selectedJobType)}" +
+        $"&minSalary={Uri.EscapeDataString(minSalary)}&maxSalary={Uri.EscapeDataString(maxSalary)}" +
         $"&showActiveOnly={(showActiveOnly ? "true" : "false")}&page={p}";
 }
 
@@ -46,6 +50,10 @@
             </label>
             <input type="hidden" name="genreId" value="@selectedGenre" />
             <input type="hidden" name="showActiveOnly" value="@(ViewBag.ShowActiveOnly == true ? "true" : "false")" />
+            <input type="number" name="minSalary" value="@minSalary" placeholder="Min $" min="0" aria-label="Minimum salary (USD)"
+                   style="width:96px;padding:9px 11px;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:var(--surface-2);color:var(--text-900);" />
+            <input type="number" name="maxSalary" value="@maxSalary" placeholder="Max $" min="0" aria-label="Maximum salary (USD)"
+                   style="width:96px;padding:9px 11px;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:var(--surface-2);color:var(--text-900);" />
             <button type="submit" class="catalog-filter-btn">Search</button>
             <a class="catalog-reset" href="/Employee/JobCatalog">Clear</a>
         </form>
@@ -66,7 +74,7 @@
                             <div class="jcl-head">
                                 <div>
                                     <div class="jcl-title">@job.JobTitle</div>
-                                    <div class="jcl-company">@(string.IsNullOrWhiteSpace(job.EmployerID) ? "JobFind Employer" : job.EmployerID)</div>
+                                    <div class="jcl-company">@(job.EmployerName ?? "JobFind Employer")</div>
                                 </div>
                                 <div class="jcl-badges">
                                     @if (job.JobStatus == true)
@@ -77,21 +85,25 @@
                                     {
                                         <span class="jcl-badge closed">Position Filled</span>
                                     }
-                                    @if (!string.IsNullOrWhiteSpace(job.JobType))
+                                    @if (!string.IsNullOrWhiteSpace(job.JobTypeName))
                                     {
-                                        <span class="jcl-badge type">@job.JobType</span>
+                                        <span class="jcl-badge type">@job.JobTypeName</span>
                                     }
                                 </div>
                             </div>
                             <div class="jcl-meta-row">
-                                <span class="jcl-meta"><span class="material-symbols-outlined" aria-hidden="true">location_on</span>@(job.CountryName ?? job.CountryID ?? "Not specified")</span>
-                                @if (!string.IsNullOrWhiteSpace(job.JobType))
+                                <span class="jcl-meta"><span class="material-symbols-outlined" aria-hidden="true">location_on</span>@(job.CountryName ?? "Not specified")</span>
+                                @if (!string.IsNullOrWhiteSpace(job.JobTypeName))
                                 {
-                                    <span class="jcl-meta"><span class="material-symbols-outlined" aria-hidden="true">work</span>@job.JobType</span>
+                                    <span class="jcl-meta"><span class="material-symbols-outlined" aria-hidden="true">work</span>@job.JobTypeName</span>
                                 }
-                                @if (!string.IsNullOrWhiteSpace(job.GenreTitle ?? job.GenreID))
+                                @if (!string.IsNullOrWhiteSpace(job.GenreTitle))
                                 {
-                                    <span class="jcl-meta"><span class="material-symbols-outlined" aria-hidden="true">category</span>@(job.GenreTitle ?? job.GenreID)</span>
+                                    <span class="jcl-meta"><span class="material-symbols-outlined" aria-hidden="true">category</span>@(job.GenreTitle)</span>
+                                }
+                                @if (job.Salary.HasValue)
+                                {
+                                    <span class="jcl-meta"><span class="material-symbols-outlined" aria-hidden="true">payments</span><span class="money" data-usd="@job.Salary.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)">$@job.Salary.Value.ToString("N0")</span></span>
                                 }
                             </div>
                             <p class="jcl-desc">@(string.IsNullOrWhiteSpace(job.JobDescription) ? "No description provided yet." : job.JobDescription)</p>
@@ -104,28 +116,47 @@
 
                         @* Action footer — sits outside the link so buttons stay clickable *@
                         <div class="jcl-actions">
-                            @if (job.JobStatus == false)
+                            @if (Context.Session.GetString("UserTypeID") == "2")
                             {
-                                <button type="button" class="catalog-apply-btn" style="background:var(--line); color:var(--text-500); cursor:not-allowed;" disabled>Position Filled</button>
-                            }
-                            else
-                            {
-                                <form method="post" action="/Employee/ApplyToJob" enctype="multipart/form-data" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0;">
+                                @if (job.JobStatus == false)
+                                {
+                                    <button type="button" class="catalog-apply-btn" style="background:var(--line); color:var(--text-500); cursor:not-allowed;" disabled>Position Filled</button>
+                                }
+                                else
+                                {
+                                    <form method="post" action="/Employee/ApplyToJob" enctype="multipart/form-data" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="jobId" value="@job.JobID" />
+                                        <input type="hidden" name="returnUrl" value="@returnUrl" />
+                                        <label class="custom-file-label">
+                                            <span class="material-symbols-outlined" style="font-size:15px;">upload_file</span>
+                                            PDF (optional)
+                                            <input type="file" name="resumeFile" accept=".pdf" class="custom-apply-file" />
+                                        </label>
+                                        <span class="custom-file-name" data-default="No file">No file</span>
+                                        <button type="submit" class="catalog-apply-btn">Apply Now</button>
+                                    </form>
+                                }
+                                @if (!string.IsNullOrEmpty(job.EmployerID))
+                                {
+                                    <a href="/Employee/Chat?partnerId=@job.EmployerID" class="cta-btn secondary" style="font-size:0.85rem; padding:7px 16px;">Message</a>
+                                }
+                                <button type="button" class="report-btn" data-report-type="Job" data-report-id="@job.JobID" data-report-label="@job.JobTitle"
+                                        style="background:none;border:none;color:var(--text-500);font-size:0.83rem;cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:7px 6px;">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">flag</span>Report
+                                </button>
+                                <form method="post" action="/Employee/ToggleSavedJob" style="margin:0;">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="jobId" value="@job.JobID" />
                                     <input type="hidden" name="returnUrl" value="@returnUrl" />
-                                    <label class="custom-file-label">
-                                        <span class="material-symbols-outlined" style="font-size:15px;">upload_file</span>
-                                        PDF (optional)
-                                        <input type="file" name="resumeFile" accept=".pdf" class="custom-apply-file" />
-                                    </label>
-                                    <span class="custom-file-name" data-default="No file">No file</span>
-                                    <button type="submit" class="catalog-apply-btn">Apply Now</button>
+                                    <button type="submit" class="cta-btn secondary" style="font-size:0.83rem;padding:7px 12px;display:inline-flex;align-items:center;gap:4px;">
+                                        <span class="material-symbols-outlined" style="font-size:16px;">@(savedJobIds.Contains(job.JobID ?? string.Empty) ? "bookmark" : "bookmark_border")</span>@(savedJobIds.Contains(job.JobID ?? string.Empty) ? "Saved" : "Save")
+                                    </button>
                                 </form>
                             }
-                            @if (!string.IsNullOrEmpty(job.EmployerID))
+                            else if (Context.Session.GetString("UserID") == null)
                             {
-                                <a href="/Employee/Chat?partnerId=@job.EmployerID" class="cta-btn secondary" style="font-size:0.85rem; padding:7px 16px;">Message</a>
+                                <a href="/Guest/Login" class="catalog-apply-btn" style="text-decoration:none;display:inline-flex;align-items:center;">Sign in to apply</a>
                             }
                         </div>
                     </article>

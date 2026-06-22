@@ -29,19 +29,19 @@
 
                     <label style="display:flex;flex-direction:column;gap:6px;font-size:0.86rem;font-weight:600;color:var(--text-700);text-transform:uppercase;letter-spacing:0.02em">
                         Job Title
-                        <input type="text" name="JobTitle" placeholder="e.g. Frontend Developer" required
+                        <input type="text" name="JobTitle" placeholder="e.g. Frontend Developer"
                                style="font-family:inherit;font-size:0.95rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;width:100%" />
                     </label>
 
                     <label style="display:flex;flex-direction:column;gap:6px;font-size:0.86rem;font-weight:600;color:var(--text-700);text-transform:uppercase;letter-spacing:0.02em">
                         Job Description
-                        <textarea name="JobDescription" rows="5" placeholder="Describe the role, responsibilities, and requirements..." required
+                        <textarea name="JobDescription" rows="5" placeholder="Describe the role, responsibilities, and requirements..."
                                   style="font-family:inherit;font-size:0.95rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;width:100%;resize:vertical"></textarea>
                     </label>
 
                     <label style="display:flex;flex-direction:column;gap:6px;font-size:0.86rem;font-weight:600;color:var(--text-700);text-transform:uppercase;letter-spacing:0.02em">
                         Job Type
-                        <select name="JobType" required style="font-family:inherit;font-size:0.95rem;font-weight:400;text-transform:none;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;width:100%">
+                        <select name="JobType" style="font-family:inherit;font-size:0.95rem;font-weight:400;text-transform:none;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;width:100%">
                             <option value="" disabled selected>Choose a job type</option>
                             @foreach (JobType jobType in Model.JobTypes)
                             {
@@ -54,7 +54,7 @@
                     0.86rem;font-weight:600;color:var(--text-700);text-transform:uppercase;
                     letter-spacing:0.02em">
                         Genre
-                        <select name="GenreID" required 
+                        <select name="GenreID"
                             style="font-family:inherit;font-size:0.95rem;font-weight:400;
                             text-transform:none;color:var(--text-900);
                             background:var(--surface-2);border:1.5px solid var(--line);
@@ -69,6 +69,12 @@
                     </label>
 
                     <label style="display:flex;flex-direction:column;gap:6px;font-size:0.86rem;font-weight:600;color:var(--text-700);text-transform:uppercase;letter-spacing:0.02em">
+                        Salary (USD / year)
+                        <input type="text" name="Salary" inputmode="decimal" placeholder="e.g. 60000"
+                               style="font-family:inherit;font-size:0.95rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;width:100%" />
+                    </label>
+
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:0.86rem;font-weight:600;color:var(--text-700);text-transform:uppercase;letter-spacing:0.02em">
                         Search Keywords / Filters
                         <input type="text" name="JobFilter" placeholder="e.g. junior, SQL, remote, customer service"
                                style="font-family:inherit;font-size:0.95rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;width:100%" />
@@ -76,9 +82,9 @@
 
                     <div style="display:flex;flex-direction:column;gap:6px;position:relative;">
                         <span style="font-size:0.86rem;font-weight:600;color:var(--text-700);text-transform:uppercase;letter-spacing:0.02em">Location (Country)</span>
-                        <input type="text" id="country-search-input" placeholder="Type to search country (e.g. Israel, United States)..." autocomplete="off" required
+                        <input type="text" id="country-search-input" placeholder="Type to search country (e.g. Israel, United States)..." autocomplete="off"
                                style="font-family:inherit;font-size:0.95rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;width:100%" />
-                        <input type="hidden" name="CountryID" id="country-id-hidden" required />
+                        <input type="hidden" name="CountryID" id="country-id-hidden" />
                         <div id="country-suggestions" style="display:none; position:absolute; top:100%; left:0; right:0; z-index:1000; max-height:200px; overflow-y:auto; background:var(--surface); border:1.5px solid var(--line); border-radius:var(--radius-sm); box-shadow:var(--shadow-md); margin-top:4px;"></div>
                     </div>
 
@@ -174,18 +180,7 @@
                 }
             });
 
-            // Validate that country was selected from list before form submit
-            if (form) {
-                form.addEventListener("submit", (e) => {
-                    if (!hiddenInput.value) {
-                        e.preventDefault();
-                        searchInput.style.borderColor = "#d63031";
-                        searchInput.placeholder = "Please select a country from the dropdown list";
-                        searchInput.focus();
-                        alert("Please select a country from the suggestions list.");
-                    }
-                });
-            }
+            // Country selection is validated in validation.js (checks the hidden CountryID).
         });
     </script>
 }

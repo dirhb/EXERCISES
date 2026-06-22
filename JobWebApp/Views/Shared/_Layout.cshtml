@@ -7,6 +7,7 @@
 
     @* Shared CSS — loaded on every page *@
     <link rel="stylesheet" href="~/css/StyleSheet.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/validation.css" asp-append-version="true" />
 
     @* Page-specific CSS — each view injects its own *@
     @RenderSection("Styles", required: false)
@@ -17,7 +18,9 @@
 
     @{
         string navSearch = Context.Request.Query["search"].ToString();
-        string navSearchAction = Context.Session.GetString("UserTypeID") == "2" ? "/Employee/JobCatalog" : "/Guest/Home";
+        string navUserType = Context.Session.GetString("UserTypeID");
+        // Employees and guests both search the open job catalog.
+        string navSearchAction = (navUserType == "2" || navUserType == null) ? "/Employee/JobCatalog" : "/Guest/Home";
     }
 
     @* Nav is here once — every page gets it automatically *@
@@ -35,6 +38,7 @@
                 @* Employee nav (UserTypeID = 2) *@
                 <li><a href="/Employee/JobHistory">Job History</a></li>
                 <li><a href="/Employee/JobCatalog">Job Catalog</a></li>
+                <li><a href="/Employee/SavedJobs">Saved Jobs</a></li>
                 <li><a href="/Employee/Resume">Online Resume</a></li>
                 <li><a href="/Employee/Chat">Chat</a></li>
             }
@@ -43,6 +47,7 @@
                 @* Employer nav (UserTypeID = 3) *@
                 <li><a href="/Employer/YourJobs">Your Jobs</a></li>
                 <li><a href="/Employer/PostJob">Post a Job</a></li>
+                <li><a href="/Employer/HiredCandidates">Hired</a></li>
                 <li><a href="/Employer/Chat">Chat</a></li>
             }
             else if (Context.Session.GetString("UserTypeID") == "4")
@@ -51,11 +56,12 @@
                 <li><a href="/Admin/Home">Manage Jobs</a></li>
                 <li><a href="/Admin/Applications">Applications</a></li>
                 <li><a href="/Admin/Notify">Notify Users</a></li>
+                <li><a href="/Admin/Reports">Reports</a></li>
             }
             else
             {
                 @* Guest nav *@
-                <li><a href="/Guest/Home">Browse Jobs</a></li>
+                <li><a href="/Employee/JobCatalog">Browse Jobs</a></li>
                 <li><a href="/Guest/Login">Register</a></li>
             }
 
@@ -70,9 +76,11 @@
             @* Notifications — only for logged in users *@
             @if (Context.Session.GetString("UserID") != null)
             {
-                <li class="notification">
+                <li class="notification" style="position:relative;">
                     <button class="notification-icon material-symbols-outlined" aria-label="Notifications">notifications</button>
-                    <ul class="dropdown" id="notification-dropdown">
+                    <span id="notif-badge" style="display:none;position:absolute;top:0;right:0;min-width:16px;height:16px;padding:0 4px;background:#e02424;color:#fff;border-radius:999px;font-size:0.64rem;font-weight:700;line-height:16px;text-align:center;pointer-events:none;">0</span>
+                    @* Capped to ~4 rows; the rest scroll. *@
+                    <ul class="dropdown" id="notification-dropdown" style="max-height:264px;overflow-y:auto;">
                         <li>Loading...</li>
                     </ul>
                 </li>
@@ -116,8 +124,49 @@
         </div>
     </div>
 
+    @* ── Report Modal (logged-in, non-admin users) ── *@
+    @if (Context.Session.GetString("UserID") != null && Context.Session.GetString("UserTypeID") != "4")
+    {
+        <div id="report-modal" class="modal-container" aria-hidden="true">
+            <div class="modal-overlay"></div>
+            <div class="modal-dialog" style="text-align:left;">
+                <h2 style="margin-bottom:4px;">Report <span class="report-target-label">this</span></h2>
+                <p style="color:var(--text-500);font-size:0.9rem;margin-bottom:14px;">Sent privately to the admins for review.</p>
+                <form method="post" action="/Report/Submit" id="report-form" style="display:grid;gap:12px;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="targetType" value="" />
+                    <input type="hidden" name="targetId" value="" />
+                    <input type="hidden" name="subject" value="" />
+                    <input type="hidden" name="returnUrl" value="" />
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:0.86rem;font-weight:600;color:var(--text-700);">
+                        Reason
+                        <select name="category" style="font-family:inherit;font-size:0.95rem;font-weight:400;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;">
+                            <option value="" disabled selected>Choose a reason</option>
+                            <option value="Offensive content / slurs">Offensive content / slurs</option>
+                            <option value="Spam or bot">Spam or bot</option>
+                            <option value="Scam or fraud">Scam or fraud</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </label>
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:0.86rem;font-weight:600;color:var(--text-700);">
+                        Details <span style="font-weight:400;color:var(--text-500);">(optional)</span>
+                        <textarea name="reportText" rows="3" placeholder="Add any details..." style="font-family:inherit;font-size:0.95rem;font-weight:400;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;resize:vertical;"></textarea>
+                    </label>
+                    <div class="modal-actions">
+                        <button type="button" class="modal-cancel report-cancel">Cancel</button>
+                        <button type="submit" class="modal-confirm">Send Report</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+
     @* Shared JS *@
-    <script src="~/js/site.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/validation.js" asp-append-version="true"></script>
+    <script>window.JOBFIND_CURRENCY = '@(Context.Session.GetString("Currency") ?? "USD")';</script>
+    <script src="~/js/currency.js" asp-append-version="true"></script>
+    <script src="~/js/report.js" asp-append-version="true"></script>
 
     @* Page-specific JS *@
     @RenderSection("Scripts", required: false)

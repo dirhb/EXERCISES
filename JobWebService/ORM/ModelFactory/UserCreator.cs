@@ -22,6 +22,8 @@ namespace JobWebService.ORM.ModelFactory
                 ResumeText = reader["ResumeText"] == DBNull.Value ? null : Convert.ToString(reader["ResumeText"]),
                 Salary = reader["Salary"] == DBNull.Value ? (decimal?)null : Convert.ToDecimal(reader["Salary"]),
                 CountryName = HasColumn(reader, "CountryName") && reader["CountryName"] != DBNull.Value ? Convert.ToString(reader["CountryName"]) : null,
+                IsBanned = HasColumn(reader, "IsBanned") && reader["IsBanned"] != DBNull.Value && Convert.ToInt32(reader["IsBanned"]) != 0,
+                PreferredCurrency = HasColumn(reader, "PreferredCurrency") && reader["PreferredCurrency"] != DBNull.Value ? Convert.ToString(reader["PreferredCurrency"]) : null,
             };
             return User;
         }

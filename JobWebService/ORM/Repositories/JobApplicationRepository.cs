@@ -93,6 +93,15 @@ public class JobApplicationRepository : Repository, IRepository<JobApplication>
         return this.helperOleDb.Update(sql) > 0;
     }
 
+    // Sets the salary offered for one specific application.
+    public bool UpdateOfferedSalary(string applicationId, decimal salary)
+    {
+        string sql = "UPDATE JobApplications SET OfferedSalary=@OfferedSalary WHERE ApplicationID=@ApplicationID";
+        this.helperOleDb.AddParameters("@OfferedSalary", salary);
+        this.helperOleDb.AddParameters("@ApplicationID", applicationId);
+        return this.helperOleDb.Update(sql) > 0;
+    }
+
     public bool Update(JobApplication model)
     {
         string sql = "UPDATE JobApplications SET JobID=@JobID,UserID=@UserID,ResumeText=@ResumeText,Status=@Status,CreatedAt=@CreatedAt WHERE ApplicationID=@ApplicationID";

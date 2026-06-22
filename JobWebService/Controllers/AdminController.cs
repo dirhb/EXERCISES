@@ -73,6 +73,47 @@ namespace JobWebService.Controllers
             }
         }
 
+        // Ban a user (they can no longer log in). Reversible via UnbanUser.
+        [HttpPost]
+        public bool BanUser(string userId)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(userId)) return false;
+                this.libraryUOW.HelperOledb.OpenConnection();
+                return this.libraryUOW.UserRepository.SetBanned(userId, true);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+                return false;
+            }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
+            }
+        }
+
+        [HttpPost]
+        public bool UnbanUser(string userId)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(userId)) return false;
+                this.libraryUOW.HelperOledb.OpenConnection();
+                return this.libraryUOW.UserRepository.SetBanned(userId, false);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+                return false;
+            }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
+            }
+        }
+
         [HttpGet]
         public List<JobApplication> ReviewApplication(string? status)
         {
@@ -98,6 +139,7 @@ namespace JobWebService.Controllers
             }
         }
 
+        // Broadcast — visible to every user (RecipientUserID left null).
         [HttpPost]
         public bool NotifyAboutWebsiteChanges(string text)
         {
@@ -105,9 +147,37 @@ namespace JobWebService.Controllers
             {
                 this.libraryUOW.HelperOledb.OpenConnection();
                 Notification model = new Notification();
-                model.NotificationID = Guid.NewGuid().ToString("N");
                 model.NotificationText = text;
                 model.NotificationDate = DateTime.UtcNow.ToString("O");
+                model.RecipientUserID = null;
+
+                return this.libraryUOW.NotificationRepository.Insert(model);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+                return false;
+            }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
+            }
+        }
+
+        // Targeted — only the addressed user will see this notification.
+        [HttpPost]
+        public bool NotifyUser(string userId, string text)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(userId))
+                    return false;
+
+                this.libraryUOW.HelperOledb.OpenConnection();
+                Notification model = new Notification();
+                model.NotificationText = text;
+                model.NotificationDate = DateTime.UtcNow.ToString("O");
+                model.RecipientUserID = userId;
 
                 return this.libraryUOW.NotificationRepository.Insert(model);
             }
@@ -142,11 +212,9 @@ namespace JobWebService.Controllers
             }
         }
 
-        // Returns latest notifications — used by the notification bell.
-        // When a userId is supplied, the user sees broadcasts plus the
-        // notifications targeted at them ("[To User {id}]: ..."), with the
-        // targeting prefix stripped off for display. Notifications aimed at
-        // other users are filtered out.
+        // Returns the latest notifications for the bell: broadcasts plus the
+        // ones targeted at this user. Targeting is done with the real
+        // RecipientUserID column, so other users' notifications never leak.
         [HttpGet]
         public List<Notification> GetNotifications(string? userId)
         {
@@ -154,35 +222,10 @@ namespace JobWebService.Controllers
             {
                 this.libraryUOW.HelperOledb.OpenConnection();
 
-                List<Notification> all = this.libraryUOW.NotificationRepository.ReadAll()
-                    .OrderByDescending(n => n.NotificationDate)
+                // ReadForUser already returns newest-first (ordered by NotificationID).
+                return this.libraryUOW.NotificationRepository.ReadForUser(userId ?? string.Empty)
+                    .Take(10)
                     .ToList();
-
-                const string targetPrefix = "[To User ";
-                List<Notification> visible = new List<Notification>();
-
-                foreach (Notification notification in all)
-                {
-                    string text = notification.NotificationText ?? string.Empty;
-
-                    if (!text.StartsWith(targetPrefix))
-                    {
-                        // Broadcast — everyone sees it
-                        visible.Add(notification);
-                    }
-                    else if (!string.IsNullOrWhiteSpace(userId))
-                    {
-                        // Targeted — only the addressed user sees it
-                        string marker = $"[To User {userId}]:";
-                        if (text.StartsWith(marker))
-                        {
-                            notification.NotificationText = text.Substring(marker.Length).Trim();
-                            visible.Add(notification);
-                        }
-                    }
-                }
-
-                return visible.Take(10).ToList();
             }
             catch (Exception ex)
             {

@@ -77,12 +77,12 @@
                             <div class="fj-top">
                                 <div>
                                     <span class="fj-title">@job.JobTitle</span>
-                                    <span class="fj-company">@job.EmployerID — @(job.CountryName ?? job.CountryID)</span>
+                                    <span class="fj-company">@(job.EmployerName ?? "JobFind Employer") — @(job.CountryName ?? "Remote")</span>
                                 </div>
                                 <span class="fj-badge">Featured</span>
                             </div>
                             <div class="fj-tags">
-                                <span>@job.JobType</span>
+                                <span>@(job.JobTypeName ?? "Not specified")</span>
                                 @* Guest can see but not apply — prompt to login *@
                                 <a href="/Guest/Login" class="fj-apply-hint">Sign in to apply</a>
                             </div>

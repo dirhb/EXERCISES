@@ -125,6 +125,7 @@ namespace JobWebApp.Controllers
                 user.UserName!,
                 $"{user.FirstName} {user.LastName}"
             );
+            SessionHelper.SetCurrency(HttpContext.Session, user.PreferredCurrency);
 
             return RedirectBasedOnRole();
         }
@@ -152,6 +153,37 @@ namespace JobWebApp.Controllers
 
             TempData["Success"] = "Account created! Please sign in.";
             return RedirectToAction("Login");
+        }
+
+        // ── GET: /Guest/ForgotPassword ─────────────────────────
+        // Simple reset: verify email + username, then set a new password.
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            if (SessionHelper.IsLoggedIn(HttpContext.Session))
+                return RedirectBasedOnRole();
+
+            return View();
+        }
+
+        // ── POST: /Guest/ForgotPassword ────────────────────────
+        [HttpPost]
+        public async Task<IActionResult> ForgotPassword(string email, string username, string newPassword)
+        {
+            ApiClient<bool> client = BuildClient<bool>("User", "ResetPassword");
+            client.AddParameter("email", email);
+            client.AddParameter("username", username);
+            client.AddParameter("newPassword", newPassword);
+            bool success = await client.PostAsync();
+
+            if (success)
+            {
+                TempData["Success"] = "Password reset. Please sign in with your new password.";
+                return RedirectToAction("Login");
+            }
+
+            TempData["Error"] = "We couldn't verify those details. Double-check your email and username.";
+            return RedirectToAction("ForgotPassword");
         }
 
         // ── GET: /Guest/Logout ─────────────────────────────────

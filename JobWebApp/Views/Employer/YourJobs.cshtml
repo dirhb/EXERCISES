@@ -39,7 +39,7 @@
                                 <div class="jcl-head">
                                     <div>
                                         <div class="jcl-title">@job.JobTitle</div>
-                                        <div class="jcl-company">@(job.CountryName ?? job.CountryID ?? "Location not set")</div>
+                                        <div class="jcl-company">@(job.CountryName ?? "Location not set")</div>
                                     </div>
                                     <div class="jcl-badges">
                                         @if (job.JobStatus == true)
@@ -50,21 +50,21 @@
                                         {
                                             <span class="jcl-badge closed">Closed / Inactive</span>
                                         }
-                                        @if (!string.IsNullOrWhiteSpace(job.JobType))
+                                        @if (!string.IsNullOrWhiteSpace(job.JobTypeName))
                                         {
-                                            <span class="jcl-badge type">@job.JobType</span>
+                                            <span class="jcl-badge type">@job.JobTypeName</span>
                                         }
                                     </div>
                                 </div>
                                 <div class="jcl-meta-row">
-                                    <span class="jcl-meta"><span class="material-symbols-outlined" aria-hidden="true">location_on</span>@(job.CountryName ?? job.CountryID ?? "Not specified")</span>
-                                    @if (!string.IsNullOrWhiteSpace(job.JobType))
+                                    <span class="jcl-meta"><span class="material-symbols-outlined" aria-hidden="true">location_on</span>@(job.CountryName ?? "Not specified")</span>
+                                    @if (!string.IsNullOrWhiteSpace(job.JobTypeName))
                                     {
-                                        <span class="jcl-meta"><span class="material-symbols-outlined" aria-hidden="true">work</span>@job.JobType</span>
+                                        <span class="jcl-meta"><span class="material-symbols-outlined" aria-hidden="true">work</span>@job.JobTypeName</span>
                                     }
-                                    @if (!string.IsNullOrWhiteSpace(job.GenreTitle ?? job.GenreID))
+                                    @if (!string.IsNullOrWhiteSpace(job.GenreTitle))
                                     {
-                                        <span class="jcl-meta"><span class="material-symbols-outlined" aria-hidden="true">category</span>@(job.GenreTitle ?? job.GenreID)</span>
+                                        <span class="jcl-meta"><span class="material-symbols-outlined" aria-hidden="true">category</span>@(job.GenreTitle)</span>
                                     }
                                 </div>
                                 <p class="jcl-desc">@(string.IsNullOrWhiteSpace(job.JobDescription) ? "No description provided yet." : job.JobDescription)</p>

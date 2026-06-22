@@ -22,7 +22,10 @@ namespace JobModels
         public string? EmployerID { get; set; }
         public string? CountryID { get; set; }
         public string? GenreID { get; set; }
+        public decimal? Salary { get; set; }
         public string? CountryName { get; set; }
         public string? GenreTitle { get; set; }
+        public string? JobTypeName { get; set; }
+        public string? EmployerName { get; set; }
     }
 }

@@ -22,5 +22,7 @@ namespace JobModels
         public string? ResumeText { get; set; }
         public decimal? Salary { get; set; }
         public string? CountryName { get; set; }
+        public bool? IsBanned { get; set; }
+        public string? PreferredCurrency { get; set; }   // display currency; defaults to USD
     }
 }

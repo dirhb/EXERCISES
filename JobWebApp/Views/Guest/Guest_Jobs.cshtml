@@ -42,12 +42,12 @@
                         <div class="fj-top">
                             <div>
                                 <span class="fj-title">@job.JobTitle</span>
-                                <span class="fj-company">@job.EmployerID — @(job.CountryName ?? job.CountryID)</span>
+                                <span class="fj-company">@(job.EmployerName ?? "JobFind Employer") — @(job.CountryName ?? "Remote")</span>
                             </div>
-                            <span class="fj-badge">@job.JobType</span>
+                            <span class="fj-badge">@(job.JobTypeName ?? "Open")</span>
                         </div>
                         <div class="fj-tags">
-                            <span>@job.JobType</span>
+                            <span>@(job.JobTypeName ?? "Not specified")</span>
                             @if (!string.IsNullOrEmpty(job.JobFilter))
                             {
                                 <span>@job.JobFilter</span>

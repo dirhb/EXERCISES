@@ -27,23 +27,23 @@
 <section class="stats-section">
     <div class="stat-box">
         <span class="stat-icon material-symbols-outlined">work</span>
-        <h2 class="stat-number">@jobs.Count</h2>
+        <h2 class="stat-number">@jobs.Count(j => j.JobStatus == true)</h2>
         <p class="stat-label">Active Postings</p>
     </div>
     <div class="stat-box">
         <span class="stat-icon material-symbols-outlined">people</span>
-        <h2 class="stat-number">—</h2>
+        <h2 class="stat-number">@(ViewBag.TotalApplicants ?? 0)</h2>
         <p class="stat-label">Total Applicants</p>
     </div>
     <div class="stat-box">
         <span class="stat-icon material-symbols-outlined">chat</span>
-        <h2 class="stat-number">—</h2>
+        <h2 class="stat-number">@(ViewBag.MessageCount ?? 0)</h2>
         <p class="stat-label">Messages</p>
     </div>
     <div class="stat-box">
-        <span class="stat-icon material-symbols-outlined">visibility</span>
-        <h2 class="stat-number">—</h2>
-        <p class="stat-label">Profile Views</p>
+        <span class="stat-icon material-symbols-outlined">star</span>
+        <h2 class="stat-number">@(ViewBag.ReviewCount ?? 0)</h2>
+        <p class="stat-label">Reviews</p>
     </div>
 </section>
 
@@ -60,7 +60,7 @@
                             <div class="fj-top">
                                 <div>
                                     <span class="fj-title">@job.JobTitle</span>
-                                    <span class="fj-company">@(job.CountryName ?? job.CountryID) — @job.JobType</span>
+                                    <span class="fj-company">@(job.CountryName ?? "Remote") — @(job.JobTypeName ?? "Not specified")</span>
                                 </div>
                                 @if (job.JobStatus == true)
                                 {
@@ -72,7 +72,7 @@
                                 }
                             </div>
                             <div class="fj-tags">
-                                <span>@job.JobType</span>
+                                <span>@(job.JobTypeName ?? "Not specified")</span>
                             </div>
                             <div style="display:flex;gap:8px;margin-top:8px">
                                 @* View applicants button *@

@@ -41,8 +41,24 @@ namespace JobWebApp.Controllers
             client.AddParameter("employerId", employerId);
             List<Job> myJobs = await client.GetAsync() ?? new List<Job>();
 
+            // ── Real dashboard stats ──
+            ApiClient<int> applicantsClient = BuildClient<int>("Employer", "CountApplicants");
+            applicantsClient.AddParameter("employerId", employerId);
+            int totalApplicants = await applicantsClient.GetAsync();
+
+            ApiClient<List<User>> convClient = BuildClient<List<User>>("Chat", "GetConversations");
+            convClient.AddParameter("userId", employerId);
+            int messageCount = (await convClient.GetAsync() ?? new List<User>()).Count;
+
+            ApiClient<List<Review>> reviewClient = BuildClient<List<Review>>("Review", "GetReviewsForEmployer");
+            reviewClient.AddParameter("employerId", employerId);
+            int reviewCount = (await reviewClient.GetAsync() ?? new List<Review>()).Count;
+
             ViewBag.FullName = SessionHelper.GetFullName(HttpContext.Session);
             ViewBag.Jobs = myJobs;
+            ViewBag.TotalApplicants = totalApplicants;
+            ViewBag.MessageCount = messageCount;
+            ViewBag.ReviewCount = reviewCount;
 
             return View();
         }
@@ -90,6 +106,19 @@ namespace JobWebApp.Controllers
                 TempData["Error"] = "That job could not be found.";
                 return RedirectToAction("YourJobs");
             }
+
+            List<Review> empReviews = new List<Review>();
+            if (!string.IsNullOrEmpty(job.EmployerID))
+            {
+                ApiClient<List<Review>> reviewClient = BuildClient<List<Review>>("Review", "GetReviewsForEmployer");
+                reviewClient.AddParameter("employerId", job.EmployerID);
+                empReviews = await reviewClient.GetAsync() ?? new List<Review>();
+            }
+            ViewBag.EmployerReviews = empReviews;
+            ViewBag.EmployerRatingCount = empReviews.Count;
+            ViewBag.EmployerRatingAvg = empReviews.Count > 0
+                ? Math.Round(empReviews.Where(r => r.RatingTitle.HasValue).Select(r => (double)r.RatingTitle!.Value).DefaultIfEmpty(0).Average(), 1)
+                : 0.0;
 
             ViewBag.Job = job;
             ViewBag.Role = "Employer";
@@ -192,23 +221,64 @@ namespace JobWebApp.Controllers
             return View();
         }
 
-        // ── POST: /Employer/UpdateSalary ───────────────────────
-        // Updates an employee's salary
+        // ── POST: /Employer/UpdateOfferedSalary ────────────────
+        // Sets the salary offered for one specific application.
         [HttpPost]
-        public async Task<IActionResult> UpdateSalary(string userId, decimal salary)
+        public async Task<IActionResult> UpdateOfferedSalary(string applicationId, decimal salary, string jobId)
         {
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
 
-            ApiClient<bool> client = BuildClient<bool>("Employer", "UpdateSalary");
-            client.AddParameter("userId", userId);
-            client.AddParameter("salary", salary.ToString());
+            ApiClient<bool> client = BuildClient<bool>("Employer", "UpdateOfferedSalary");
+            client.AddParameter("applicationId", applicationId);
+            client.AddParameter("salary", salary.ToString(System.Globalization.CultureInfo.InvariantCulture));
             bool success = await client.PostAsync();
 
             TempData[success ? "Success" : "Error"] = success
-                ? "Salary updated."
-                : "Failed to update salary.";
+                ? "Salary offer sent — the candidate can now see it."
+                : "Failed to send the offer.";
 
-            return RedirectToAction("Applicants", new { jobId = Request.Form["jobId"] });
+            return RedirectToAction("Applicants", new { jobId });
+        }
+
+        // ── GET: /Employer/HiredCandidates ─────────────────────
+        // Everyone this employer has accepted, across all their jobs.
+        public async Task<IActionResult> HiredCandidates()
+        {
+            if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
+
+            string employerId = SessionHelper.GetUserID(HttpContext.Session)!;
+
+            ApiClient<List<JobApplication>> acceptedClient = BuildClient<List<JobApplication>>("Employer", "GetAcceptedApplications");
+            acceptedClient.AddParameter("employerId", employerId);
+            List<JobApplication> accepted = await acceptedClient.GetAsync() ?? new List<JobApplication>();
+
+            ApiClient<List<Job>> jobsClient = BuildClient<List<Job>>("Employer", "GetMyJobs");
+            jobsClient.AddParameter("employerId", employerId);
+            List<Job> myJobs = await jobsClient.GetAsync() ?? new List<Job>();
+            Dictionary<string, string> jobTitles = myJobs
+                .Where(j => !string.IsNullOrEmpty(j.JobID))
+                .GroupBy(j => j.JobID!)
+                .ToDictionary(g => g.Key, g => g.First().JobTitle ?? "Job");
+
+            // Fetch each hired candidate's profile.
+            Dictionary<string, User> users = new Dictionary<string, User>();
+            foreach (JobApplication app in accepted)
+            {
+                string uid = app.EmployeeId.ToString();
+                if (!users.ContainsKey(uid))
+                {
+                    ApiClient<User> userClient = BuildClient<User>("User", "GetUser");
+                    userClient.AddParameter("userId", uid);
+                    User? u = await userClient.GetAsync();
+                    if (u != null) users[uid] = u;
+                }
+            }
+
+            ViewBag.Accepted = accepted;
+            ViewBag.JobTitles = jobTitles;
+            ViewBag.Users = users;
+            ViewBag.FullName = SessionHelper.GetFullName(HttpContext.Session);
+            return View();
         }
 
         // ── POST: /Employer/UpdateApplicationStatus ───────────
@@ -242,9 +312,17 @@ namespace JobWebApp.Controllers
             jobClient.AddParameter("employerId", employerId);
             List<Job> myJobs = await jobClient.GetAsync() ?? new List<Job>();
 
+            ApiClient<User> userClient = BuildClient<User>("User", "GetUser");
+            userClient.AddParameter("userId", employerId);
+            User? user = await userClient.GetAsync();
+            List<Country> countries = await BuildClient<List<Country>>("Guest", "GetAllCountries").GetAsync() ?? new List<Country>();
+
             ViewBag.FullName = SessionHelper.GetFullName(HttpContext.Session);
             ViewBag.UserName = SessionHelper.GetUserName(HttpContext.Session);
+            ViewBag.UserID = employerId;
             ViewBag.JobCount = myJobs.Count;
+            ViewBag.User = user;
+            ViewBag.Countries = countries;
 
             return View();
         }

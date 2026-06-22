@@ -47,7 +47,7 @@
                             <div class="fj-top">
                                 <div>
                                     <span class="fj-title">@job.JobTitle</span>
-                                    <span class="fj-company">@job.EmployerID — @(job.CountryName ?? job.CountryID) — @job.JobType</span>
+                                    <span class="fj-company">@(job.EmployerName ?? "JobFind Employer") — @(job.CountryName ?? "Remote") — @(job.JobTypeName ?? "Any type")</span>
                                 </div>
                                 @if (job.JobStatus == true)
                                 {

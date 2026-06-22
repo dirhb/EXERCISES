@@ -1,12 +1,13 @@
 @*
     Views/Employee/Resume.cshtml
-    Simplified online resume builder for employees.
-    Single textarea for resume/cover letter text.
-    Form posts to EmployeeController → UpdateResume
+    Online resume builder for employees.
+    A single text area where the employee writes their resume / cover letter.
+    Form posts to EmployeeController → UpdateResume (saved as plain text).
 *@
 
 @{
     ViewBag.Title = "Online Resume";
+    string resumeText = (ViewBag.ResumeText as string) ?? string.Empty;
 }
 
 @section Styles {
@@ -21,66 +22,27 @@
 <main class="container content-page resume-page">
     <section class="left-col">
         <div class="card">
-            <h3>Resume / Cover Letter</h3>
-            @if (!string.IsNullOrEmpty(ViewBag.ResumeText))
-            {
-                <div style="margin-bottom: 20px; padding: 16px; background: var(--surface-2); border: 1.5px dashed var(--brand-300); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-                    <div>
-                        <span style="font-weight: 700; color: var(--brand-800); display: block;">Saved Resume</span>
-                        <span style="font-size: 0.85rem; color: var(--text-500);">You already have a resume uploaded.</span>
-                    </div>
-                    <a href="@ViewBag.ResumeText" target="_blank" class="cta-btn" style="padding: 8px 16px; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 6px; background: var(--brand-600); color: #fff;">
-                        <span class="material-symbols-outlined" style="font-size: 18px;">picture_as_pdf</span>
-                        View PDF
-                    </a>
-                </div>
-            }
+            <h3>Online Resume</h3>
+            <p style="color: var(--text-500); font-size: 0.9rem; margin: -4px 0 16px;">
+                Write about your experience, skills and what you're looking for. This is shown to employers when you apply.
+            </p>
 
-            <form method="post" action="/Employee/UpdateResume" enctype="multipart/form-data" id="resume-upload-form">
+            <form method="post" asp-action="UpdateResume" asp-controller="Employee" id="resume-form">
                 @Html.AntiForgeryToken()
                 <div class="acc-fields">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-700);">
-                        Upload PDF Resume (Max 5MB)
+                    <label>
+                        Your Resume
+                        <textarea name="resumeText" id="resume-text" rows="16"
+                                  placeholder="e.g. Front-end developer with 3 years of experience building responsive web apps with React and TypeScript...">@resumeText</textarea>
                     </label>
-                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px; border:1.5px solid var(--line); border-radius:var(--radius-sm); background:var(--surface-2);">
-                        <label class="custom-file-label" style="flex-shrink:0;">
-                            <span class="material-symbols-outlined" style="font-size:16px;">upload_file</span>
-                            Choose PDF
-                            <input type="file" id="resume-file-input" name="resumeFile" accept=".pdf" required />
-                        </label>
-                        <span id="resume-file-name" style="font-size:0.85rem; color:var(--text-500); font-weight:400;">No file chosen</span>
-                    </div>
                 </div>
-                <button type="submit" class="auth-submit" style="margin-top:16px; width: auto; padding: 10px 24px;">Upload Resume</button>
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:16px; flex-wrap:wrap;">
+                    <span id="char-count" style="font-size:0.82rem; color:var(--text-500);">@resumeText.Length characters</span>
+                    <button type="submit" class="auth-submit" style="width:auto; padding:10px 24px;">Save Resume</button>
+                </div>
             </form>
         </div>
     </section>
-
-    @section Scripts {
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const form = document.getElementById('resume-upload-form');
-                if (form) {
-                    const fileInput = form.querySelector('input[name="resumeFile"]');
-                    fileInput.addEventListener('change', () => {
-                        const file = fileInput.files[0];
-                        if (file) {
-                            if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-                                alert('Please select a PDF file only.');
-                                fileInput.value = '';
-                                return;
-                            }
-                            if (file.size > 5 * 1024 * 1024) {
-                                alert('File size exceeds the 5MB limit.');
-                                fileInput.value = '';
-                                return;
-                            }
-                        }
-                    });
-                }
-            });
-        </script>
-    }
 
     <aside class="right-col">
         <div class="card">
@@ -93,3 +55,27 @@
         </div>
     </aside>
 </main>
+
+@if (TempData["Success"] != null)
+{
+    <div class="toast-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="toast-error">@TempData["Error"]</div>
+}
+
+@section Scripts {
+    <script>
+        // Live character count under the resume box.
+        document.addEventListener('DOMContentLoaded', () => {
+            const box = document.getElementById('resume-text');
+            const count = document.getElementById('char-count');
+            if (box && count) {
+                box.addEventListener('input', () => {
+                    count.textContent = box.value.length + ' characters';
+                });
+            }
+        });
+    </script>
+}

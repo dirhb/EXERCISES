@@ -14,6 +14,7 @@ namespace JobWebService.ORM
         JobApplicationCreator jobApplicationCreator;
         NotificationCreator notificationCreator;
         ReviewCreator reviewCreator;
+        ReportCreator reportCreator;
         EducationCreator educationCreator;
         EducationTypeCreator educationTypeCreator;
         ChatMessageCreator chatMessageCreator;
@@ -103,6 +104,17 @@ namespace JobWebService.ORM
                     reviewCreator = new ReviewCreator();
                 }
                 return reviewCreator;
+            }
+        }
+        public ReportCreator ReportCreator
+        {
+            get
+            {
+                if (reportCreator == null)
+                {
+                    reportCreator = new ReportCreator();
+                }
+                return reportCreator;
             }
         }
         public EducationCreator EducationCreator

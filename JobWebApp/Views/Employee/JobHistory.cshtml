@@ -44,14 +44,18 @@
                     {
                         var job = item.Job;
                         var badge = statusBadge(item.Status);
-                        <div class="job-row" role="listitem" data-genre="@job.GenreID" style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px; border-bottom:1px solid var(--line);">
+                        <div class="job-row" role="listitem" data-genre="@job.GenreID" data-status="@badge.label" style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px; border-bottom:1px solid var(--line);">
                             <div>
                                 <strong>@job.JobTitle</strong>
                                 <span class="app-status @badge.css">@badge.label</span><br />
-                                <span style="color:var(--text-500);font-size:0.88rem;">@job.EmployerID — @(job.CountryName ?? job.CountryID) — @job.JobType</span>
+                                <span style="color:var(--text-500);font-size:0.88rem;">@(job.EmployerName ?? "JobFind Employer") — @(job.CountryName ?? "Remote") — @(job.JobTypeName ?? "Not specified")</span>
                                 @if (!string.IsNullOrWhiteSpace(item.AppliedAt))
                                 {
                                     <span class="app-applied">Applied @item.AppliedAt</span>
+                                }
+                                @if (item.OfferedSalary != null && item.OfferedSalary.Value > 0)
+                                {
+                                    <span class="app-applied" style="color:var(--brand-700);font-weight:700;">Offered salary: <span class="money" data-usd="@item.OfferedSalary.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)">$@item.OfferedSalary.Value.ToString("N0")</span></span>
                                 }
                             </div>
                             @if (!string.IsNullOrEmpty(job.EmployerID))
@@ -72,15 +76,15 @@
     </section>
 
     <aside class="right-col">
-        @* Employers filter *@
-        <div class="card employers-card">
-            <h3>Employers</h3>
-            <ul class="popular-list employers-list">
-                @foreach (var employer in employers)
-                {
-                    <li><a href="#">@employer</a></li>
-                }
-            </ul>
+        @* Status filter *@
+        <div class="card status-card">
+            <h3>Status</h3>
+            <div class="genres-list">
+                <label><input type="radio" name="status" value="" checked /> All</label>
+                <label><input type="radio" name="status" value="Pending" /> Pending</label>
+                <label><input type="radio" name="status" value="Accepted" /> Accepted</label>
+                <label><input type="radio" name="status" value="Rejected" /> Rejected</label>
+            </div>
         </div>
 
         @* Genre filter *@

@@ -37,8 +37,11 @@
         {
             string userId = app.EmployeeId.ToString();
             User? user = users.ContainsKey(userId) ? users[userId] : null;
+            string st = (app.Status ?? "").Trim();
+            bool isAccepted = string.Equals(st, "Accepted", StringComparison.OrdinalIgnoreCase);
+            bool isRejected = string.Equals(st, "Rejected", StringComparison.OrdinalIgnoreCase);
 
-            <div class="card applicant-card">
+            <div class="card applicant-card" style="@(isRejected ? "opacity:0.6;" : "")">
                 <div class="applicant-header">
                     <h3>@(user != null ? $"{user.FirstName} {user.LastName}" : "Unknown Candidate")</h3>
                     <div class="applicant-meta">
@@ -84,41 +87,88 @@
                     <p style="margin-bottom:10px;">
                         <span style="display:inline-block;font-size:0.78rem;font-weight:700;padding:4px 12px;border-radius:999px;letter-spacing:0.03em;background:@badge.bg;color:@badge.fg;">@badge.label</span>
                     </p>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                        <form method="post" action="/Employer/UpdateApplicationStatus" style="margin:0;">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="applicationId" value="@app.ApplicationId" />
-                            <input type="hidden" name="jobId" value="@jobId" />
-                            <input type="hidden" name="status" value="Accepted" />
-                            <button type="submit" class="cta-btn" style="font-size:0.85rem;padding:7px 16px;background:var(--color-text-success,#0f6b34);color:#fff;border-radius:var(--radius-sm);">Accept</button>
-                        </form>
-                        <form method="post" action="/Employer/UpdateApplicationStatus" style="margin:0;">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="applicationId" value="@app.ApplicationId" />
-                            <input type="hidden" name="jobId" value="@jobId" />
-                            <input type="hidden" name="status" value="Rejected" />
-                            <button type="submit" class="cta-btn secondary" style="font-size:0.85rem;padding:7px 16px;color:var(--color-text-danger,#a12622);border-radius:var(--radius-sm);">Reject</button>
-                        </form>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                        @if (isAccepted)
+                        {
+                            <span style="font-size:0.88rem;color:var(--color-text-success,#0f6b34);font-weight:600;">✓ Hired</span>
+                            <a href="/Employer/HiredCandidates" class="cta-btn secondary" style="font-size:0.82rem;padding:6px 14px;text-decoration:none;">View in Hired Candidates</a>
+                            <form method="post" action="/Employer/UpdateApplicationStatus" style="margin:0;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="applicationId" value="@app.ApplicationId" />
+                                <input type="hidden" name="jobId" value="@jobId" />
+                                <input type="hidden" name="status" value="Submitted" />
+                                <button type="submit" class="cta-btn secondary" style="font-size:0.82rem;padding:6px 14px;">Undo</button>
+                            </form>
+                        }
+                        else if (isRejected)
+                        {
+                            <span style="font-size:0.88rem;color:var(--color-text-danger,#a12622);font-weight:600;">Rejected</span>
+                            <form method="post" action="/Employer/UpdateApplicationStatus" style="margin:0;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="applicationId" value="@app.ApplicationId" />
+                                <input type="hidden" name="jobId" value="@jobId" />
+                                <input type="hidden" name="status" value="Submitted" />
+                                <button type="submit" class="cta-btn secondary" style="font-size:0.82rem;padding:6px 14px;">Reconsider</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form method="post" action="/Employer/UpdateApplicationStatus" style="margin:0;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="applicationId" value="@app.ApplicationId" />
+                                <input type="hidden" name="jobId" value="@jobId" />
+                                <input type="hidden" name="status" value="Accepted" />
+                                <button type="submit" class="cta-btn" style="font-size:0.85rem;padding:7px 16px;background:var(--color-text-success,#0f6b34);color:#fff;border-radius:var(--radius-sm);">Accept</button>
+                            </form>
+                            <form method="post" action="/Employer/UpdateApplicationStatus" style="margin:0;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="applicationId" value="@app.ApplicationId" />
+                                <input type="hidden" name="jobId" value="@jobId" />
+                                <input type="hidden" name="status" value="Rejected" />
+                                <button type="submit" class="cta-btn secondary" style="font-size:0.85rem;padding:7px 16px;color:var(--color-text-danger,#a12622);border-radius:var(--radius-sm);">Reject</button>
+                            </form>
+                        }
                     </div>
                 </div>
 
                 <div class="applicant-actions">
-                    <form method="post" action="/Employer/UpdateSalary" class="salary-form">
-                        <input type="hidden" name="userId" value="@userId" />
-                        <input type="hidden" name="jobId" value="@jobId" />
-                        <label>
-                            Offer Salary:
-                            <input type="number" name="salary" step="0.01" placeholder="0.00" />
-                        </label>
-                        <button type="submit">Update Salary</button>
-                    </form>
+                    @if (!isRejected)
+                    {
+                        <div class="offer-block">
+                            <div class="offer-title">Salary offer to this candidate</div>
+                            <div class="offer-current">
+                                Current offer:
+                                @if (app.OfferedSalary != null && app.OfferedSalary.Value > 0)
+                                {
+                                    <strong class="money" data-usd="@app.OfferedSalary.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)">$@app.OfferedSalary.Value.ToString("N0")</strong>
+                                }
+                                else
+                                {
+                                    <strong>none yet</strong>
+                                }
+                            </div>
+                            <form method="post" action="/Employer/UpdateOfferedSalary" class="salary-form">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="applicationId" value="@app.ApplicationId" />
+                                <input type="hidden" name="jobId" value="@jobId" />
+                                <label>
+                                    Offer (USD/year):
+                                    <input type="number" name="salary" step="100" min="0" placeholder="e.g. 60000" />
+                                </label>
+                                <button type="submit">Send offer</button>
+                            </form>
+                            <div class="offer-hint">The candidate is notified instantly and sees this on their Applications page.</div>
+                        </div>
+                    }
 
                     @if (user != null)
                     {
-                        <a href="/Employer/Chat?partnerId=@user.UserID" class="chat-btn">
-                            Chat with Candidate
-                        </a>
+                        <a href="/Employer/Chat?partnerId=@user.UserID" class="chat-btn">Chat with Candidate</a>
                     }
+                    <button type="button" class="report-btn" data-report-type="Applicant" data-report-id="@userId" data-report-label="@(user != null ? $"{user.FirstName} {user.LastName}" : "this applicant")"
+                            style="background:none;border:none;color:var(--text-500);font-size:0.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:6px 4px;">
+                        <span class="material-symbols-outlined" style="font-size:16px;">flag</span>Report applicant
+                    </button>
                 </div>
             </div>
         }

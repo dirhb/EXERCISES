@@ -29,7 +29,7 @@
                 @Html.AntiForgeryToken()
                 <label style="display:flex;flex-direction:column;gap:6px;font-size:0.86rem;font-weight:600;color:var(--text-700);">
                     Message
-                    <textarea name="text" rows="4" required placeholder="Type your notification message..."
+                    <textarea name="text" rows="4" placeholder="Type your notification message..."
                               style="font-family:inherit;font-size:0.95rem;font-weight:400;color:var(--text-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:10px 13px;outline:none;resize:vertical;"></textarea>
                 </label>
                 <button type="submit" class="auth-submit" style="width:auto;padding:10px 24px;">Send to All</button>
@@ -60,7 +60,7 @@
                                 <form method="post" action="/Admin/SendNotificationToUser" style="display:flex;gap:8px;align-items:center;">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="userId" value="@user.UserID" />
-                                    <input type="text" name="text" placeholder="Message..." required
+                                    <input type="text" name="text" placeholder="Message..."
                                            style="font-size:0.88rem;padding:6px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface-2);color:var(--text-900);outline:none;" />
                                     <button type="submit" style="background:var(--brand-600);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 14px;font-size:0.85rem;font-weight:600;cursor:pointer;">Send</button>
                                 </form>

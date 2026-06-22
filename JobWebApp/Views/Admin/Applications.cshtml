@@ -8,6 +8,11 @@
     ViewBag.Title = "Review Applications";
     var apps = ViewBag.Applications as List<JobApplication> ?? new List<JobApplication>();
     string statusFilter = ViewBag.StatusFilter as string ?? string.Empty;
+    var jobTitles = ViewBag.JobTitles as Dictionary<string, string> ?? new Dictionary<string, string>();
+    var userNames = ViewBag.UserNames as Dictionary<string, string> ?? new Dictionary<string, string>();
+
+    Func<int, string> jobTitle = id => jobTitles.TryGetValue(id.ToString(), out var t) && !string.IsNullOrWhiteSpace(t) ? t : "Untitled job";
+    Func<int, string> applicantName = id => userNames.TryGetValue(id.ToString(), out var n) && !string.IsNullOrWhiteSpace(n) ? n : "Unknown applicant";
 }
 
 @section Styles {
@@ -44,9 +49,9 @@
                     {
                         <div class="job-row" role="listitem" style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--line);">
                             <div>
-                                <strong>Application #@app.ApplicationId</strong><br />
+                                <strong>@jobTitle(app.JobId)</strong><br />
                                 <span style="color:var(--text-500);font-size:0.88rem;">
-                                    Job ID: @app.JobId — User ID: @app.EmployeeId — Status: @app.Status
+                                    Applicant: @applicantName(app.EmployeeId)
                                 </span><br />
                                 <span style="color:var(--text-500);font-size:0.82rem;">@app.SubmittedAtUTC</span>
                             </div>

@@ -12,10 +12,12 @@ namespace JobWebService.ORM.Repositories
         JobTypeRepository jobTypeRepository;
         NotificationRepository notificationRepository;
         ReviewRepository reviewRepository;
+        ReportRepository reportRepository;
         UserRepository userRepository;
         UserTypeRepository userTypeRepository;
         JobApplicationRepository jobApplicationRepository;
         ChatMessageRepository chatMessageRepository;
+        SavedJobRepository savedJobRepository;
 
         DBHelperOledb helperOledb;
         ModelCreators modelcreators;
@@ -108,6 +110,16 @@ namespace JobWebService.ORM.Repositories
             }
         }
 
+        public ReportRepository ReportRepository
+        {
+            get
+            {
+                if (reportRepository == null)
+                    reportRepository = new ReportRepository(helperOledb, modelcreators);
+                return reportRepository;
+            }
+        }
+
         public UserRepository UserRepository
         {
             get
@@ -144,6 +156,16 @@ namespace JobWebService.ORM.Repositories
                 if (chatMessageRepository == null)
                     chatMessageRepository = new ChatMessageRepository(helperOledb, modelcreators);
                 return chatMessageRepository;
+            }
+        }
+
+        public SavedJobRepository SavedJobRepository
+        {
+            get
+            {
+                if (savedJobRepository == null)
+                    savedJobRepository = new SavedJobRepository(helperOledb, modelcreators);
+                return savedJobRepository;
             }
         }
     }

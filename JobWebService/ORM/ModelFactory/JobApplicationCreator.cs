@@ -15,8 +15,19 @@ namespace JobWebService.ORM.ModelFactory
                 ResumeSnapshot = Convert.ToString(reader["ResumeText"]),
                 Status = Convert.ToString(reader["Status"]),
                 SubmittedAtUTC = Convert.ToString(reader["CreatedAt"]),
+                OfferedSalary = HasColumn(reader, "OfferedSalary") && reader["OfferedSalary"] != DBNull.Value ? Convert.ToDecimal(reader["OfferedSalary"]) : (decimal?)null,
             };
             return jobApplication;
+        }
+
+        private static bool HasColumn(IDataReader reader, string columnName)
+        {
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                if (reader.GetName(i).Equals(columnName, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+            return false;
         }
     }
 }

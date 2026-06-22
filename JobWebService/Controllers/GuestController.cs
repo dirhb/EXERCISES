@@ -141,8 +141,9 @@ namespace JobWebService.Controllers
             try
             {
                 this.libraryUOW.HelperOledb.OpenConnection();
-                string passInDb = this.libraryUOW.UserRepository.GetPasswordByUserName(username);
-                return passInDb != null && passInDb.Equals(password);
+                string stored = this.libraryUOW.UserRepository.GetPasswordByUserName(username);
+                return PasswordHasher.Verify(password, stored)
+                    || (!PasswordHasher.LooksHashed(stored) && stored != null && stored == password);
             }
             catch (Exception ex)
             {
@@ -167,7 +168,33 @@ namespace JobWebService.Controllers
             try
             {
                 this.libraryUOW.HelperOledb.OpenConnection();
-                return this.libraryUOW.UserRepository.GetByCredentials(email, password);
+
+                User user = this.libraryUOW.UserRepository.ReadByEmail(email);
+                if (user == null) return null;
+
+                // Banned accounts can't sign in.
+                if (user.IsBanned == true) return null;
+
+                string stored = user.Password ?? string.Empty;
+
+                // Normal case: verify the supplied password against the stored hash.
+                if (PasswordHasher.Verify(password, stored))
+                {
+                    user.Password = null;
+                    return user;
+                }
+
+                // Legacy plaintext password: accept the correct one once, then
+                // upgrade it to a hash so it's never stored in clear text again.
+                if (!PasswordHasher.LooksHashed(stored) && stored == password)
+                {
+                    user.Password = PasswordHasher.Hash(password);
+                    this.libraryUOW.UserRepository.UpdatePassword(user);
+                    user.Password = null;
+                    return user;
+                }
+
+                return null;
             }
             catch (Exception ex)
             {

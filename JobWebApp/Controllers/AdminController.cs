@@ -56,6 +56,20 @@ namespace JobWebApp.Controllers
 
             List<JobApplication> applications = await client.GetAsync() ?? new List<JobApplication>();
 
+            // Build id→name lookups so the view can show job titles and applicant
+            // names instead of raw IDs.
+            List<Job> allJobs = await BuildClient<List<Job>>("Guest", "GetAllJobs").GetAsync() ?? new List<Job>();
+            List<User> allUsers = await BuildClient<List<User>>("Admin", "GetAllUsers").GetAsync() ?? new List<User>();
+
+            ViewBag.JobTitles = allJobs
+                .Where(j => !string.IsNullOrEmpty(j.JobID))
+                .GroupBy(j => j.JobID!)
+                .ToDictionary(g => g.Key, g => g.First().JobTitle ?? "Untitled job");
+            ViewBag.UserNames = allUsers
+                .Where(u => !string.IsNullOrEmpty(u.UserID))
+                .GroupBy(u => u.UserID!)
+                .ToDictionary(g => g.Key, g => $"{g.First().FirstName} {g.First().LastName}".Trim());
+
             ViewBag.Applications = applications;
             ViewBag.StatusFilter = status;
 
@@ -130,8 +144,9 @@ namespace JobWebApp.Controllers
         {
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
 
-            ApiClient<bool> client = BuildClient<bool>("Admin", "NotifyAboutWebsiteChanges");
-            client.AddParameter("text", $"[To User {userId}]: {text}");
+            ApiClient<bool> client = BuildClient<bool>("Admin", "NotifyUser");
+            client.AddParameter("userId", userId);
+            client.AddParameter("text", text);
             bool success = await client.PostAsync();
 
             TempData[success ? "Success" : "Error"] = success
@@ -139,6 +154,97 @@ namespace JobWebApp.Controllers
                 : "Failed to send notification.";
 
             return RedirectToAction("Notify");
+        }
+
+        // ── GET: /Admin/Reports ────────────────────────────────
+        // Shows all reports submitted by users, newest first.
+        public async Task<IActionResult> Reports()
+        {
+            if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
+
+            List<Report> reports = await BuildClient<List<Report>>("Report", "GetAllReports").GetAsync() ?? new List<Report>();
+            List<User> allUsers = await BuildClient<List<User>>("Admin", "GetAllUsers").GetAsync() ?? new List<User>();
+
+            ViewBag.UserNames = allUsers
+                .Where(u => !string.IsNullOrEmpty(u.UserID))
+                .GroupBy(u => u.UserID!)
+                .ToDictionary(g => g.Key, g => $"{g.First().FirstName} {g.First().LastName}".Trim());
+            ViewBag.Reports = reports;
+
+            return View();
+        }
+
+        // ── POST: /Admin/ResolveReport ─────────────────────────
+        [HttpPost]
+        public async Task<IActionResult> ResolveReport(string reportId)
+        {
+            if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
+
+            ApiClient<bool> client = BuildClient<bool>("Report", "ResolveReport");
+            client.AddParameter("reportId", reportId);
+            bool success = await client.PostAsync();
+
+            TempData[success ? "Success" : "Error"] = success
+                ? "Report marked as resolved."
+                : "Failed to update report.";
+
+            return RedirectToAction("Reports");
+        }
+
+        // ── POST: /Admin/BanReportedUser ───────────────────────
+        // Bans the reported user, then resolves the report.
+        [HttpPost]
+        public async Task<IActionResult> BanReportedUser(string reportId, string userId)
+        {
+            if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
+
+            bool banned = false;
+            if (!string.IsNullOrWhiteSpace(userId))
+            {
+                ApiClient<bool> banClient = BuildClient<bool>("Admin", "BanUser");
+                banClient.AddParameter("userId", userId);
+                banned = await banClient.PostAsync();
+            }
+
+            await ResolveReportInternal(reportId);
+
+            TempData[banned ? "Success" : "Error"] = banned
+                ? "User banned — they can no longer sign in. Report resolved."
+                : "Could not ban that user.";
+
+            return RedirectToAction("Reports");
+        }
+
+        // ── POST: /Admin/DeleteReportedJob ─────────────────────
+        // Deletes the reported job, then resolves the report.
+        [HttpPost]
+        public async Task<IActionResult> DeleteReportedJob(string reportId, string jobId)
+        {
+            if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
+
+            bool deleted = false;
+            if (!string.IsNullOrWhiteSpace(jobId))
+            {
+                ApiClient<bool> delClient = BuildClient<bool>("Admin", "DeleteJob");
+                delClient.AddParameter("jobId", jobId);
+                deleted = await delClient.PostAsync();
+            }
+
+            await ResolveReportInternal(reportId);
+
+            TempData[deleted ? "Success" : "Error"] = deleted
+                ? "Reported job deleted. Report resolved."
+                : "Could not delete that job.";
+
+            return RedirectToAction("Reports");
+        }
+
+        private async Task ResolveReportInternal(string reportId)
+        {
+            if (string.IsNullOrWhiteSpace(reportId)) return;
+            ApiClient<bool> resolveClient = BuildClient<bool>("Report", "ResolveReport");
+            resolveClient.AddParameter("reportId", reportId);
+            await resolveClient.PostAsync();
         }
 
         // ── GET: /Admin/Profile ────────────────────────────────

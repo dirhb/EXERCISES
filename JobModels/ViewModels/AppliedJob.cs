@@ -13,5 +13,6 @@ namespace JobModels.ViewModels
         public Job Job { get; set; }
         public string Status { get; set; }
         public string AppliedAt { get; set; }
+        public decimal? OfferedSalary { get; set; }
     }
 }

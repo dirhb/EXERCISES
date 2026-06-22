@@ -29,10 +29,28 @@ namespace JobWebService.ORM.Repositories
 
         public bool Insert(Notification model)
         {
-            string sql = $"INSERT INTO Notification(NotificationText,NotificationDate) VALUES(@NotificationText,@NotificationDate)";
+            string sql = $"INSERT INTO Notification(NotificationText,NotificationDate,RecipientUserID) VALUES(@NotificationText,@NotificationDate,@RecipientUserID)";
             this.helperOleDb.AddParameters("NotificationText", model.NotificationText);
             this.helperOleDb.AddParameters("NotificationDate", model.NotificationDate);
+            // null RecipientUserID = broadcast to everyone
+            this.helperOleDb.AddParameters("RecipientUserID", model.RecipientUserID);
             return this.helperOleDb.Create(sql) > 0;
+        }
+
+        // Notifications a given user should see: broadcasts (RecipientUserID IS NULL)
+        // plus the ones targeted specifically at them.
+        public List<Notification> ReadForUser(string userId)
+        {
+            List<Notification> list = new List<Notification>();
+            // Order by NotificationID (AutoNumber = insertion order) so the newest
+            // really come first. Ordering by NotificationDate text is unreliable
+            // because older rows were stored in a different date format.
+            string sql = "SELECT * FROM Notification WHERE RecipientUserID IS NULL OR RecipientUserID=@RecipientUserID ORDER BY NotificationID DESC";
+            this.helperOleDb.AddParameters("RecipientUserID", userId);
+            using (IDataReader dataReader = this.helperOleDb.Read(sql))
+                while (dataReader.Read())
+                    list.Add(this.modelCreators.NotificationCreator.CreateModel(dataReader));
+            return list;
         }
 
         public Notification Read(object id)

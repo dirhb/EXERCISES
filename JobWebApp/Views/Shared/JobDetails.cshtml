@@ -14,6 +14,12 @@
     string backUrl = isEmployer ? "/Employer/YourJobs" : "/Employee/JobCatalog";
     string backText = isEmployer ? "Back to Your Jobs" : "Back to Job Catalog";
     ViewBag.Title = job.JobTitle ?? "Job Details";
+
+    double ratingAvg = ViewBag.EmployerRatingAvg != null ? (double)ViewBag.EmployerRatingAvg : 0.0;
+    int ratingCount = ViewBag.EmployerRatingCount != null ? (int)ViewBag.EmployerRatingCount : 0;
+    var employerReviews = ViewBag.EmployerReviews as List<Review> ?? new List<Review>();
+    bool canReview = ViewBag.CanReview != null && (bool)ViewBag.CanReview;
+    bool isSaved = ViewBag.IsSaved != null && (bool)ViewBag.IsSaved;
 }
 
 @section Styles {
@@ -32,7 +38,15 @@
         <div class="jd-head">
             <div>
                 <div class="jd-title">@job.JobTitle</div>
-                <div class="jd-company">@(string.IsNullOrWhiteSpace(job.EmployerID) ? "JobFind Employer" : job.EmployerID)</div>
+                <div class="jd-company">@(job.EmployerName ?? "JobFind Employer")</div>
+                @if (ratingCount > 0)
+                {
+                    <div style="display:flex;align-items:center;gap:5px;margin-top:3px;font-size:0.9rem;">
+                        <span class="material-symbols-outlined" style="font-size:18px;color:#f5a623;">star</span>
+                        <strong>@ratingAvg.ToString("0.0")</strong>
+                        <span style="color:var(--text-500);">· @ratingCount review@(ratingCount == 1 ? "" : "s")</span>
+                    </div>
+                }
             </div>
             <div class="jd-badges">
                 @if (isActive)
@@ -43,9 +57,9 @@
                 {
                     <span class="jcl-badge closed">Position Filled</span>
                 }
-                @if (!string.IsNullOrWhiteSpace(job.JobType))
+                @if (!string.IsNullOrWhiteSpace(job.JobTypeName))
                 {
-                    <span class="jcl-badge type">@job.JobType</span>
+                    <span class="jcl-badge type">@job.JobTypeName</span>
                 }
             </div>
         </div>
@@ -55,21 +69,37 @@
                 <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
                 <span>
                     <span class="jd-meta-label">Location</span>
-                    <span class="jd-meta-value">@(job.CountryName ?? job.CountryID ?? "Not specified")</span>
+                    <span class="jd-meta-value">@(job.CountryName ?? "Not specified")</span>
                 </span>
             </div>
             <div class="jd-meta">
                 <span class="material-symbols-outlined" aria-hidden="true">work</span>
                 <span>
                     <span class="jd-meta-label">Employment Type</span>
-                    <span class="jd-meta-value">@(string.IsNullOrWhiteSpace(job.JobType) ? "Not specified" : job.JobType)</span>
+                    <span class="jd-meta-value">@(job.JobTypeName ?? "Not specified")</span>
                 </span>
             </div>
             <div class="jd-meta">
                 <span class="material-symbols-outlined" aria-hidden="true">category</span>
                 <span>
                     <span class="jd-meta-label">Category</span>
-                    <span class="jd-meta-value">@(job.GenreTitle ?? job.GenreID ?? "General")</span>
+                    <span class="jd-meta-value">@(job.GenreTitle ?? "General")</span>
+                </span>
+            </div>
+            <div class="jd-meta">
+                <span class="material-symbols-outlined" aria-hidden="true">payments</span>
+                <span>
+                    <span class="jd-meta-label">Salary</span>
+                    <span class="jd-meta-value">
+                        @if (job.Salary.HasValue)
+                        {
+                            <span class="money" data-usd="@job.Salary.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)">$@job.Salary.Value.ToString("N0")</span>
+                        }
+                        else
+                        {
+                            @:Not specified
+                        }
+                    </span>
                 </span>
             </div>
             <div class="jd-meta">
@@ -90,6 +120,60 @@
                 <div class="jd-tags">
                     <span>@job.JobFilter</span>
                 </div>
+            }
+        </div>
+
+        <div class="jd-section">
+            <div class="jd-section-title">Employer reviews</div>
+            @if (employerReviews.Any())
+            {
+                <div style="display:grid;gap:10px;">
+                    @foreach (var rev in employerReviews.Take(5))
+                    {
+                        int stars = Math.Clamp(rev.RatingTitle ?? 0, 0, 5);
+                        <div style="border:1px solid var(--line);border-radius:var(--radius-sm);padding:10px 12px;">
+                            <div style="font-size:0.95rem;letter-spacing:1px;"><span style="color:#f5a623;">@(new string('★', stars))</span><span style="color:var(--line);">@(new string('★', 5 - stars))</span></div>
+                            @if (!string.IsNullOrWhiteSpace(rev.ReviewText))
+                            {
+                                <p style="margin:4px 0 0;font-size:0.9rem;">@rev.ReviewText</p>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p style="color:var(--text-500);">No reviews yet@(Context.Session.GetString("UserTypeID") == "2" ? " — be the first to review this employer." : ".")</p>
+            }
+
+            @if (Context.Session.GetString("UserTypeID") == "2" && !string.IsNullOrEmpty(job.EmployerID) && !canReview)
+            {
+                <p style="color:var(--text-500);margin-top:12px;font-size:0.9rem;">You can review this employer once one of your applications to them has been accepted.</p>
+            }
+
+            @if (Context.Session.GetString("UserTypeID") == "2" && !string.IsNullOrEmpty(job.EmployerID) && canReview)
+            {
+                <form method="post" action="/Review/Submit" id="review-form" style="display:grid;gap:10px;max-width:480px;margin-top:14px;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="employerId" value="@job.EmployerID" />
+                    <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString.ToString())" />
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:0.86rem;font-weight:600;color:var(--text-700);">
+                        Your rating
+                        <select name="rating" style="font-family:inherit;font-size:0.95rem;padding:9px 12px;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:var(--surface-2);color:var(--text-900);">
+                            <option value="" disabled selected>Choose 1–5 stars</option>
+                            <option value="5">★★★★★ — Excellent</option>
+                            <option value="4">★★★★ — Good</option>
+                            <option value="3">★★★ — Okay</option>
+                            <option value="2">★★ — Poor</option>
+                            <option value="1">★ — Bad</option>
+                        </select>
+                    </label>
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:0.86rem;font-weight:600;color:var(--text-700);">
+                        Review <span style="font-weight:400;color:var(--text-500);">(optional)</span>
+                        <textarea name="reviewText" rows="3" placeholder="Share your experience with this employer..." style="font-family:inherit;font-size:0.95rem;padding:9px 12px;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:var(--surface-2);color:var(--text-900);resize:vertical;"></textarea>
+                    </label>
+                    <button type="submit" class="cta-btn" style="width:fit-content;">Submit Review</button>
+                </form>
             }
         </div>
 
@@ -115,29 +199,48 @@
             }
             else
             {
-                @* ── Employee apply / message actions ── *@
-                @if (isActive)
+                @* ── Employee apply / message actions (guests are prompted to sign in) ── *@
+                @if (Context.Session.GetString("UserTypeID") == "2")
                 {
-                    <form method="post" action="/Employee/ApplyToJob" enctype="multipart/form-data" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0;">
+                    @if (isActive)
+                    {
+                        <form method="post" action="/Employee/ApplyToJob" enctype="multipart/form-data" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="jobId" value="@job.JobID" />
+                            <input type="hidden" name="returnUrl" value="@(Context.Request.Path.ToString() + Context.Request.QueryString.ToString())" />
+                            <label class="custom-file-label">
+                                <span class="material-symbols-outlined" style="font-size:15px;">upload_file</span>
+                                Attach PDF (optional)
+                                <input type="file" name="resumeFile" accept=".pdf" class="custom-apply-file" />
+                            </label>
+                            <span class="custom-file-name" data-default="No file">No file</span>
+                            <button type="submit" class="catalog-apply-btn">Apply Now</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <button type="button" class="catalog-apply-btn" style="background:var(--line);color:var(--text-500);cursor:not-allowed;" disabled>Position Filled</button>
+                    }
+                    @if (!string.IsNullOrEmpty(job.EmployerID))
+                    {
+                        <a href="/Employee/Chat?partnerId=@job.EmployerID" class="cta-btn secondary" style="font-size:0.9rem;padding:9px 18px;">Message Employer</a>
+                    }
+                    <button type="button" class="report-btn" data-report-type="Job" data-report-id="@job.JobID" data-report-label="@job.JobTitle"
+                            style="background:none;border:none;color:var(--text-500);font-size:0.88rem;cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:9px 6px;">
+                        <span class="material-symbols-outlined" style="font-size:17px;">flag</span>Report job
+                    </button>
+                    <form method="post" action="/Employee/ToggleSavedJob" style="margin:0;">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="jobId" value="@job.JobID" />
-                        <input type="hidden" name="returnUrl" value="@(Context.Request.Path.ToString() + Context.Request.QueryString.ToString())" />
-                        <label class="custom-file-label">
-                            <span class="material-symbols-outlined" style="font-size:15px;">upload_file</span>
-                            Attach PDF (optional)
-                            <input type="file" name="resumeFile" accept=".pdf" class="custom-apply-file" />
-                        </label>
-                        <span class="custom-file-name" data-default="No file">No file</span>
-                        <button type="submit" class="catalog-apply-btn">Apply Now</button>
+                        <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString.ToString())" />
+                        <button type="submit" class="cta-btn secondary" style="font-size:0.88rem;padding:9px 14px;display:inline-flex;align-items:center;gap:5px;">
+                            <span class="material-symbols-outlined" style="font-size:17px;">@(isSaved ? "bookmark" : "bookmark_border")</span>@(isSaved ? "Saved" : "Save job")
+                        </button>
                     </form>
                 }
-                else
+                else if (Context.Session.GetString("UserID") == null)
                 {
-                    <button type="button" class="catalog-apply-btn" style="background:var(--line);color:var(--text-500);cursor:not-allowed;" disabled>Position Filled</button>
-                }
-                @if (!string.IsNullOrEmpty(job.EmployerID))
-                {
-                    <a href="/Employee/Chat?partnerId=@job.EmployerID" class="cta-btn secondary" style="font-size:0.9rem;padding:9px 18px;">Message Employer</a>
+                    <a href="/Guest/Login" class="catalog-apply-btn" style="text-decoration:none;display:inline-flex;align-items:center;">Sign in to apply</a>
                 }
             }
         </div>

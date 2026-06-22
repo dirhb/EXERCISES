@@ -1,0 +1,133 @@
+@*
+    Views/Admin/Reports.cshtml
+    Admin view — all reports filed by users, in a table.
+*@
+
+@using JobModels
+@{
+    ViewBag.Title = "Reports";
+    var reports = ViewBag.Reports as List<Report> ?? new List<Report>();
+    var userNames = ViewBag.UserNames as Dictionary<string, string> ?? new Dictionary<string, string>();
+
+    Func<string?, string> reporterName = id =>
+        !string.IsNullOrEmpty(id) && userNames.TryGetValue(id, out var n) && !string.IsNullOrWhiteSpace(n)
+            ? n : "Unknown user";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Register.css" />
+}
+
+<header class="page-header content-page-header">
+    <h1>User Reports</h1>
+    <p>Issues reported by employees and employers across the platform.</p>
+</header>
+
+<main class="container content-page" style="padding-top:24px">
+    <section class="left-col">
+        <div class="card">
+            <h3>All Reports (@reports.Count)</h3>
+
+            @if (reports.Any())
+            {
+                <div style="overflow-x:auto;margin-top:12px;">
+                    <table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
+                        <thead>
+                            <tr style="text-align:left;border-bottom:2px solid var(--line);color:var(--text-700);">
+                                <th style="padding:10px 8px;">Date</th>
+                                <th style="padding:10px 8px;">Reporter</th>
+                                <th style="padding:10px 8px;">Reason</th>
+                                <th style="padding:10px 8px;">Target</th>
+                                <th style="padding:10px 8px;">Details</th>
+                                <th style="padding:10px 8px;">Status</th>
+                                <th style="padding:10px 8px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var report in reports)
+                            {
+                                bool resolved = string.Equals(report.Status, "Resolved", StringComparison.OrdinalIgnoreCase);
+                                <tr style="border-bottom:1px solid var(--line);vertical-align:top;">
+                                    <td style="padding:10px 8px;color:var(--text-500);white-space:nowrap;">
+                                        @{
+                                            var when = report.ReportDate;
+                                            if (DateTime.TryParse(report.ReportDate, out var dt)) { when = dt.ToString("yyyy-MM-dd HH:mm"); }
+                                        }
+                                        @when
+                                    </td>
+                                    <td style="padding:10px 8px;">@reporterName(report.ReporterUserID)</td>
+                                    <td style="padding:10px 8px;">@report.Category</td>
+                                    <td style="padding:10px 8px;font-weight:600;">@report.TargetType@(string.IsNullOrWhiteSpace(report.Subject) ? "" : ": " + report.Subject)</td>
+                                    <td style="padding:10px 8px;max-width:340px;white-space:pre-wrap;">@report.ReportText</td>
+                                    <td style="padding:10px 8px;">
+                                        <span style="display:inline-block;font-size:0.76rem;font-weight:700;padding:3px 10px;border-radius:999px;
+                                            background:@(resolved ? "var(--color-background-success,#e7f8ed)" : "var(--accent-lt)");
+                                            color:@(resolved ? "var(--color-text-success,#0f6b34)" : "#a06b00");">
+                                            @(resolved ? "Resolved" : "Open")
+                                        </span>
+                                    </td>
+                                    <td style="padding:10px 8px;">
+                                        @if (!resolved)
+                                        {
+                                            <div style="display:flex;flex-direction:column;gap:6px;">
+                                                @if (string.Equals(report.TargetType, "Applicant", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(report.TargetID))
+                                                {
+                                                    <form method="post" action="/Admin/BanReportedUser" style="margin:0;">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="reportId" value="@report.ReportID" />
+                                                        <input type="hidden" name="userId" value="@report.TargetID" />
+                                                        <button type="submit" style="background:var(--color-text-danger,#a12622);color:#fff;border:none;border-radius:var(--radius-sm);padding:6px 12px;font-size:0.8rem;font-weight:600;cursor:pointer;">Ban user</button>
+                                                    </form>
+                                                }
+                                                else if (string.Equals(report.TargetType, "Job", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(report.TargetID))
+                                                {
+                                                    <form method="post" action="/Admin/DeleteReportedJob" style="margin:0;">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="reportId" value="@report.ReportID" />
+                                                        <input type="hidden" name="jobId" value="@report.TargetID" />
+                                                        <button type="submit" style="background:var(--color-text-danger,#a12622);color:#fff;border:none;border-radius:var(--radius-sm);padding:6px 12px;font-size:0.8rem;font-weight:600;cursor:pointer;">Delete job</button>
+                                                    </form>
+                                                }
+                                                <form method="post" action="/Admin/ResolveReport" style="margin:0;">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="reportId" value="@report.ReportID" />
+                                                    <button type="submit" style="background:var(--surface-2);color:var(--text-700);border:1px solid var(--line);border-radius:var(--radius-sm);padding:6px 12px;font-size:0.8rem;font-weight:600;cursor:pointer;">Dismiss</button>
+                                                </form>
+                                            </div>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p style="color:var(--text-500);padding:12px;">No reports have been filed yet.</p>
+            }
+        </div>
+    </section>
+
+    <aside class="right-col">
+        <div class="card">
+            <h3>Admin Actions</h3>
+            <ul class="popular-list">
+                <li><a href="/Admin/Home">Manage Jobs</a></li>
+                <li><a href="/Admin/Applications">Applications</a></li>
+                <li><a href="/Admin/Notify">Notify Users</a></li>
+                <li><a href="/Admin/Reports">Reports</a></li>
+                <li><a href="/Guest/Logout" style="color:var(--color-text-danger)">Logout</a></li>
+            </ul>
+        </div>
+    </aside>
+</main>
+
+@if (TempData["Success"] != null)
+{
+    <div class="toast-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="toast-error">@TempData["Error"]</div>
+}

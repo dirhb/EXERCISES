@@ -50,6 +50,7 @@ namespace JobWebService.Controllers
 
                 user.UserTypeID ??= 2;
                 user.CreationDate ??= DateTime.UtcNow.ToString("yyyy-MM-dd");
+                user.Password = PasswordHasher.Hash(user.Password);
 
                 bool result = this.libraryUOW.UserRepository.Create(user);
                 Console.WriteLine($"Register result: {result}");
@@ -87,12 +88,61 @@ namespace JobWebService.Controllers
             return false;
         }
 
+        // Updates the user's preferred display currency.
+        [HttpPost]
+        public bool UpdateCurrency(string userId, string currency)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(userId)) return false;
+                string code = string.IsNullOrWhiteSpace(currency) ? "USD" : currency.Trim().ToUpperInvariant();
+
+                this.libraryUOW.HelperOledb.OpenConnection();
+                return this.libraryUOW.UserRepository.UpdateCurrency(userId, code);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+                return false;
+            }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
+            }
+        }
+
+        // Updates profile fields (name, email, phone, country) — not the password.
+        [HttpPost]
+        public bool UpdateProfile([FromBody] User user)
+        {
+            try
+            {
+                if (user == null || string.IsNullOrWhiteSpace(user.UserID)) return false;
+                if (string.IsNullOrWhiteSpace(user.Email)) return false;
+
+                this.libraryUOW.HelperOledb.OpenConnection();
+                return this.libraryUOW.UserRepository.UpdateProfile(user);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+                return false;
+            }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
+            }
+        }
+
         [HttpPost]
         [ActionName("UpdatePassword")]
         public bool UpdatePassword(User user)
         {
             try
             {
+                if (user == null || string.IsNullOrWhiteSpace(user.Password)) return false;
+                user.Password = PasswordHasher.Hash(user.Password);
+
                 this.libraryUOW.HelperOledb.OpenConnection();
                 return libraryUOW.UserRepository.UpdatePassword(user);
             }
@@ -107,14 +157,47 @@ namespace JobWebService.Controllers
             return false;
         }
 
+        // Resets a password after verifying the email + username pair. Used by
+        // the "Forgot your password?" flow (no email infrastructure required).
+        [HttpPost]
+        public bool ResetPassword(string email, string username, string newPassword)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(email)
+                    || string.IsNullOrWhiteSpace(username)
+                    || string.IsNullOrWhiteSpace(newPassword))
+                    return false;
+
+                this.libraryUOW.HelperOledb.OpenConnection();
+
+                User user = this.libraryUOW.UserRepository.ReadByEmail(email.Trim());
+                if (user == null) return false;
+                if (!string.Equals(user.UserName, username.Trim(), StringComparison.OrdinalIgnoreCase)) return false;
+
+                user.Password = PasswordHasher.Hash(newPassword);
+                return this.libraryUOW.UserRepository.UpdatePassword(user);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+                return false;
+            }
+            finally
+            {
+                this.libraryUOW.HelperOledb.CloseConnection();
+            }
+        }
+
         [HttpGet]
         public bool CheckPassword(string username, string password)
         {
             try
             {
                 this.libraryUOW.HelperOledb.OpenConnection();
-                string password2 = libraryUOW.UserRepository.GetPasswordByUserName(username);
-                return password2 != null && password2.Equals(password);
+                string stored = libraryUOW.UserRepository.GetPasswordByUserName(username);
+                return PasswordHasher.Verify(password, stored)
+                    || (!PasswordHasher.LooksHashed(stored) && stored != null && stored == password);
             }
             catch (Exception ex)
             {
@@ -201,6 +284,13 @@ namespace JobWebService.Controllers
                 int.TryParse(userId, out int employeeIdInt);
                 int.TryParse(jobId, out int jobIdInt);
 
+                // Don't insert duplicate applications. If this user already
+                // applied to this job, treat it as success — it's already in
+                // their job history — rather than piling up identical rows.
+                List<JobApplication> existing = this.libraryUOW.JobApplicationRepository.ReadByUserId(userId);
+                if (existing.Any(a => a.JobId == jobIdInt))
+                    return true;
+
                 JobApplication app = new JobApplication();
                 app.EmployeeId = employeeIdInt;
                 app.JobId = jobIdInt;
@@ -209,6 +299,22 @@ namespace JobWebService.Controllers
                 app.SubmittedAtUTC = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 
                 bool ok = this.libraryUOW.JobApplicationRepository.Create(app);
+
+                // Trigger-based notification: tell the employer about the new application.
+                if (ok)
+                {
+                    Job? job = this.libraryUOW.JobRepository.Read(jobId);
+                    if (job != null && !string.IsNullOrWhiteSpace(job.EmployerID))
+                    {
+                        Notification note = new Notification
+                        {
+                            NotificationText = $"New application received for '{job.JobTitle}'.",
+                            NotificationDate = DateTime.UtcNow.ToString("O"),
+                            RecipientUserID = job.EmployerID
+                        };
+                        this.libraryUOW.NotificationRepository.Insert(note);
+                    }
+                }
 
                 return ok;
             }
@@ -247,7 +353,8 @@ namespace JobWebService.Controllers
                         {
                             Job = job,
                             Status = app.Status,
-                            AppliedAt = app.SubmittedAtUTC
+                            AppliedAt = app.SubmittedAtUTC,
+                            OfferedSalary = app.OfferedSalary
                         });
                     }
                 }

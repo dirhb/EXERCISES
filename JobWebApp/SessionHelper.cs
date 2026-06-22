@@ -15,6 +15,7 @@ namespace JobWebApp
         private const string USER_TYPE = "UserTypeID";
         private const string USER_NAME = "UserName";
         private const string FULL_NAME = "FullName";
+        private const string CURRENCY = "Currency";
 
         // ── Save user to session (called after login) ──────────
         public static void SetUser(ISession session, string userId, int userTypeId, string userName, string fullName)
@@ -47,6 +48,18 @@ namespace JobWebApp
         public static string? GetFullName(ISession session)
         {
             return session.GetString(FULL_NAME);
+        }
+
+        // Preferred display currency (defaults to USD).
+        public static void SetCurrency(ISession session, string? currency)
+        {
+            session.SetString(CURRENCY, string.IsNullOrWhiteSpace(currency) ? "USD" : currency.Trim().ToUpperInvariant());
+        }
+
+        public static string GetCurrency(ISession session)
+        {
+            string? c = session.GetString(CURRENCY);
+            return string.IsNullOrWhiteSpace(c) ? "USD" : c;
         }
 
         // ── Check if logged in ─────────────────────────────────

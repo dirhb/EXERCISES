@@ -40,14 +40,28 @@ namespace JobWebApp.Controllers
             // Not an employee? Send them back to guest homepage
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
 
+            string userId = SessionHelper.GetUserID(HttpContext.Session)!;
+
             ApiClient<List<Job>> client = BuildClient<List<Job>>("Guest", "GetAllJobs");
             List<Job> jobs = (await client.GetAsync() ?? new List<Job>())
                 .Where(job => job.JobStatus != false)
                 .ToList();
 
-            // Pass their name to the view so we can say "Welcome back, John!"
+            // ── Real dashboard stats ──
+            ApiClient<JobHistory> historyClient = BuildClient<JobHistory>("User", "GetJobHistory");
+            historyClient.AddParameter("userId", userId);
+            JobHistory history = await historyClient.GetAsync() ?? new JobHistory();
+
+            ApiClient<List<User>> convClient = BuildClient<List<User>>("Chat", "GetConversations");
+            convClient.AddParameter("userId", userId);
+            int messageCount = (await convClient.GetAsync() ?? new List<User>()).Count;
+
             ViewBag.FullName = SessionHelper.GetFullName(HttpContext.Session);
             ViewBag.Jobs = jobs.Take(6).ToList();
+            ViewBag.TotalJobs = jobs.Count;
+            ViewBag.ApplicationCount = history.AppliedJobs?.Count ?? 0;
+            ViewBag.SavedCount = (await FetchSavedJobIds(userId)).Count;
+            ViewBag.MessageCount = messageCount;
 
             return View();
         }
@@ -55,9 +69,9 @@ namespace JobWebApp.Controllers
 
         // ── GET: /Employee/JobCatalog ─────────────────────────
         // Shows all jobs with search, employer/genre filters, and paging.
-        public async Task<IActionResult> JobCatalog(string? search, string? employerId, string? genreId, string? jobType, bool showActiveOnly = false, int page = 1)
+        public async Task<IActionResult> JobCatalog(string? search, string? employerId, string? genreId, string? jobType, decimal? minSalary = null, decimal? maxSalary = null, bool showActiveOnly = false, int page = 1)
         {
-            if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
+            // Open to everyone — guests may browse; actions (apply/message) require login.
 
             // Smaller page size now that each job is shown as a large, detailed card.
             const int pageSize = 8;
@@ -95,6 +109,13 @@ namespace JobWebApp.Controllers
             if (!string.IsNullOrWhiteSpace(jobType))
                 filteredJobs = filteredJobs.Where(job => string.Equals((job.JobType ?? "").Trim(), jobType.Trim(), StringComparison.OrdinalIgnoreCase));
 
+            // Salary range filter — jobs without a salary are excluded once a bound is set.
+            if (minSalary.HasValue)
+                filteredJobs = filteredJobs.Where(job => job.Salary.HasValue && job.Salary.Value >= minSalary.Value);
+
+            if (maxSalary.HasValue)
+                filteredJobs = filteredJobs.Where(job => job.Salary.HasValue && job.Salary.Value <= maxSalary.Value);
+
             if (showActiveOnly)
                 filteredJobs = filteredJobs.Where(job => job.JobStatus == true);
 
@@ -107,6 +128,8 @@ namespace JobWebApp.Controllers
             ViewBag.SelectedEmployer = employerId;
             ViewBag.SelectedGenre = genreId;
             ViewBag.SelectedJobType = jobType;
+            ViewBag.MinSalary = minSalary;
+            ViewBag.MaxSalary = maxSalary;
             ViewBag.ShowActiveOnly = showActiveOnly;
             ViewBag.Employers = employers;
             ViewBag.Genres = genres;
@@ -115,6 +138,11 @@ namespace JobWebApp.Controllers
             ViewBag.TotalJobs = results.Count;
             ViewBag.Jobs = results.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
+            HashSet<string> savedJobIds = new HashSet<string>();
+            if (SessionHelper.IsEmployee(HttpContext.Session))
+                savedJobIds = (await FetchSavedJobIds(SessionHelper.GetUserID(HttpContext.Session)!)).ToHashSet();
+            ViewBag.SavedJobIds = savedJobIds;
+
             return View();
         }
 
@@ -122,7 +150,7 @@ namespace JobWebApp.Controllers
         // Dedicated individual job page, reached by clicking a catalog card.
         public async Task<IActionResult> JobDetails(string jobId)
         {
-            if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
+            // Open to everyone — guests may view job details; applying requires login.
 
             ApiClient<Job> client = BuildClient<Job>("Guest", "GetJob");
             client.AddParameter("JobID", jobId);
@@ -133,6 +161,13 @@ namespace JobWebApp.Controllers
                 TempData["Error"] = "That job could not be found.";
                 return RedirectToAction("JobCatalog");
             }
+
+            await PopulateEmployerRating(job);
+
+            bool isSaved = false;
+            if (SessionHelper.IsEmployee(HttpContext.Session))
+                isSaved = (await FetchSavedJobIds(SessionHelper.GetUserID(HttpContext.Session)!)).Contains(jobId);
+            ViewBag.IsSaved = isSaved;
 
             ViewBag.Job = job;
             ViewBag.Role = "Employee";
@@ -182,66 +217,22 @@ namespace JobWebApp.Controllers
         }
 
         // ── POST: /Employee/UpdateResume ───────────────────────
-        // Called when the employee saves their resume
+        // Saves the employee's online resume as plain text.
         [HttpPost]
-        public async Task<IActionResult> UpdateResume(IFormFile resumeFile)
+        public async Task<IActionResult> UpdateResume(string resumeText)
         {
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
 
-            if (resumeFile == null || resumeFile.Length == 0)
-            {
-                TempData["Error"] = "Please select a file to upload.";
-                return RedirectToAction("Resume");
-            }
-
-            // Server-side validation
-            var extension = Path.GetExtension(resumeFile.FileName).ToLower();
-            if (extension != ".pdf")
-            {
-                TempData["Error"] = "Only PDF files are allowed.";
-                return RedirectToAction("Resume");
-            }
-
-            if (resumeFile.Length > 5 * 1024 * 1024)
-            {
-                TempData["Error"] = "File size must be less than 5MB.";
-                return RedirectToAction("Resume");
-            }
-
             string userId = SessionHelper.GetUserID(HttpContext.Session)!;
-            bool success = false;
-            try
-            {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                if (!Directory.Exists(uploadsFolder))
-                {
-                    Directory.CreateDirectory(uploadsFolder);
-                }
 
-                var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(resumeFile.FileName)}";
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await resumeFile.CopyToAsync(fileStream);
-                }
-
-                var fileUrl = $"/uploads/{uniqueFileName}";
-
-                ApiClient<bool> client = BuildClient<bool>("User", "UpdateOnlineResume");
-                client.AddParameter("userId", userId);
-                client.AddParameter("resumeText", fileUrl);
-                success = await client.PostAsync();
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = $"An error occurred during file upload: {ex.Message}";
-                return RedirectToAction("Resume");
-            }
+            ApiClient<bool> client = BuildClient<bool>("User", "UpdateOnlineResume");
+            client.AddParameter("userId", userId);
+            client.AddParameter("resumeText", resumeText ?? string.Empty);
+            bool success = await client.PostAsync();
 
             TempData[success ? "Success" : "Error"] = success
-                ? "Resume uploaded successfully!"
-                : "Failed to save resume to database. Please try again.";
+                ? "Resume saved!"
+                : "Couldn't save your resume. Please try again.";
 
             return RedirectToAction("Resume");
         }
@@ -308,7 +299,7 @@ namespace JobWebApp.Controllers
 
             TempData[success ? "Success" : "Error"] = success
                 ? "Application submitted successfully!"
-                : "Failed to apply. You may have already applied to this job.";
+                : "Sorry — something went wrong submitting your application. Please try again.";
 
             return RedirectToReturnUrl(returnUrl);
         }
@@ -318,6 +309,78 @@ namespace JobWebApp.Controllers
             if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return LocalRedirect(returnUrl);
             return RedirectToAction("Home");
+        }
+
+        private async Task<List<string>> FetchSavedJobIds(string userId)
+        {
+            ApiClient<List<string>> client = BuildClient<List<string>>("SavedJob", "GetSavedJobIds");
+            client.AddParameter("userId", userId);
+            return await client.GetAsync() ?? new List<string>();
+        }
+
+        // ── POST: /Employee/ToggleSavedJob ────────────────────
+        // Saves the job if it isn't saved yet, otherwise un-saves it.
+        [HttpPost]
+        public async Task<IActionResult> ToggleSavedJob(string jobId, string? returnUrl)
+        {
+            if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
+
+            string userId = SessionHelper.GetUserID(HttpContext.Session)!;
+            bool isSaved = (await FetchSavedJobIds(userId)).Contains(jobId);
+
+            ApiClient<bool> client = BuildClient<bool>("SavedJob", isSaved ? "UnsaveJob" : "SaveJob");
+            client.AddParameter("userId", userId);
+            client.AddParameter("jobId", jobId);
+            bool ok = await client.PostAsync();
+
+            TempData[ok ? "Success" : "Error"] = ok
+                ? (isSaved ? "Removed from saved jobs." : "Job saved.")
+                : "Couldn't update your saved jobs.";
+
+            return RedirectToReturnUrl(returnUrl);
+        }
+
+        // ── GET: /Employee/SavedJobs ──────────────────────────
+        public async Task<IActionResult> SavedJobs()
+        {
+            if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
+
+            string userId = SessionHelper.GetUserID(HttpContext.Session)!;
+            List<string> savedIds = await FetchSavedJobIds(userId);
+            List<Job> allJobs = await BuildClient<List<Job>>("Guest", "GetAllJobs").GetAsync() ?? new List<Job>();
+
+            ViewBag.Jobs = allJobs.Where(j => savedIds.Contains(j.JobID ?? string.Empty)).ToList();
+            ViewBag.FullName = SessionHelper.GetFullName(HttpContext.Session);
+            return View();
+        }
+
+        // Loads the employer's reviews + average rating into ViewBag for the detail page.
+        private async Task PopulateEmployerRating(Job job)
+        {
+            List<Review> reviews = new List<Review>();
+            if (!string.IsNullOrEmpty(job.EmployerID))
+            {
+                ApiClient<List<Review>> reviewClient = BuildClient<List<Review>>("Review", "GetReviewsForEmployer");
+                reviewClient.AddParameter("employerId", job.EmployerID);
+                reviews = await reviewClient.GetAsync() ?? new List<Review>();
+            }
+
+            ViewBag.EmployerReviews = reviews;
+            ViewBag.EmployerRatingCount = reviews.Count;
+            ViewBag.EmployerRatingAvg = reviews.Count > 0
+                ? Math.Round(reviews.Where(r => r.RatingTitle.HasValue).Select(r => (double)r.RatingTitle!.Value).DefaultIfEmpty(0).Average(), 1)
+                : 0.0;
+
+            // An employee may review this employer only after being accepted by them.
+            bool canReview = false;
+            if (SessionHelper.IsEmployee(HttpContext.Session) && !string.IsNullOrEmpty(job.EmployerID))
+            {
+                ApiClient<bool> canReviewClient = BuildClient<bool>("Review", "CanReview");
+                canReviewClient.AddParameter("userId", SessionHelper.GetUserID(HttpContext.Session));
+                canReviewClient.AddParameter("employerId", job.EmployerID);
+                canReview = await canReviewClient.GetAsync();
+            }
+            ViewBag.CanReview = canReview;
         }
 
         private static bool MatchesJobSearch(Job job, string search)
@@ -333,14 +396,21 @@ namespace JobWebApp.Controllers
 
         // ── GET: /Employee/Profile ─────────────────────────────
         // Shows the employee's profile page
-        public IActionResult Profile()
+        public async Task<IActionResult> Profile()
         {
             if (!IsAuthorized()) return RedirectToAction("Home", "Guest");
 
-            // Pass session info to the view
+            string userId = SessionHelper.GetUserID(HttpContext.Session)!;
+            ApiClient<User> userClient = BuildClient<User>("User", "GetUser");
+            userClient.AddParameter("userId", userId);
+            User? user = await userClient.GetAsync();
+            List<Country> countries = await BuildClient<List<Country>>("Guest", "GetAllCountries").GetAsync() ?? new List<Country>();
+
             ViewBag.FullName = SessionHelper.GetFullName(HttpContext.Session);
             ViewBag.UserName = SessionHelper.GetUserName(HttpContext.Session);
-            ViewBag.UserID = SessionHelper.GetUserID(HttpContext.Session);
+            ViewBag.UserID = userId;
+            ViewBag.User = user;
+            ViewBag.Countries = countries;
 
             return View();
         }

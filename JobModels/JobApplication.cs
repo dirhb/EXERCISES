@@ -14,5 +14,6 @@ namespace JobModels
         public string ResumeSnapshot { get; set; } = string.Empty;
         public string SubmittedAtUTC { get; set; } = string.Empty;
         public string Status { get; set; } = "Submitted";
+        public decimal? OfferedSalary { get; set; }   // salary the employer offered for THIS application
     }
 }

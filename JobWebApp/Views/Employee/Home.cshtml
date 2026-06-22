@@ -18,7 +18,7 @@
 
 <section class="welcome-section">
     <h1>Welcome back, @ViewBag.FullName 👋</h1>
-    <p>You have @jobs.Count jobs available. Start applying today.</p>
+    <p>You have @(ViewBag.TotalJobs ?? jobs.Count) jobs available. Start applying today.</p>
     <div class="hero-cta-row">
         <a href="/Employee/JobCatalog" class="cta-btn">Browse Job Catalog</a>
         <a href="/Employee/Resume" class="cta-btn secondary">Update Resume</a>
@@ -29,22 +29,22 @@
 <section class="stats-section">
     <div class="stat-box">
         <span class="stat-icon material-symbols-outlined">work</span>
-        <h2 class="stat-number">@jobs.Count</h2>
+        <h2 class="stat-number">@(ViewBag.TotalJobs ?? jobs.Count)</h2>
         <p class="stat-label">Available Jobs</p>
     </div>
     <div class="stat-box">
         <span class="stat-icon material-symbols-outlined">send</span>
-        <h2 class="stat-number">—</h2>
+        <h2 class="stat-number">@(ViewBag.ApplicationCount ?? 0)</h2>
         <p class="stat-label">Your Applications</p>
     </div>
     <div class="stat-box">
         <span class="stat-icon material-symbols-outlined">star</span>
-        <h2 class="stat-number">—</h2>
+        <h2 class="stat-number">@(ViewBag.SavedCount ?? 0)</h2>
         <p class="stat-label">Saved Jobs</p>
     </div>
     <div class="stat-box">
         <span class="stat-icon material-symbols-outlined">chat</span>
-        <h2 class="stat-number">—</h2>
+        <h2 class="stat-number">@(ViewBag.MessageCount ?? 0)</h2>
         <p class="stat-label">Messages</p>
     </div>
 </section>
@@ -60,12 +60,12 @@
                         <div class="fj-top">
                             <div>
                                 <span class="fj-title">@job.JobTitle</span>
-                                <span class="fj-company">@job.EmployerID — @(job.CountryName ?? job.CountryID)</span>
+                                <span class="fj-company">@(job.EmployerName ?? "JobFind Employer") — @(job.CountryName ?? "Remote")</span>
                             </div>
                             <span class="fj-badge">Featured</span>
                         </div>
                         <div class="fj-tags">
-                            <span>@job.JobType</span>
+                            <span>@(job.JobTypeName ?? "Not specified")</span>
                         </div>
                         @* Apply button — posts to EmployeeController → ApplyToJob *@
                         <div style="margin-top:8px; width:100%;">
